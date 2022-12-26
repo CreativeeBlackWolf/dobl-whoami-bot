@@ -61,9 +61,8 @@ class Map:
         :param player: the player in question
         :return: list of objects
         """
-        roomPos = [
-            int(player.position[0])-int(player.position[0]) % 32,
-            int(player.position[1])-int(player.position[1]) % 32]
+        roomPos = [ int(player.position[0])-int(player.position[0]) % 32,
+                    int(player.position[1])-int(player.position[1]) % 32]
         objects = []
         for objectgroup in self.root.findall("objectgroup"):
             if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
