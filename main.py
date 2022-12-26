@@ -38,6 +38,8 @@ async def send_abilities(message, player) -> None:
 @client.event
 async def on_ready():
     print(f'We have logged in as {client.user}')
+    await client.change_presence(activity=discord.Game(name="напиши .помоги, и я тебе помогу"))
+
 
 @client.event
 async def on_message(message):
