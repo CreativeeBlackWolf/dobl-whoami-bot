@@ -70,11 +70,15 @@ class Map:
                 for object in objectgroup.findall("object"):
                     objX, objY = int(object.attrib["x"]), int(object.attrib["y"])
                     if objX-objX % 32 == roomPos[0] and objY-objY % 32 == roomPos[1]:
+                        name = object.attrib.get("name", "???")
                         props = {prop.attrib["name"]: prop.attrib.get("value")
                             for prop in object.find("properties").findall("property")}
                         group = props.get("Группа", "")
                         hidden = True if props.get("Скрыт", "false") == "true" else False
                         owner = props.get("Владелец", "")
-                        if (not hidden) or (owner != "" and owner == player.name) or (group != "" and group == player.group):
+                        if  (not hidden) or\
+                            (owner != "" and owner == player.name) or\
+                            (group != "" and group == player.group) or\
+                            (name != "???" and name == player.name):
                             objects.append(object.attrib.get("name", "???"))
         return objects
