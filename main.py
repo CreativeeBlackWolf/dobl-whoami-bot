@@ -109,7 +109,19 @@ async def on_message(message):
             await message.channel.send(f'Неправильное использование команды:\n{help.get_commands("покажи")}')
     
     if message.content.lower().startswith(prefix + 'где я'):
-        await message.channel.send('здесь.')
+        player = map.get_player(playername)
+
+        if not player:
+            await message.channel.send("Ты не существуешь.")
+            return
+        
+        objects = map.get_same_room_objects(player)
+        assert len(objects) != 0, "Player not in room with themself"
+        resp = "В твоей комнате находятся:\n"
+        for obj in objects:
+            resp += f" - {obj}\n"
+            
+        await message.reply(resp)
 
 
 if __name__ == '__main__':
