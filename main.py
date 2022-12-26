@@ -31,7 +31,7 @@ async def send_abilities(message, player) -> None:
 {active}
 
 Особенности:
-{passive})
+{passive}
 ```''')
 
 
