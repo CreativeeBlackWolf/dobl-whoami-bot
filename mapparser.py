@@ -96,8 +96,8 @@ class Map:
                     if objX-objX % 32 == roomPos[0] and objY-objY % 32 == roomPos[1]:
                         name = object.attrib.get("name", "???")
                         try:
-                        props = {prop.attrib["name"]: prop.attrib.get("value")
-                            for prop in object.find("properties").findall("property")}
+                            props = {prop.attrib["name"]: prop.attrib.get("value")
+                                for prop in object.find("properties").findall("property")}
                         except AttributeError:
                             props = {}
                         group = props.get("Группа", "")
@@ -108,7 +108,7 @@ class Map:
                             (group != "" and group == player.group) or\
                             (name != "???" and name == player.name):
                             objX, objY = objX % 32 // 4, objY % 32 // 4
-                            objects.append((object.attrib.get("name", "???"), objX, objY))
+                            objects.append((object.attrib.get("name", "???"), objX, objY, object.attrib.get("class", "")))
 
         return sorted(objects, key=lambda x: x[0]+str(x[1])+str(x[2]))
 
@@ -132,13 +132,19 @@ class Map:
             while self.loose_char_in(firstChar, usedChars):
                 firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
                 nextDefaultIndex += 1
-            assert firstChar not in usedChars, f"Couldn't find a free char for object {obj[0]}"
             if obj[0] == player.name:
-                repr[obj[2]][obj[1]] = '[2;34m' + firstChar + '[0m'
+                coloredChar = '[2;47m[2;30m' + firstChar + '[0m'
+            elif obj[3] == "НПЦ":
+                coloredChar = '[2;31m' + firstChar + '[0m'
+            elif obj[3] == "Предмет(-ы)":
+                coloredChar = '[2;34m' + firstChar + '[0m'
+            elif obj[3] == "Игрок":
+                coloredChar = '[2;37m' + firstChar + '[0m'
             else:
-                repr[obj[2]][obj[1]] = firstChar
+                coloredChar = firstChar
+            repr[obj[2]][obj[1]] = coloredChar
             usedChars.append(firstChar)
-            legend[firstChar] = [obj[0]]
+            legend[coloredChar] = [obj[0]]
         repr = "\n".join(["".join(row) for row in repr])
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
         return f"{repr}\n\n{legend}"
