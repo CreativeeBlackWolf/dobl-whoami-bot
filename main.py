@@ -18,7 +18,7 @@ client = discord.Client(intents=intents)
 
 async def send_inventory(message, player) -> None:
     inv = "\n".join(player.inventory)
-    await message.channel.send(f'''```
+    await message.channel.send(f'''```ansi
 Инвентарь:
 {inv}
 ```''')
