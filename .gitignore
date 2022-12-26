@@ -1,5 +1,5 @@
-**/*.cfg
 **/__pycache__
-**/.venv
+**/.*
+**/*.cfg
 **/*.tmx
 !config_example.cfg
