@@ -39,7 +39,7 @@ class Map:
         """
         def replacer(match):
             if match.group(1) is not None:
-                return "???"
+                return "?"
             if match.group(2) is not None:
                 return "???,"
             if match.group(3) is not None:
@@ -55,6 +55,9 @@ class Map:
         inventory = []
         for item in props.get("Инвентарь", "").split("\n"):
             item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
+            item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
+            item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::]
+            item = item.replace("  ", " ")
             inventory.append(item)
 
         hp = props.get("Очки Здоровья", "100/100 (100)")
