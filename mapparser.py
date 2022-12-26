@@ -42,7 +42,7 @@ class Map:
                     for prop in pl.find("properties").findall("property")}
         inventory = props.get("Инвентарь", "").split("\n")
         hp = props.get("Очки Здоровья", "100/100 (100)")
-        mp = props.get("Очки Здоровья", "100/100 (100)")
+        mp = props.get("Очки Маны", "100/100 (100)")
         sp = props.get("Очки Души", "3")
         rerolls = props.get("Рероллы", "2")
         active_abilities = props.get("Навыки", "").split("\n")
@@ -51,4 +51,3 @@ class Map:
         frags = props.get("Фраги", "0/4")
         return player.Player(position, name, inventory, hp, mp, sp, 
         level, frags, active_abilities, passive_abilities, rerolls)
-
