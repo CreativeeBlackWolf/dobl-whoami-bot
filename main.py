@@ -52,10 +52,13 @@ async def on_message(message):
 
     if message.content.lower().startswith(prefix + 'кто я'):
         map = mapparser.Map(config["map"]["path"])
-        player = map.get_player(message.author.display_name)
+        player = map.get_player(message.author.display_name, message.author.id)
 
-        if not player:
+        if player == mapparser.GetPlayerErrors.NOT_FOUND:
             await message.channel.send("Ты не существуешь.")
+            return
+        elif player == mapparser.GetPlayerErrors.WRONG_ID:
+            await message.channel.send("Ты меня обмануть пытаешься?")
             return
 
         msg = await message.channel.send(f'''```
@@ -91,10 +94,13 @@ async def on_message(message):
 
     if message.content.lower().startswith(prefix + 'покажи'):
         map = mapparser.Map(config["map"]["path"])
-        player = map.get_player(message.author.display_name)
+        player = map.get_player(message.author.display_name, message.author.id)
 
-        if not player:
+        if player == mapparser.GetPlayerErrors.NOT_FOUND:
             await message.channel.send("Ты не существуешь.")
+            return
+        elif player == mapparser.GetPlayerErrors.WRONG_ID:
+            await message.channel.send("Ты меня обмануть пытаешься?")
             return
 
         args = message.content.lower().split()
@@ -110,10 +116,13 @@ async def on_message(message):
     
     if message.content.lower().startswith(prefix + 'где я'):
         map = mapparser.Map(config["map"]["path"])
-        player = map.get_player(message.author.display_name)
+        player = map.get_player(message.author.display_name, message.author.id)
 
-        if not player:
+        if player == mapparser.GetPlayerErrors.NOT_FOUND:
             await message.channel.send("Ты не существуешь.")
+            return
+        elif player == mapparser.GetPlayerErrors.WRONG_ID:
+            await message.channel.send("Ты меня обмануть пытаешься?")
             return
         
         resp = map.construct_ascii_repr(player)

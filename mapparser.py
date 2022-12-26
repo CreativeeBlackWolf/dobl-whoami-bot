@@ -4,7 +4,9 @@ import datetime
 import player
 import os
 import re
+from enum import Enum
 
+GetPlayerErrors = Enum("GetPlayerErrors", ["NOT_FOUND", "WRONG_ID"])
 
 class Map:
     # name's actually misleading since it's not strictly ASCII
@@ -52,7 +54,7 @@ class Map:
                 return True
         return False
 
-    def get_player(self, playername: str) -> Union[player.Player, None]:
+    def get_player(self, playername: str, playerID: str) -> Union[player.Player, GetPlayerErrors]:
         """
         Get serialized Player object
 
@@ -69,14 +71,18 @@ class Map:
 
         pl = self.search_player(playername)
         if not pl:
-            return None
+            return GetPlayerErrors.NOT_FOUND
         name = pl.attrib["name"]
         position = [pl.attrib["x"], pl.attrib["y"]]
         try:
-        props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
-                    for prop in pl.find("properties").findall("property")}
+            props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
+                        for prop in pl.find("properties").findall("property")}
         except AttributeError:
             props = {}
+        foundPlayerID = props.get("ID игрока", "")
+        if str(playerID) != str(foundPlayerID):
+            print("Player ID mismatch: expected {}, got {}".format(type(foundPlayerID), type(playerID)))
+            return GetPlayerErrors.WRONG_ID
         inventory = []
         for item in props.get("Инвентарь", "").split("\n"):
             # replacing hidden properties with `???` 
