@@ -116,13 +116,8 @@ async def on_message(message):
             await message.channel.send("Ты не существуешь.")
             return
         
-        objects = map.get_same_room_objects(player)
-        assert len(objects) != 0, "Player not in room with themself"
-        resp = "В твоей комнате находятся:\n"
-        for obj in objects:
-            resp += f" - {obj[0]} ({obj[1]},{obj[2]})\n"
-            
-        await message.reply(resp)
+        resp = map.construct_ascii_repr(player)
+        await message.reply('```ansi\n'+resp+'\n```')
 
 
 if __name__ == '__main__':

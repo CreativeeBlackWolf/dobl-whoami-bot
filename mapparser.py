@@ -6,6 +6,9 @@ import player
 
 
 class Map:
+    # name's actually misleading since it's not strictly ASCII
+    ASCII_DEFAULT_CHARS = '!"#$%&\'()*+,-./:;<=>?[\\]^_`{|}~0123456789ABCDEFGHIJKLMNOPQRSTUVW'
+
     def __init__(self, filepath):
         # read the file
         tree = etree.parse(filepath)
@@ -81,5 +84,36 @@ class Map:
                             (name != "???" and name == player.name):
                             objX, objY = objX % 32 // 4, objY % 32 // 4
                             objects.append((object.attrib.get("name", "???"), objX, objY))
-                            
-        return objects
+
+        return sorted(objects, key=lambda x: x[0]+str(x[1])+str(x[2]))
+
+    def construct_ascii_repr(self, player: player.Player) -> str:
+        objlist = self.get_same_room_objects(player)
+        repr = [["." for i in range(8)] for j in range(8)]
+        legend = {}
+        usedChars = []
+        nextDefaultIndex = 0
+        for obj in objlist:
+            # check if another object is at same position
+            existingChar = repr[obj[2]][obj[1]]
+            if existingChar != ".":
+                # if so, use the same char
+                legend[existingChar].append(obj[0])
+                continue
+            # find a new char, first candidate is the first letter of the object name
+            firstChar = obj[0][0].upper()
+            if firstChar in usedChars:
+                firstChar = firstChar.lower()
+            if firstChar in usedChars:
+                firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
+                nextDefaultIndex += 1
+            assert firstChar not in usedChars, f"Couldn't find a free char for object {obj[0]}"
+            if obj[0] == player.name:
+                repr[obj[2]][obj[1]] = '[2;34m' + firstChar + '[0m'
+            else:
+                repr[obj[2]][obj[1]] = firstChar
+            usedChars.append(firstChar)
+            legend[firstChar] = [obj[0]]
+        repr = "\n".join(["".join(row) for row in repr])
+        legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
+        return f"{repr}\n\n{legend}"
