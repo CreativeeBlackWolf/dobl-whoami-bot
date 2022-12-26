@@ -1,8 +1,9 @@
 from typing import Union
 import xml.etree.ElementTree as etree
 import datetime
-import os
 import player
+import os
+import re
 
 
 class Map:
@@ -36,6 +37,14 @@ class Map:
         :param playername: the name of the player to search for
         :return: Player object or None if player not found
         """
+        def replacer(match):
+            if match.group(1) is not None:
+                return "???"
+            if match.group(2) is not None:
+                return "???,"
+            if match.group(3) is not None:
+                return "???}"
+
         pl = self.search_player(playername)
         if not pl:
             return None
@@ -43,7 +52,11 @@ class Map:
         position = [pl.attrib["x"], pl.attrib["y"]]
         props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
                     for prop in pl.find("properties").findall("property")}
-        inventory = props.get("Инвентарь", "").split("\n")
+        inventory = []
+        for item in props.get("Инвентарь", "").split("\n"):
+            item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
+            inventory.append(item)
+
         hp = props.get("Очки Здоровья", "100/100 (100)")
         mp = props.get("Очки Маны", "100/100 (100)")
         sp = props.get("Очки Души", "3")
@@ -117,3 +130,8 @@ class Map:
         repr = "\n".join(["".join(row) for row in repr])
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
         return f"{repr}\n\n{legend}"
+
+if __name__ == "__main__":
+    map = Map("instances-cropped.tmx")
+    player = map.get_player("Штрафник Данёк")
+    print(player.inventory)
