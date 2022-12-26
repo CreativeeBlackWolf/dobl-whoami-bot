@@ -8,6 +8,8 @@ import asyncio
 
 config = configparser.ConfigParser()
 config.read('botconfig.cfg')
+prefix = config["bot"]["prefix"]
+
 intents = discord.Intents.default()
 intents.message_content = True
 
@@ -47,10 +49,10 @@ async def on_message(message):
     map = mapparser.Map(config["map"]["path"])
     playername = message.author.display_name
 
-    if message.content.lower().startswith("~помоги"):
+    if message.content.lower().startswith(prefix + "помоги"):
         await message.channel.send(help.get_commands())
 
-    if message.content.lower().startswith('~кто я'):
+    if message.content.lower().startswith(prefix + 'кто я'):
         player = map.get_player(playername)
 
         if not player:
@@ -81,14 +83,14 @@ async def on_message(message):
                                                                            else False, timeout = 10)
         except asyncio.TimeoutError:
             await msg.remove_reaction("📦", client.user)
-            await msg.add_reaction("🔸", client.user)
+            await msg.remove_reaction("🔸", client.user)
         else:
             if str(reaction.emoji) == "📦":
                 await send_inventory(message, player)
             elif str(reaction.emoji) == "🔸":
                 await send_abilities(message, player)
 
-    if message.content.lower().startswith('~покажи'):
+    if message.content.lower().startswith(prefix + 'покажи'):
         player = map.get_player(playername)
 
         if not player:
@@ -106,7 +108,7 @@ async def on_message(message):
         else:
             await message.channel.send(f'Неправильное использование команды:\n{help.get_commands("покажи")}')
     
-    if message.content.lower().startswith('~где я'):
+    if message.content.lower().startswith(prefix + 'где я'):
         await message.channel.send('здесь.')
 
 
