@@ -53,7 +53,7 @@ class Map:
         props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
                     for prop in pl.find("properties").findall("property")}
         inventory = []
-        for item in props.get("Инвентарь", "").split("\n"):
+        for item in props.get("Инвентарь", "").split("\n")[1::]:
             item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
             item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
             item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::]
