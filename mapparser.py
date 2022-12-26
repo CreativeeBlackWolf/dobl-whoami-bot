@@ -168,6 +168,8 @@ class Map:
                 coloredChar = '[2;34m' + firstChar + '[0m'
             elif obj[3] == "Игрок":
                 coloredChar = '[2;37m' + firstChar + '[0m'
+            elif obj[3] == "Труп":
+                coloredChar = '[2;30m' + firstChar + '[0m'
             else:
                 coloredChar = firstChar
             repr[obj[2]][obj[1]] = coloredChar
