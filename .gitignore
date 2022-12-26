@@ -1,0 +1,4 @@
+**/*.cfg
+**/__pycache__
+**/.venv
+**/*.tmx
