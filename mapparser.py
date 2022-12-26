@@ -61,7 +61,7 @@ class Map:
         """
         def replacer(match):
             if match.group(1) is not None:
-                return "???"
+                return "?"
             if match.group(2) is not None:
                 return "???,"
             if match.group(3) is not None:
@@ -76,7 +76,13 @@ class Map:
                     for prop in pl.find("properties").findall("property")}
         inventory = []
         for item in props.get("Инвентарь", "").split("\n"):
+            # replacing hidden properties with `???` 
+            # (or `?`, if the property partially disclosed)
             item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
+            item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
+            # hiding actual item name
+            item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::] if item.find("{") != -1 else item
+            item = item.replace("  ", " ")
             inventory.append(item)
 
         hp = props.get("Очки Здоровья", "100/100 (100)")
