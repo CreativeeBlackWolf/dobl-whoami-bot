@@ -8,6 +8,9 @@ import player
 class Map:
     # name's actually misleading since it's not strictly ASCII
     ASCII_DEFAULT_CHARS = '!"#$%&\'()*+,-./:;<=>?[\\]^_`{|}~0123456789ABCDEFGHIJKLMNOPQRSTUVW'
+    LAT_CYR_LOOKALIKES = (('A', 'А'), ('B', 'В'), ('E', 'Е'), ('K', 'К'), ('M', 'М'), ('H', 'Н'), ('O', 'О'), ('P', 'Р'),
+                          ('C', 'С'), ('T', 'Т'), ('X', 'Х'), ('Y', 'У'), ('a', 'а'), ('b', 'в'), ('e', 'е'), ('k', 'к'),
+                          ('m', 'м'), ('h', 'н'), ('o', 'о'), ('p', 'р'), ('c', 'с'), ('t', 'т'), ('x', 'х'), ('y', 'у'))
 
     def __init__(self, filepath):
         # read the file
@@ -28,6 +31,25 @@ class Map:
                 for object in objectgroup.findall("object"):
                     if object.attrib["name"] == playername:
                         return object
+
+    def loose_char_equals(self, char1: str, char2: str) -> bool:
+        """
+        Compare two characters across Cyrillic and Latin alphabets.
+        """
+        if ord(char1) > ord(char2):
+            char1, char2 = char2, char1
+        if (char1, char2) in self.LAT_CYR_LOOKALIKES:
+            return True
+        return char1 == char2
+
+    def loose_char_in(self, char: str, container) -> bool:
+        """
+        Check if a character is in a container across Cyrillic and Latin alphabets.
+        """
+        for c in container:
+            if self.loose_char_equals(char, c):
+                return True
+        return False
 
     def get_player(self, playername: str) -> Union[player.Player, None]:
         """
@@ -105,9 +127,9 @@ class Map:
                 continue
             # find a new char, first candidate is the first letter of the object name
             firstChar = obj[0][0].upper()
-            if firstChar in usedChars:
+            if self.loose_char_in(firstChar, usedChars):
                 firstChar = firstChar.lower()
-            if firstChar in usedChars:
+            while self.loose_char_in(firstChar, usedChars):
                 firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
                 nextDefaultIndex += 1
             assert firstChar not in usedChars, f"Couldn't find a free char for object {obj[0]}"
