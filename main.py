@@ -16,16 +16,18 @@ intents.message_content = True
 
 client = discord.Client(intents=intents)
 
+def player_info(playername: str):
+    map = mapparser.Map(config["map"]["path"])
+    return map.get_player(playername)
 
-
-async def send_inventory(message, player):
+async def send_inventory(message, player) -> None:
     inv = "\n".join(player.inventory)
     await message.channel.send(f'''```
 Инвентарь:
 {inv}
 ```''')
 
-async def send_abilities(message, player):
+async def send_abilities(message, player) -> None:
     active = "\n".join(player.active_abilities)
     passive = "\n".join(player.passive_abilities)
     await message.channel.send(f'''```
@@ -46,14 +48,12 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    map = mapparser.Map(config["map"]["path"])
-    playername = message.author.display_name
 
     if message.content.lower().startswith(prefix + "помоги"):
         await message.channel.send(help.get_commands())
 
     if message.content.lower().startswith(prefix + 'кто я'):
-        player = map.get_player(playername)
+        player = player_info(message.author.display_name)
 
         if not player:
             await message.channel.send("Ты не существуешь.")
@@ -91,7 +91,7 @@ async def on_message(message):
                 await send_abilities(message, player)
 
     if message.content.lower().startswith(prefix + 'покажи'):
-        player = map.get_player(playername)
+        player = player_info(message.author.display_name)
 
         if not player:
             await message.channel.send("Ты не существуешь.")
