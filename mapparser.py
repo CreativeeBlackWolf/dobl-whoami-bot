@@ -73,8 +73,11 @@ class Map:
                     objX, objY = int(object.attrib["x"]), int(object.attrib["y"])
                     if objX-objX % 32 == roomPos[0] and objY-objY % 32 == roomPos[1]:
                         name = object.attrib.get("name", "???")
+                        try:
                         props = {prop.attrib["name"]: prop.attrib.get("value")
                             for prop in object.find("properties").findall("property")}
+                        except AttributeError:
+                            props = {}
                         group = props.get("Группа", "")
                         hidden = True if props.get("Скрыт", "false") == "true" else False
                         owner = props.get("Владелец", "")
