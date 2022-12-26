@@ -10,7 +10,8 @@ class Player:
                  frags:             str, # frags/frags until levelup
                  active_abilities:  list,
                  passive_abilities: list,
-                 rerolls:           str
+                 rerolls:           str,
+                 group:             str
         ):
         self.position = position
         self.name = name
@@ -23,6 +24,7 @@ class Player:
         self.active_abilities = active_abilities
         self.passive_abilities = passive_abilities
         self.rerolls = rerolls
+        self.group = group
 
     def __str__(self):
         return f"Player: {self.name}"
