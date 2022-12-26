@@ -52,7 +52,7 @@ class Map:
         position = [pl.attrib["x"], pl.attrib["y"]]
         props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
                     for prop in pl.find("properties").findall("property")}
-        inventory = []
+        inventory = [props.get("Инвентарь", "").split("\n")[0]]
         # first item is always the coin(s), so we are skipping it
         for item in props.get("Инвентарь", "").split("\n")[1::]:
             # replacing hidden properties with `???` 
