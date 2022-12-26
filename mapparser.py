@@ -1,3 +1,4 @@
+from typing import Union
 import xml.etree.ElementTree as etree
 import datetime
 import os
@@ -12,7 +13,7 @@ class Map:
         time = os.path.getmtime(filepath)
         self.map_datetime = datetime.datetime.fromtimestamp(time).strftime('%H:%M:%S %d/%m/%Y')
 
-    def search_player(self, playername: str) -> etree.Element | None:
+    def search_player(self, playername: str) -> Union[etree.Element, None]:
         """
         Search for a player in the map.
 
@@ -25,7 +26,7 @@ class Map:
                     if object.attrib["name"] == playername:
                         return object
 
-    def get_player(self, playername: str) -> player.Player | None:
+    def get_player(self, playername: str) -> Union[player.Player, None]:
         """
         Get serialized Player object
 
