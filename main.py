@@ -109,7 +109,8 @@ async def on_message(message):
             await message.channel.send(f'Неправильное использование команды:\n{help.get_commands("покажи")}')
     
     if message.content.lower().startswith(prefix + 'где я'):
-        player = map.get_player(playername)
+        map = mapparser.Map(config["map"]["path"])
+        player = map.get_player(message.author.display_name)
 
         if not player:
             await message.channel.send("Ты не существуешь.")
