@@ -55,7 +55,7 @@ class Map:
         inventory = []
         for item in props.get("Инвентарь", "").split("\n"):
             # replacing hidden properties with `???` 
-            # (or `?`, if the propertypartially disclosed)
+            # (or `?`, if the property partially disclosed)
             item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
             item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
             # hiding actual item name
