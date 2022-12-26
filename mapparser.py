@@ -49,5 +49,30 @@ class Map:
         passive_abilities = props.get("Особенности", "").split("\n")
         level = props.get("Уровень", "1")
         frags = props.get("Фраги", "0/4")
+        group = props.get("Группа", "")
         return player.Player(position, name, inventory, hp, mp, sp, 
-        level, frags, active_abilities, passive_abilities, rerolls)
+        level, frags, active_abilities, passive_abilities, rerolls, group)
+
+    def get_same_room_objects(self, player: player.Player) -> list:
+        """
+        Get all objects in the same room as the player
+        Hidden objects are not included
+
+        :param player: the player in question
+        :return: list of objects
+        """
+        roomPos = [int(player.position[0])-int(player.position[0]) % 32, int(player.position[1])-int(player.position[1]) % 32]
+        objects = []
+        for objectgroup in self.root.findall("objectgroup"):
+            if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
+                for object in objectgroup.findall("object"):
+                    objX, objY = int(object.attrib["x"]), int(object.attrib["y"])
+                    if objX-objX % 32 == roomPos[0] and objY-objY % 32 == roomPos[1]:
+                        props = {prop.attrib["name"]: prop.attrib.get("value")
+                            for prop in object.find("properties").findall("property")}
+                        group = props.get("Группа", "")
+                        hidden = True if props.get("Скрыт", "false") == "true" else False
+                        owner = props.get("Владелец", "")
+                        if (not hidden) or (owner != "" and owner == player.name) or (group != "" and group == player.group):
+                            objects.append(object.attrib.get("name", "???"))
+        return objects
