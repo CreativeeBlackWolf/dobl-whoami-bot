@@ -38,17 +38,17 @@ class Map:
             return None
         name = pl.attrib["name"]
         position = [pl.attrib["x"], pl.attrib["y"]]
-        props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text 
+        props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
                     for prop in pl.find("properties").findall("property")}
-        inventory = props["Инвентарь"].split("\n")
-        hp = props["Очки Здоровья"]
-        mp = props["Очки Маны"]
-        sp = props["Очки Души"]
-        rerolls = int(props["Рероллы"])
-        active_abilities = props["Навыки"].split("\n")
-        passive_abilities = props["Особенности"].split("\n")
-        level = props["Уровень"]
-        frags = props["Фраги"]
+        inventory = props.get("Инвентарь", "").split("\n")
+        hp = props.get("Очки Здоровья", "100/100 (100)")
+        mp = props.get("Очки Здоровья", "100/100 (100)")
+        sp = props.get("Очки Души", "3")
+        rerolls = props.get("Рероллы", "2")
+        active_abilities = props.get("Навыки", "").split("\n")
+        passive_abilities = props.get("Особенности", "").split("\n")
+        level = props.get("Уровень", "1")
+        frags = props.get("Фраги", "0/4")
         return player.Player(position, name, inventory, hp, mp, sp, 
         level, frags, active_abilities, passive_abilities, rerolls)
 
