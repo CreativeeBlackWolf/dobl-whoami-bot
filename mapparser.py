@@ -79,5 +79,7 @@ class Map:
                             (owner != "" and owner == player.name) or\
                             (group != "" and group == player.group) or\
                             (name != "???" and name == player.name):
-                            objects.append(object.attrib.get("name", "???"))
+                            objX, objY = objX % 32 // 4, objY % 32 // 4
+                            objects.append((object.attrib.get("name", "???"), objX, objY))
+                            
         return objects

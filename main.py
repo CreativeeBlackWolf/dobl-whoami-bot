@@ -120,7 +120,7 @@ async def on_message(message):
         assert len(objects) != 0, "Player not in room with themself"
         resp = "В твоей комнате находятся:\n"
         for obj in objects:
-            resp += f" - {obj}\n"
+            resp += f" - {obj[0]} ({obj[1]},{obj[2]})\n"
             
         await message.reply(resp)
 
