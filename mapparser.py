@@ -72,8 +72,11 @@ class Map:
             return None
         name = pl.attrib["name"]
         position = [pl.attrib["x"], pl.attrib["y"]]
+        try:
         props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
                     for prop in pl.find("properties").findall("property")}
+        except AttributeError:
+            props = {}
         inventory = []
         for item in props.get("Инвентарь", "").split("\n"):
             # replacing hidden properties with `???` 
