@@ -51,3 +51,20 @@ class Map:
         frags = props.get("Фраги", "0/4")
         return player.Player(position, name, inventory, hp, mp, sp, 
         level, frags, active_abilities, passive_abilities, rerolls)
+
+    def get_same_room_objects(self, player: player.Player) -> list:
+        """
+        Get all objects in the same room as the player
+
+        :param player: the player in question
+        :return: list of objects
+        """
+        roomPos = [int(player.position[0])-int(player.position[0]) % 32, int(player.position[1])-int(player.position[1]) % 32]
+        objects = []
+        for objectgroup in self.root.findall("objectgroup"):
+            if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
+                for object in objectgroup.findall("object"):
+                    objX, objY = int(object.attrib["x"]), int(object.attrib["y"])
+                    if objX-objX % 32 == roomPos[0] and objY-objY % 32 == roomPos[1]:
+                        objects.append(object.attrib.get("name", "???"))
+        return objects
