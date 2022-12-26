@@ -53,9 +53,13 @@ class Map:
         props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
                     for prop in pl.find("properties").findall("property")}
         inventory = []
+        # first item is always the coin(s), so we are skipping it
         for item in props.get("Инвентарь", "").split("\n")[1::]:
+            # replacing hidden properties with `???` 
+            # (or `?`, if the propertypartially disclosed)
             item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
             item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
+            # hiding actual item name
             item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::]
             item = item.replace("  ", " ")
             inventory.append(item)
