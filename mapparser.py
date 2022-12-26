@@ -52,15 +52,14 @@ class Map:
         position = [pl.attrib["x"], pl.attrib["y"]]
         props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
                     for prop in pl.find("properties").findall("property")}
-        inventory = [props.get("Инвентарь", "").split("\n")[0]]
-        # first item is always the coin(s), so we are skipping it
-        for item in props.get("Инвентарь", "").split("\n")[1::]:
+        inventory = []
+        for item in props.get("Инвентарь", "").split("\n"):
             # replacing hidden properties with `???` 
             # (or `?`, if the propertypartially disclosed)
             item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
             item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
             # hiding actual item name
-            item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::]
+            item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::] if item.find("{") != -1 else item
             item = item.replace("  ", " ")
             inventory.append(item)
 
