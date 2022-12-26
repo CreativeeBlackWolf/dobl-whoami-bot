@@ -99,7 +99,7 @@ async def on_message(message):
 
         args = message.content.lower().split()
         if len(args) == 2:
-            if args[1] in ["скиллы", "способности", "особенности", "навыки", "спеллы"]:
+            if args[1] in ["скиллы", "способности", "особенности", "навыки", "спеллы", "абилки"]:
                 await send_abilities(message, player)
             elif args[1] in ["инвентарь", "шмотки"]:
                 await send_inventory(message, player)
