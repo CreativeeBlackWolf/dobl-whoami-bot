@@ -130,8 +130,3 @@ class Map:
         repr = "\n".join(["".join(row) for row in repr])
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
         return f"{repr}\n\n{legend}"
-
-if __name__ == "__main__":
-    map = Map("instances-cropped.tmx")
-    player = map.get_player("Штрафник Данёк")
-    print(player.inventory)
