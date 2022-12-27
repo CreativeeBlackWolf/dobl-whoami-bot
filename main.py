@@ -107,9 +107,9 @@ async def on_message(message: discord.Message):
         elif player == mapparser.MapObjectError.WRONG_ID:
             await message.channel.send("Ты меня обмануть пытаешься?")
             return
-        
-        resp = map.construct_ascii_repr(player)
-        await message.reply('```ansi\n'+resp+'\n```')
+
+        resp = '```ansi\n'+map.construct_ascii_repr(player)+'\n```\n'+map.list_doors_string(player)
+        await message.reply(resp)
 
     if message.content.lower().startswith('.инвентарь'):
         if str(message.author.id) not in admins:
