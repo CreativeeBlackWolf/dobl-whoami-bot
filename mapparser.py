@@ -8,6 +8,13 @@ from enum import Enum
 
 GetPlayerErrors = Enum("GetPlayerErrors", ["NOT_FOUND", "WRONG_ID"])
 
+class TileIDs(Enum):
+    NULL = 0
+    EMPTY = 1
+    ABYSS = 2
+    ENEMY = 3
+    MERCHANT = 4
+
 class Map:
     # name's actually misleading since it's not strictly ASCII
     ASCII_DEFAULT_CHARS = '!"#$%&\'()*+,-./:;<=>?[\\]^_`{|}~0123456789ABCDEFGHIJKLMNOPQRSTUVW'
@@ -210,7 +217,72 @@ class Map:
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
         return f"{repr}\n\n{legend}"
 
-if __name__ == '__main__':
-    map = Map("instances-cropped.tmx")
-    player = map.get_player("Штрафник Данёк", "236917592684625921")
-    print(player.inventory)
+    def __list_doors(self, player: player.Player) -> list:
+        """
+        List available doors in the same room as the player
+
+        :param player: the player in question
+        :return: list of doors
+        """
+        roomPos = [ int(player.position[0]) // 32,
+                    int(player.position[1]) // 32]
+        doors = []
+        if self.__get_tile([roomPos[0], roomPos[1]-1]) not in (TileIDs.NULL, TileIDs.ABYSS):
+            doors.append("север")
+        if self.__get_tile([roomPos[0], roomPos[1]+1]) not in (TileIDs.NULL, TileIDs.ABYSS):
+            doors.append("юг")
+        if self.__get_tile([roomPos[0]-1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS):
+            doors.append("запад")
+        if self.__get_tile([roomPos[0]+1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS):
+            doors.append("восток")
+        # end of floor
+        if roomPos[0] % 4 == 0 and roomPos[1] % 5 == 0:
+            doors.append("вниз")
+        return doors
+
+    def list_doors_string(self, player: player.Player) -> str:
+        """
+        List available doors in the same room as the player
+
+        :param player: the player in question
+        :return: friendly string describing available doors
+        """
+        doors = self.__list_doors(player)
+        if 'вниз' in doors:
+            down = True
+        else:
+            down = False
+        doors = [door for door in doors if door != 'вниз']
+        if len(doors) == 0:
+            resp = "В этой комнате нет дверей."
+        elif len(doors) == 1:
+            resp = "Единственная дверь ведёт на " + doors[0] + "."
+        elif len(doors) == 2:
+            resp = "Двери ведут на " + doors[0] + " и " + doors[1] + "."
+        elif len(doors) == 3:
+            resp = "Двери ведут на " + doors[0] + ", " + doors[1] + " и " + doors[2] + "."
+        elif len(doors) == 4:
+            resp = "Двери ведут на 4 стороны света."
+        resp = resp if not down else resp + " Здесь также находится лестница вниз."
+        return resp
+    
+    def __get_tile(self, pos: list) -> TileIDs:
+        """
+        Get tile ID at given position
+
+        :param pos: the position
+        :returns: tile ID
+        """
+        chunkPos = [int(pos[0])-int(pos[0]) % 16,
+                    int(pos[1])-int(pos[1]) % 16]
+        for layer in self.root.findall("layer"):
+            if layer.attrib["name"] == "пол":
+                for chunk in layer.find('data').findall("chunk"):
+                    if chunk.attrib["x"] == str(chunkPos[0]) and chunk.attrib["y"] == str(chunkPos[1]):
+                        data = chunk.text
+                        data = data.replace("\n", "")
+                        data = data.replace(" ", "")
+                        data = data.split(",")
+                        data = [int(tile) for tile in data]
+                        return TileIDs(data[(pos[1] % 16) * 16 + pos[0] % 16])
+        raise Exception("Unknown tile at position " + str(pos))
