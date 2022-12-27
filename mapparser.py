@@ -6,7 +6,11 @@ import os
 import re
 from enum import Enum
 
-GetPlayerErrors = Enum("GetPlayerErrors", ["NOT_FOUND", "WRONG_ID"])
+
+class MapObjectError(Enum):
+    NOT_FOUND = "NOT_FOUND"
+    WRONG_ID = "WRONG_ID"
+
 
 class TileIDs(Enum):
     NULL = 0
@@ -29,7 +33,7 @@ class Map:
         time = os.path.getmtime(filepath)
         self.map_datetime = datetime.datetime.fromtimestamp(time).strftime('%H:%M:%S %d/%m/%Y')
 
-    def __search_player(self, playername: str) -> Union[etree.Element, None]:
+    def __search_object(self, objectname: str) -> Union[etree.Element, None]:
         """
         Search for a player in the map.
 
@@ -39,7 +43,7 @@ class Map:
         for objectgroup in self.root.findall("objectgroup"):
             if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
                 for object in objectgroup.findall("object"):
-                    if object.attrib["name"] == playername:
+                    if object.attrib["name"] == objectname:
                         return object
 
     def __loose_char_equals(self, char1: str, char2: str) -> bool:
@@ -61,24 +65,37 @@ class Map:
                 return True
         return False
 
-    def get_player(self, playername: str, playerID: str) -> Union[player.Player, GetPlayerErrors]:
+    def get_objects_inventory(self, objectname: str) -> Union[list, MapObjectError]:
+        """
+        Get formatted inventory of a given object by name
+        :param objectname: name of the object
+        :return: formatted inventory
+        """
+        obj = self.__search_object(objectname)
+
+        if not obj:
+            return MapObjectError.NOT_FOUND
+
+        try:
+            props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
+                        for prop in obj.find("properties").findall("property")}
+        except AttributeError:
+            props = {}
+
+        return player.Player.format_inventory(props.get("Инвентарь", "").split("\n"))
+
+
+    def get_player(self, playername: str, playerID: str) -> Union[player.Player, MapObjectError]:
         """
         Get serialized Player object
 
         :param playername: the name of the player to search for
+        :param playerID: Discord id of the player
         :return: Player object or None if player not found
         """
-        def replacer(match):
-            if match.group(1) is not None:
-                return "?"
-            if match.group(2) is not None:
-                return "???,"
-            if match.group(3) is not None:
-                return "???}"
-
-        pl = self.__search_player(playername)
+        pl = self.__search_object(playername)
         if not pl:
-            return GetPlayerErrors.NOT_FOUND
+            return MapObjectError.NOT_FOUND
         name = pl.attrib["name"]
         position = [pl.attrib["x"], pl.attrib["y"]]
         try:
@@ -86,38 +103,13 @@ class Map:
                         for prop in pl.find("properties").findall("property")}
         except AttributeError:
             props = {}
+
         foundPlayerID = props.get("ID игрока", "")
         if str(playerID) != str(foundPlayerID):
             print("Player ID mismatch: expected {}, got {}".format(type(foundPlayerID), type(playerID)))
-            return GetPlayerErrors.WRONG_ID
-        inventory = []
-        for item in props.get("Инвентарь", "").split("\n"):
-            # replacing hidden properties with `???` 
-            # (or `?`, if the property partially disclosed)
-            item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
-            item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
-            # hiding actual item name
-            item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::] if item.find("{") != -1 else item
-            item = item.replace("  ", " ")
+            return MapObjectError.WRONG_ID
 
-            # colorize inventory items
-            # checking if item equipped
-            if "э" in item.split(".")[0]:
-                equippedIndex = item.find("э") + 1
-                item = "[32m" + item[:equippedIndex] + "[0m" + item[equippedIndex:]
-            
-            # colorizing hidden properties
-            item = re.sub(r"\?{3}", "[35m???[0m", item)
-
-            # colorizing durability (if its less than 25%) 
-            durability = re.findall(r"\([0-9]+?\/[0-9]+?\)", item)
-            if durability:
-                itemDurability, itemMaxDurability = [int(i) for i in durability[0].replace("(", "").replace(")", "").split("/")]
-                if itemDurability / itemMaxDurability <= 0.25:
-                    durabilityIndex = item.find("(")
-                    item = item[:durabilityIndex] + "[31m" + item[durabilityIndex:] + "[0m"
-                
-            inventory.append(item)
+        inventory = player.Player.format_inventory(props.get("Инвентарь", "").split("\n"))
 
         hp = props.get("Очки Здоровья", "100/100 (100)")
         mp = props.get("Очки Маны", "100/100 (100)")

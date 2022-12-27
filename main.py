@@ -1,38 +1,21 @@
 #!/usr/bin/env python3
 import configparser
 import discord
+import asyncio
+from dialog_manager import send_abilities, send_inventory
 import mapparser
 import help
-import asyncio
 
 
 config = configparser.ConfigParser()
 config.read('botconfig.cfg')
 prefix = config.get("bot", "prefix", fallback=".")
+admins = config.get("bot", "admins", fallback="")
 
 intents = discord.Intents.default()
 intents.message_content = True
 
-
 client = discord.Client(intents=intents)
-
-async def send_inventory(message, player) -> None:
-    inv = "\n".join(player.inventory)
-    await message.channel.send(f'''```ansi
-Инвентарь:
-{inv}
-```''')
-
-async def send_abilities(message, player) -> None:
-    active = "\n".join(player.active_abilities)
-    passive = "\n".join(player.passive_abilities)
-    await message.channel.send(f'''```
-Навыки:
-{active}
-
-Особенности:
-{passive}
-```''')
 
 
 @client.event
@@ -42,7 +25,7 @@ async def on_ready():
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     if message.author == client.user:
         return
 
@@ -54,10 +37,10 @@ async def on_message(message):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
 
-        if player == mapparser.GetPlayerErrors.NOT_FOUND:
+        if player == mapparser.MapObjectError.NOT_FOUND:
             await message.channel.send("Ты не существуешь.")
             return
-        elif player == mapparser.GetPlayerErrors.WRONG_ID:
+        elif player == mapparser.MapObjectError.WRONG_ID:
             await message.channel.send("Ты меня обмануть пытаешься?")
             return
 
@@ -96,10 +79,10 @@ async def on_message(message):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
 
-        if player == mapparser.GetPlayerErrors.NOT_FOUND:
+        if player == mapparser.MapObjectError.NOT_FOUND:
             await message.channel.send("Ты не существуешь.")
             return
-        elif player == mapparser.GetPlayerErrors.WRONG_ID:
+        elif player == mapparser.MapObjectError.WRONG_ID:
             await message.channel.send("Ты меня обмануть пытаешься?")
             return
 
@@ -118,15 +101,37 @@ async def on_message(message):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
 
-        if player == mapparser.GetPlayerErrors.NOT_FOUND:
+        if player == mapparser.MapObjectError.NOT_FOUND:
             await message.channel.send("Ты не существуешь.")
             return
-        elif player == mapparser.GetPlayerErrors.WRONG_ID:
+        elif player == mapparser.MapObjectError.WRONG_ID:
             await message.channel.send("Ты меня обмануть пытаешься?")
             return
 
         resp = '```ansi\n'+map.construct_ascii_repr(player)+'\n```\n'+map.list_doors_string(player)
         await message.reply(resp)
+
+    if message.content.lower().startswith('.инвентарь'):
+        if str(message.author.id) not in admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+
+        if len(message.content.split("\n")) < 2:
+            if len(message.content.split()) >= 2:
+                map = mapparser.Map(config["map"]["path"])
+                inv = map.get_objects_inventory(" ".join(message.content.split()[1::]))
+                
+                if inv is mapparser.MapObjectError.NOT_FOUND:
+                    await message.channel.send("Объекта с таким именем нет на карте.")
+                    return
+
+                await send_inventory(message, inv, format=False)
+                return
+
+            await message.channel.send("А инвентарь-то где?")
+            return
+
+        await send_inventory(message, message.content.split("\n")[1::])
 
 
 if __name__ == '__main__':
