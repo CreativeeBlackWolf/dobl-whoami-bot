@@ -3,3 +3,4 @@
 **/*.cfg
 **/*.tmx
 !config_example.cfg
+**/test*
