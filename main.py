@@ -8,7 +8,7 @@ import asyncio
 
 config = configparser.ConfigParser()
 config.read('botconfig.cfg')
-prefix = config.get("bot", "prefix")
+prefix = config.get("bot", "prefix", fallback=".")
 
 intents = discord.Intents.default()
 intents.message_content = True
