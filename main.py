@@ -31,7 +31,14 @@ async def on_message(message: discord.Message):
 
 
     if message.content.lower().startswith(prefix + "помоги"):
-        await message.channel.send(help.get_commands())
+        splittedMessage = message.content.split()
+        if len(splittedMessage) == 1:
+            await message.channel.send(help.get_commands())
+        elif len(splittedMessage) >= 2:
+            if splittedMessage[1] == "мне":
+                await message.channel.send("Сам справишься.")
+            else:
+                await message.channel.send(help.get_commands(" ".join(splittedMessage[1::])))
 
     if message.content.lower().startswith((prefix + 'кто я', prefix + 'я кто')):
         map = mapparser.Map(config["map"]["path"])
