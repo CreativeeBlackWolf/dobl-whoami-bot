@@ -50,7 +50,7 @@ async def on_message(message):
     if message.content.lower().startswith(prefix + "помоги"):
         await message.channel.send(help.get_commands())
 
-    if message.content.lower().startswith(prefix + 'кто я'):
+    if message.content.lower().startswith((prefix + 'кто я', prefix + 'я кто')):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
 
