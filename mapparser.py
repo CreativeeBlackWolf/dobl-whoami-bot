@@ -103,7 +103,7 @@ class Map:
             item = re.sub(r"\?{3}", "[35m???[0m", item)
 
             # colorizing durability (if its less than 25%) 
-            durability = re.findall(r"\([0-9].?\/[0-9].?\)", item)
+            durability = re.findall(r"\([0-9]+?\/[0-9]+?\)", item)
             if durability:
                 itemDurability, itemMaxDurability = [int(i) for i in durability[0].replace("(", "").replace(")", "").split("/")]
                 if itemDurability / itemMaxDurability <= 0.25:
