@@ -5,7 +5,7 @@ from multipledispatch import dispatch
 @dispatch(discord.Message, player.Player)
 async def send_inventory(message: discord.Message, player: player.Player) -> None:
     """
-    send 
+    Send inventory of a given player
     """
     inv = "\n".join(player.inventory)
     await message.channel.send(f'''```ansi
@@ -15,6 +15,9 @@ async def send_inventory(message: discord.Message, player: player.Player) -> Non
 
 @dispatch(discord.Message, list)
 async def send_inventory(message: discord.Message, inventory: list, format = True) -> None:
+    """
+    Format inventory list
+    """
     inv = "\n".join(player.Player.format_inventory(inventory) if format else inventory)
     await message.delete()
     await message.channel.send(f'''```ansi
