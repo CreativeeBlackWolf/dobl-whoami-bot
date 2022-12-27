@@ -175,7 +175,14 @@ class Map:
             existingChar = repr[obj[2]][obj[1]]
             if existingChar != ".":
                 # if so, use the same char
-                legend[existingChar].append(obj[0])
+                # if this is the player, colorize the char
+                if obj[0] == player.name:
+                    coloredChar = '[2;47m[2;30m' + existingChar + '[0m'
+                    repr[obj[2]][obj[1]] = coloredChar
+                    legend[coloredChar] = legend[existingChar]+[obj[0]]
+                    del legend[existingChar]
+                else:
+                    legend[existingChar].append(obj[0])
                 continue
             # find a new char, first candidate is the first letter of the object name
             firstChar = obj[0][0].upper()
