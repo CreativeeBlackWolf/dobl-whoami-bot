@@ -22,7 +22,7 @@ class Map:
         time = os.path.getmtime(filepath)
         self.map_datetime = datetime.datetime.fromtimestamp(time).strftime('%H:%M:%S %d/%m/%Y')
 
-    def search_player(self, playername: str) -> Union[etree.Element, None]:
+    def __search_player(self, playername: str) -> Union[etree.Element, None]:
         """
         Search for a player in the map.
 
@@ -35,7 +35,7 @@ class Map:
                     if object.attrib["name"] == playername:
                         return object
 
-    def loose_char_equals(self, char1: str, char2: str) -> bool:
+    def __loose_char_equals(self, char1: str, char2: str) -> bool:
         """
         Compare two characters across Cyrillic and Latin alphabets.
         """
@@ -50,7 +50,7 @@ class Map:
         Check if a character is in a container across Cyrillic and Latin alphabets.
         """
         for c in container:
-            if self.loose_char_equals(char, c):
+            if self.__loose_char_equals(char, c):
                 return True
         return False
 
@@ -69,7 +69,7 @@ class Map:
             if match.group(3) is not None:
                 return "???}"
 
-        pl = self.search_player(playername)
+        pl = self.__search_player(playername)
         if not pl:
             return GetPlayerErrors.NOT_FOUND
         name = pl.attrib["name"]
@@ -92,6 +92,24 @@ class Map:
             # hiding actual item name
             item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::] if item.find("{") != -1 else item
             item = item.replace("  ", " ")
+
+            # colorize inventory items
+            # checking if item equipped
+            if "э" in item.split(".")[0]:
+                equippedIndex = item.find("э") + 1
+                item = "[32m" + item[:equippedIndex] + "[0m" + item[equippedIndex:]
+            
+            # colorizing hidden properties
+            item = re.sub(r"\?{3}", "[35m???[0m", item)
+
+            # colorizing durability (if its less than 25%) 
+            durability = re.findall(r"\([0-9].?\/[0-9].?\)", item)
+            if durability:
+                itemDurability, itemMaxDurability = [int(i) for i in durability[0].replace("(", "").replace(")", "").split("/")]
+                if itemDurability / itemMaxDurability <= 0.25:
+                    durabilityIndex = item.find("(")
+                    item = item[:durabilityIndex] + "[31m" + item[durabilityIndex:] + "[0m"
+                
             inventory.append(item)
 
         hp = props.get("Очки Здоровья", "100/100 (100)")
@@ -141,6 +159,12 @@ class Map:
         return sorted(objects, key=lambda x: x[0]+str(x[1])+str(x[2]))
 
     def construct_ascii_repr(self, player: player.Player) -> str:
+        """
+        Generates an ASCII string representation of a room
+
+        :param player: the player object
+        :returns: an ASCII string representation of a room
+        """
         objlist = self.get_same_room_objects(player)
         repr = [["." for i in range(8)] for j in range(8)]
         legend = {}
@@ -178,3 +202,8 @@ class Map:
         repr = "\n".join(["".join(row) for row in repr])
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
         return f"{repr}\n\n{legend}"
+
+if __name__ == '__main__':
+    map = Map("instances-cropped.tmx")
+    player = map.get_player("Штрафник Данёк", "236917592684625921")
+    print(player.inventory)
