@@ -69,21 +69,28 @@ async def on_message(message: discord.Message):
         await msg.add_reaction("📦")
         await msg.add_reaction("🔸")
 
-        try:
-            reaction, user = await client.wait_for(
-                "reaction_add", 
-                check = lambda reaction, user: True if user == message.author and
-                                                       str(reaction.emoji) in ["📦", "🔸"] and
-                                                       reaction.message == msg
-                                                       else False, timeout = 10)
-        except asyncio.TimeoutError:
-            await msg.remove_reaction("📦", client.user)
-            await msg.remove_reaction("🔸", client.user)
-        else:
-            if str(reaction.emoji) == "📦":
-                await send_inventory(message, player)
-            elif str(reaction.emoji) == "🔸":
-                await send_abilities(message, player)
+        servedInv, servedAbils = False, False
+        while True:
+            try:
+                reaction, user = await client.wait_for(
+                    "reaction_add", 
+                    check = lambda reaction, user: True if user == message.author and
+                                                        str(reaction.emoji) in ["📦", "🔸"] and
+                                                        reaction.message == msg
+                                                        else False, timeout = 10)
+            except asyncio.TimeoutError:
+                await msg.remove_reaction("📦", client.user)
+                await msg.remove_reaction("🔸", client.user)
+                break
+            else:
+                if not servedInv and str(reaction.emoji) == "📦":
+                    await send_inventory(message, player)
+                    await msg.remove_reaction("📦", client.user)
+                    servedInv = True
+                elif not servedAbils and str(reaction.emoji) == "🔸":
+                    await send_abilities(message, player)
+                    await msg.remove_reaction("🔸", client.user)
+                    servedAbils = True
 
     if message.content.lower().startswith(prefix + 'покажи'):
         map = mapparser.Map(config["map"]["path"])
