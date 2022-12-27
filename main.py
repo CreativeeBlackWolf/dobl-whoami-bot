@@ -70,9 +70,12 @@ async def on_message(message: discord.Message):
         await msg.add_reaction("🔸")
 
         try:
-            reaction, user = await client.wait_for("reaction_add", check = lambda reaction, user: True if user == message.author and
-                                                                           str(reaction.emoji) in ["📦", "🔸"]
-                                                                           else False, timeout = 10)
+            reaction, user = await client.wait_for(
+                "reaction_add", 
+                check = lambda reaction, user: True if user == message.author and
+                                                       str(reaction.emoji) in ["📦", "🔸"] and
+                                                       reaction.message == msg
+                                                       else False, timeout = 10)
         except asyncio.TimeoutError:
             await msg.remove_reaction("📦", client.user)
             await msg.remove_reaction("🔸", client.user)
