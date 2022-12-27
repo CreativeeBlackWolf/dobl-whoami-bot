@@ -45,7 +45,7 @@ class Map:
             return True
         return char1 == char2
 
-    def loose_char_in(self, char: str, container) -> bool:
+    def __loose_char_in(self, char: str, container) -> bool:
         """
         Check if a character is in a container across Cyrillic and Latin alphabets.
         """
@@ -186,9 +186,9 @@ class Map:
                 continue
             # find a new char, first candidate is the first letter of the object name
             firstChar = obj[0][0].upper()
-            if self.loose_char_in(firstChar, usedChars):
+            if self.__loose_char_in(firstChar, usedChars):
                 firstChar = firstChar.lower()
-            while self.loose_char_in(firstChar, usedChars):
+            while self.__loose_char_in(firstChar, usedChars):
                 firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
                 nextDefaultIndex += 1
             if obj[0] == player.name:

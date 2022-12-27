@@ -2,7 +2,7 @@ import configparser
 
 config = configparser.ConfigParser()
 config.read("botconfig.cfg")
-prefix = config["bot"]["prefix"]
+prefix = config.get("bot", "prefix", fallback=".")
 
 commands = {
     "кто я": f"Вывести своего персонажа // {prefix}кто я",
