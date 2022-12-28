@@ -35,10 +35,10 @@ class Map:
 
     def __search_object(self, objectname: str) -> Union[etree.Element, None]:
         """
-        Search for a player in the map.
+        Search for a object in the map.
 
-        :param playername: the name of the player to search for
-        :return: the player's root element or None if no match found
+        :param objectname: the name of the object to search for
+        :return: the object's root element or None if no match found
         """
         for objectgroup in self.root.findall("objectgroup"):
             if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
@@ -106,20 +106,19 @@ class Map:
 
         foundPlayerID = props.get("ID игрока", "")
         if str(playerID) != str(foundPlayerID):
-            print("Player ID mismatch: expected {}, got {}".format(type(foundPlayerID), type(playerID)))
             return MapObjectError.WRONG_ID
 
         inventory = player.Player.format_inventory(props.get("Инвентарь", "").split("\n"))
 
-        hp = props.get("Очки Здоровья", "100/100 (100)")
-        mp = props.get("Очки Маны", "100/100 (100)")
-        sp = props.get("Очки Души", "3")
-        rerolls = props.get("Рероллы", "2")
-        active_abilities = props.get("Навыки", "").split("\n")
+        hp                = props.get("Очки Здоровья", "100/100 (100)")
+        mp                = props.get("Очки Маны", "100/100 (100)")
+        sp                = props.get("Очки Души", "3")
+        rerolls           = props.get("Рероллы", "2")
+        active_abilities  = props.get("Навыки", "").split("\n")
         passive_abilities = props.get("Особенности", "").split("\n")
-        level = props.get("Уровень", "1")
-        frags = props.get("Фраги", "0/4")
-        group = props.get("Группа", "")
+        level             = props.get("Уровень", "1")
+        frags             = props.get("Фраги", "0/4")
+        group             = props.get("Группа", "")
         return player.Player(position, name, inventory, hp, mp, sp, 
         level, frags, active_abilities, passive_abilities, rerolls, group)
 
@@ -148,9 +147,9 @@ class Map:
                         group = props.get("Группа", "")
                         hidden = True if props.get("Скрыт", "false") == "true" else False
                         owner = props.get("Владелец", "")
-                        if  (not hidden) or\
-                            (owner != "" and owner == player.name) or\
-                            (group != "" and group == player.group) or\
+                        if  (not hidden) or \
+                            (owner != "" and owner == player.name) or \
+                            (group != "" and group == player.group) or \
                             (name != "???" and name == player.name):
                             objX, objY = objX % 32 // 4, objY % 32 // 4
                             objects.append((object.attrib.get("name", "???"), objX, objY, object.attrib.get("class", "")))
@@ -241,21 +240,21 @@ class Map:
         """
         doors = self.__list_doors(player)
         if 'вниз' in doors:
-            down = True
+            ladder = True
         else:
-            down = False
+            ladder = False
         doors = [door for door in doors if door != 'вниз']
         if len(doors) == 0:
             resp = "В этой комнате нет дверей."
         elif len(doors) == 1:
-            resp = "Единственная дверь ведёт на " + doors[0] + "."
+            resp = f"Единственная дверь ведёт на {doors[0]}."
         elif len(doors) == 2:
-            resp = "Двери ведут на " + doors[0] + " и " + doors[1] + "."
+            resp = f"Двери ведут на {doors[0]} и {doors[1]}."
         elif len(doors) == 3:
-            resp = "Двери ведут на " + doors[0] + ", " + doors[1] + " и " + doors[2] + "."
+            resp = f"Двери ведут на {doors[0]}, {doors[1]} и {doors[2]}."
         elif len(doors) == 4:
             resp = "Двери ведут на 4 стороны света."
-        resp = resp if not down else resp + " Здесь также находится лестница вниз."
+        resp = resp if not ladder else resp + " Здесь также находится лестница вниз."
         return resp
     
     def __get_tile(self, pos: list) -> TileIDs:
