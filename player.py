@@ -66,7 +66,7 @@ class Player:
             if "э" in item.split(".")[0]:
                 equippedIndex = item.find("э") + 1
                 item = "[32m" + item[:equippedIndex] + "[0m" + item[equippedIndex:]
-            
+
             # colorizing hidden properties
             item = re.sub(r"\?{3}", "[35m???[0m", item)
 
