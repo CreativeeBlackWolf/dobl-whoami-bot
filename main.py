@@ -182,15 +182,15 @@ async def on_message(message: discord.Message):
     elif message.content.lower().startswith(prefix + 'карта'):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
-        if 'карта' not in command_help.list_inventory_commands(player):
-            await message.channel.send("У тебя нет карты.")
-            return
 
         if player == mapparser.MapObjectError.NOT_FOUND:
             await message.channel.send("Ты не существуешь.")
             return
         elif player == mapparser.MapObjectError.WRONG_ID:
             await message.channel.send("Ты меня обмануть пытаешься?")
+            return
+        if 'карта' not in command_help.list_inventory_commands(player):
+            await message.channel.send("У тебя нет карты.")
             return
 
         resp = '```\n'+map.construct_ascii_map(player)+'```'
