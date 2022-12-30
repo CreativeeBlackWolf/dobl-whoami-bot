@@ -4,7 +4,7 @@ import discord
 import asyncio
 from dialog_manager import send_abilities, send_inventory
 import mapparser
-import help
+import command_help
 
 
 config = configparser.ConfigParser()
@@ -14,6 +14,7 @@ admins = config.get("bot", "admins", fallback="")
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 
 client = discord.Client(intents=intents)
 
@@ -33,12 +34,12 @@ async def on_message(message: discord.Message):
     if message.content.lower().startswith(prefix + "помоги"):
         splittedMessage = message.content.split()
         if len(splittedMessage) == 1:
-            await message.channel.send(help.get_commands())
+            await message.channel.send(command_help.get_commands())
         elif len(splittedMessage) >= 2:
             if splittedMessage[1] == "мне":
                 await message.channel.send("Сам справишься.")
             else:
-                await message.channel.send(help.get_commands(" ".join(splittedMessage[1::])))
+                await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::])))
 
     if message.content.lower().startswith((prefix + 'кто я', prefix + 'я кто')):
         map = mapparser.Map(config["map"]["path"])
@@ -52,8 +53,8 @@ async def on_message(message: discord.Message):
             return
 
         msg = await message.channel.send(f'''```
-ОЗ: {player.HP}
-ОМ: {player.MP}
+ОЗ: {player.format_HP()}
+ОМ: {player.format_MP()}
 ОД: {player.SP}
 УР: {player.level}
 ФРА: {player.frags}
@@ -107,12 +108,12 @@ async def on_message(message: discord.Message):
         if len(args) == 2:
             if args[1] in ["скиллы", "способности", "особенности", "навыки", "спеллы", "абилки"]:
                 await send_abilities(message, player)
-            elif args[1] in ["инвентарь", "шмотки"]:
+            elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:
                 await send_inventory(message, player)
             else:
-                await message.channel.send(f'Неправильное использование команды:\n{help.get_commands("покажи")}')
+                await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
         else:
-            await message.channel.send(f'Неправильное использование команды:\n{help.get_commands("покажи")}')
+            await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
     
     if message.content.lower().startswith(prefix + 'где я'):
         map = mapparser.Map(config["map"]["path"])
@@ -127,6 +128,30 @@ async def on_message(message: discord.Message):
 
         resp = '```ansi\n'+map.construct_ascii_repr(player)+'\n```\n'+map.list_doors_string(player)
         await message.reply(resp)
+
+    if message.content.lower().startswith(".группа"):
+        groupRole: discord.Role = None
+        for role in message.author.roles:
+            if role.name.startswith("группа"):
+                groupRole = role
+                break
+        else:
+            await message.channel.send("Ты не находишься в группе.")
+            return
+
+        map = mapparser.Map(config["map"]["path"])
+        groupMembers = list(groupRole.members)
+        msg = "```ansi\n"
+        
+        for member in groupMembers:
+            player = map.get_player(member.display_name, member.id)
+            msg += f"{member.display_name}: <[31m{player.HP}/{player.maxHP}[0m> "
+            if player.maxMP > 0:
+                msg += f"<[34m{player.MP}/{player.maxMP}[0m>"
+            msg += "\n"
+        
+        msg += "\n```"
+        await message.channel.send(msg)
 
     if message.content.lower().startswith('.инвентарь'):
         if str(message.author.id) not in admins:
