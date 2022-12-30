@@ -129,7 +129,7 @@ async def on_message(message: discord.Message):
         resp = '```ansi\n'+map.construct_ascii_repr(player)+'\n```\n'+map.list_doors_string(player)
         await message.reply(resp)
 
-    if message.content.lower().startswith(".группа"):
+    if message.content.lower().startswith(prefix + "группа"):
         groupRole: discord.Role = None
         for role in message.author.roles:
             if role.name.startswith("группа"):
@@ -153,7 +153,7 @@ async def on_message(message: discord.Message):
         msg += "\n```"
         await message.channel.send(msg)
 
-    if message.content.lower().startswith('.инвентарь'):
+    if message.content.lower().startswith(prefix + 'инвентарь'):
         if str(message.author.id) not in admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
