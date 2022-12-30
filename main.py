@@ -15,6 +15,7 @@ admins = config.get("bot", "admins", fallback="")
 
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
 
 client = discord.Client(intents=intents)
 
@@ -140,7 +141,7 @@ async def on_message(message: discord.Message):
             return
 
         map = mapparser.Map(config["map"]["path"])
-        groupMembers: list[discord.User] = [message.author, *groupRole.members]
+        groupMembers = list(groupRole.members)
         msg = "```ansi\n"
         for member in groupMembers:
             player = map.get_player(member.display_name, member.id)
