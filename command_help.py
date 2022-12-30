@@ -1,6 +1,8 @@
 import re
 import player as pl
-from main import prefix
+from main import config
+
+prefix = config.Bot.prefix
 
 commands = {
     "кто я": f"Вывести своего персонажа // `{prefix}кто я`",

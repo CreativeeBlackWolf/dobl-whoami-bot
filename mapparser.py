@@ -1,10 +1,9 @@
 from typing import Union
+from enum import Enum
 import xml.etree.ElementTree as etree
+import os
 import datetime
 import player
-import os
-import re
-from enum import Enum
 
 
 class MapObjectError(Enum):

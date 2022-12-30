@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-import configparser
 import discord
 import asyncio
 import random
 from dialog_manager import send_abilities, send_inventory
+from config import Config
 import mapparser
 import command_help
 
 
-config = configparser.ConfigParser()
-config.read('botconfig.cfg')
-prefix = config.get("bot", "prefix", fallback=".")
-admins = config.get("bot", "admins", fallback="")
-
+config = Config("botconfig.cfg")
 intents = discord.Intents.all()
-
 client = discord.Client(intents=intents)
 
 
@@ -30,8 +25,8 @@ async def on_message(message: discord.Message):
         return
 
 
-    if message.content.lower().startswith(prefix + "помоги"):
-        map = mapparser.Map(config["map"]["path"])
+    if message.content.lower().startswith(config.Bot.prefix + "помоги"):
+        map = mapparser.Map(config.Map.path)
         player = map.get_player(message.author.display_name, message.author.id)
 
         splittedMessage = message.content.split()
@@ -43,8 +38,8 @@ async def on_message(message: discord.Message):
             else:
                 await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::]), player))
 
-    elif message.content.lower().startswith((prefix + 'кто я', prefix + 'я кто')):
-        map = mapparser.Map(config["map"]["path"])
+    elif message.content.lower().startswith((config.Bot.prefix + 'кто я', config.Bot.prefix + 'я кто')):
+        map = mapparser.Map(config.Map.path)
         player = map.get_player(message.author.display_name, message.author.id)
 
         if player == mapparser.MapObjectError.NOT_FOUND:
@@ -62,8 +57,8 @@ async def on_message(message: discord.Message):
 ФРА: {player.frags}
 Рероллы: {player.rerolls}
 
-Если хочешь увидеть инвентарь, нажми на 📦, или введи `{prefix}покажи инвентарь`
-Если хочешь увидеть навыки и особенности, нажми на 🔸, или введи `{prefix}покажи навыки`
+Если хочешь увидеть инвентарь, нажми на 📦, или введи `{config.Bot.prefix}покажи инвентарь`
+Если хочешь увидеть навыки и особенности, нажми на 🔸, или введи `{config.Bot.prefix}покажи навыки`
 
 Персонаж актуален на момент времени: {map.map_datetime}.
 Учитывай, что данные за время могли измениться.
@@ -95,8 +90,8 @@ async def on_message(message: discord.Message):
                     await msg.remove_reaction("🔸", client.user)
                     servedAbils = True
 
-    elif message.content.lower().startswith(prefix + 'покажи'):
-        map = mapparser.Map(config["map"]["path"])
+    elif message.content.lower().startswith(config.Bot.prefix + 'покажи'):
+        map = mapparser.Map(config.Map.path)
         player = map.get_player(message.author.display_name, message.author.id)
 
         if player == mapparser.MapObjectError.NOT_FOUND:
@@ -117,8 +112,8 @@ async def on_message(message: discord.Message):
         else:
             await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
     
-    elif message.content.lower().startswith(prefix + 'где я'):
-        map = mapparser.Map(config["map"]["path"])
+    elif message.content.lower().startswith(config.Bot.prefix + 'где я'):
+        map = mapparser.Map(config.Map.path)
         player = map.get_player(message.author.display_name, message.author.id)
 
         if player == mapparser.MapObjectError.NOT_FOUND:
@@ -131,7 +126,7 @@ async def on_message(message: discord.Message):
         resp = '```ansi\n'+map.construct_ascii_repr(player)+'\n```\n'+map.list_doors_string(player)
         await message.reply(resp)
 
-    elif message.content.lower().startswith(prefix + "группа"):
+    elif message.content.lower().startswith(config.Bot.prefix + "группа"):
         groupRole: discord.Role = None
         for role in message.author.roles:
             if role.name.startswith("группа"):
@@ -141,7 +136,7 @@ async def on_message(message: discord.Message):
             await message.channel.send("Ты не находишься в группе.")
             return
 
-        map = mapparser.Map(config["map"]["path"])
+        map = mapparser.Map(config.Map.path)
         groupMembers = list(groupRole.members)
         msg = "```ansi\n"
         
@@ -155,14 +150,14 @@ async def on_message(message: discord.Message):
         msg += "\n```"
         await message.channel.send(msg)
 
-    elif message.content.lower().startswith(prefix + 'инвентарь'):
-        if str(message.author.id) not in admins:
+    elif message.content.lower().startswith(config.Bot.prefix + 'инвентарь'):
+        if str(message.author.id) not in config.Bot.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
 
         if len(message.content.split("\n")) < 2:
             if len(message.content.split()) >= 2:
-                map = mapparser.Map(config["map"]["path"])
+                map = mapparser.Map(config.Map.path)
                 inv = map.get_objects_inventory(" ".join(message.content.split()[1::]))
                 
                 if inv is mapparser.MapObjectError.NOT_FOUND:
@@ -177,14 +172,14 @@ async def on_message(message: discord.Message):
 
         await send_inventory(message, message.content.split("\n")[1::])
 
-    elif message.content.lower().startswith(prefix + "выбери"):
-        if str(message.author.id) not in admins:
+    elif message.content.lower().startswith(config.Bot.prefix + "выбери"):
+        if str(message.author.id) not in config.Bot.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
         
         args = message.content.split()
         if len(args) >= 2:
-            map = mapparser.Map(config["map"]["path"])
+            map = mapparser.Map(config.Map.path)
             if args[1] == "игрока":
                 await message.delete()
 
@@ -209,8 +204,8 @@ async def on_message(message: discord.Message):
         else:
             await message.channel.send("Выбрать что?")
 
-    elif message.content.lower().startswith(prefix + 'карта'):
-        map = mapparser.Map(config["map"]["path"])
+    elif message.content.lower().startswith(config.Bot.prefix + 'карта'):
+        map = mapparser.Map(config.Map.path)
         player = map.get_player(message.author.display_name, message.author.id)
 
         if player == mapparser.MapObjectError.NOT_FOUND:
@@ -227,5 +222,4 @@ async def on_message(message: discord.Message):
         await message.reply(resp)
 
 if __name__ == '__main__':
-    bot_token = config['bot']['token']
-    client.run(bot_token)
+    client.run(config.Bot.token)
