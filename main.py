@@ -178,6 +178,10 @@ async def on_message(message: discord.Message):
         await send_inventory(message, message.content.split("\n")[1::])
 
     elif message.content.lower().startswith(prefix + "выбери"):
+        if str(message.author.id) not in admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+        
         args = message.content.split()
         if len(args) >= 2:
             map = mapparser.Map(config["map"]["path"])
@@ -191,9 +195,10 @@ async def on_message(message: discord.Message):
                        and not [role for role in user.roles if role.name == "ДМ"]: # what the actual fuck is this...
                         if not isinstance(player := map.get_player(user.name, user.id), 
                                           mapparser.MapObjectError):
-                            if player.level > levelNeeded:
+                            if player.level == levelNeeded:
                                 candidates.append(player)
                 if candidates:
+                    await message.delete()
                     await message.channel.send(random.choice(candidates))
                 else:
                     await message.channel.send("По таким критериям я никого не нашёл.")
