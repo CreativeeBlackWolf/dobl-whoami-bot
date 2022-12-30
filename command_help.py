@@ -1,4 +1,3 @@
-import configparser
 import player as pl
 import re
 from main import prefix
