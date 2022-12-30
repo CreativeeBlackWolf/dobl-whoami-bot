@@ -82,7 +82,7 @@ class Map:
         except AttributeError:
             props = {}
 
-        return player.Player.format_inventory(props.get("Инвентарь", "").split("\n"))
+        return player.Player.format_inventory_list(props.get("Инвентарь", "").split("\n"))
 
 
     def get_player(self, playername: str, playerID: str) -> Union[player.Player, MapObjectError]:
@@ -108,19 +108,40 @@ class Map:
         if str(playerID) != str(foundPlayerID):
             return MapObjectError.WRONG_ID
 
-        inventory = player.Player.format_inventory(props.get("Инвентарь", "").split("\n"))
+        inventory = player.Player.format_inventory_list(props.get("Инвентарь", "").split("\n"))
 
-        hp                = props.get("Очки Здоровья", "100/100 (100)")
-        mp                = props.get("Очки Маны", "100/100 (100)")
-        sp                = props.get("Очки Души", "3")
-        rerolls           = props.get("Рероллы", "2")
+        hpString          = props.get("Очки Здоровья", "100/100 (100)")
+        hp                = int(hpString.split()[0].split("/")[0])
+        maxHP             = float(hpString.split()[0].split("/")[1])
+        trueHP            = int(hpString.split()[1][1:-1])
+        mpString          = props.get("Очки Маны", "100/100 (100)")
+        mp                = int(mpString.split()[0].split("/")[0])
+        maxMP             = float(mpString.split()[0].split("/")[1])
+        trueMP            = int(mpString.split()[1][1:-1])
+        sp                = int(props.get("Очки Души", "3"))
+        rerolls           = int(props.get("Рероллы", "2"))
         active_abilities  = props.get("Навыки", "").split("\n")
         passive_abilities = props.get("Особенности", "").split("\n")
-        level             = props.get("Уровень", "1")
+        level             = int(props.get("Уровень", "1"))
         frags             = props.get("Фраги", "0/4")
         group             = props.get("Группа", "")
-        return player.Player(position, name, inventory, hp, mp, sp, 
-        level, frags, active_abilities, passive_abilities, rerolls, group)
+        return player.Player(
+            position=position,
+            name=name,
+            inventory=inventory,
+            HP=hp,
+            maxHP=maxHP,
+            trueHP=trueHP,
+            MP=mp,
+            maxMP=maxMP,
+            trueMP=trueMP,
+            SP=sp,
+            level=level,
+            frags=frags,
+            active_abilities=active_abilities,
+            passive_abilities=passive_abilities,
+            rerolls=rerolls,
+            group=group)
 
     def get_same_room_objects(self, player: player.Player) -> list:
         """

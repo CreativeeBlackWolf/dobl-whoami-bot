@@ -18,7 +18,7 @@ async def send_inventory(message: discord.Message, inventory: list, format = Tru
     """
     Format inventory list
     """
-    inv = "\n".join(player.Player.format_inventory(inventory) if format else inventory)
+    inv = "\n".join(player.Player.format_inventory_list(inventory) if format else inventory)
     await message.delete()
     await message.channel.send(f'''```ansi
 Инвентарь:

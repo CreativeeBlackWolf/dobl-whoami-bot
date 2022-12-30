@@ -2,7 +2,6 @@
 import configparser
 import discord
 import asyncio
-import re
 from dialog_manager import send_abilities, send_inventory
 import mapparser
 import command_help
@@ -54,8 +53,8 @@ async def on_message(message: discord.Message):
             return
 
         msg = await message.channel.send(f'''```
-ОЗ: {player.HP}
-ОМ: {player.MP}
+ОЗ: {player.format_HP()}
+ОМ: {player.format_MP()}
 ОД: {player.SP}
 УР: {player.level}
 ФРА: {player.frags}
@@ -143,12 +142,14 @@ async def on_message(message: discord.Message):
         map = mapparser.Map(config["map"]["path"])
         groupMembers = list(groupRole.members)
         msg = "```ansi\n"
+        
         for member in groupMembers:
             player = map.get_player(member.display_name, member.id)
-            msg += \
-            f"{member.display_name}: <[31m{player.HP.split()[0]}[0m> " + \
-            f"{'<[34m' + player.MP.split()[0] + '[0m>' if float(player.MP.split()[0].split('/')[1]) > 0 else ''}\n"
-
+            msg += f"{member.display_name}: <[31m{player.HP}/{player.maxHP}[0m> "
+            if player.maxMP > 0:
+                msg += f"<[34m{player.MP}/{player.maxMP}[0m>"
+            msg += "\n"
+        
         msg += "\n```"
         await message.channel.send(msg)
 
