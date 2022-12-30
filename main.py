@@ -109,7 +109,7 @@ async def on_message(message: discord.Message):
         if len(args) == 2:
             if args[1] in ["скиллы", "способности", "особенности", "навыки", "спеллы", "абилки"]:
                 await send_abilities(message, player)
-            elif args[1] in ["инвентарь", "шмотки"]:
+            elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:
                 await send_inventory(message, player)
             else:
                 await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
