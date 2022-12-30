@@ -298,3 +298,26 @@ class Map:
                         data = [int(tile) for tile in data]
                         return TileIDs(data[(pos[1] % 16) * 16 + pos[0] % 16])
         raise Exception("Unknown tile at position " + str(pos))
+
+    def construct_ascii_map(self, player: player.Player) -> str:
+        """
+        Construct the map of a floor the player is in, represented as ASCII art
+
+        :param player: the player in question
+        :return: the map
+        """
+        roomPos = [ int(player.position[0]) // 32,
+                    int(player.position[1]) // 32]
+        floorStart = [  roomPos[0] - (roomPos[0]+1) % 4,
+                        roomPos[1] - (roomPos[1]+4) % 5]
+        repr = ''
+        for y in range(5):
+            for x in range(3):
+                tile = self.__get_tile([floorStart[0]+x, floorStart[1]+y])
+                if tile in (TileIDs.NULL, TileIDs.ABYSS):
+                    repr += ' '
+                else:
+                    repr += '#'
+            repr += '\n'
+        tile = self.__get_tile([floorStart[0]+1, floorStart[1]+4])
+        return repr

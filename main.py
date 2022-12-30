@@ -32,14 +32,17 @@ async def on_message(message: discord.Message):
 
 
     if message.content.lower().startswith(prefix + "помоги"):
+        map = mapparser.Map(config["map"]["path"])
+        player = map.get_player(message.author.display_name, message.author.id)
+
         splittedMessage = message.content.split()
         if len(splittedMessage) == 1:
-            await message.channel.send(command_help.get_commands())
+            await message.channel.send(command_help.get_commands(player=player))
         elif len(splittedMessage) >= 2:
             if splittedMessage[1] == "мне":
                 await message.channel.send("Сам справишься.")
             else:
-                await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::])))
+                await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::]), player))
 
     elif message.content.lower().startswith((prefix + 'кто я', prefix + 'я кто')):
         map = mapparser.Map(config["map"]["path"])
@@ -175,6 +178,22 @@ async def on_message(message: discord.Message):
 
         await send_inventory(message, message.content.split("\n")[1::])
 
+    elif message.content.lower().startswith(prefix + 'карта'):
+        map = mapparser.Map(config["map"]["path"])
+        player = map.get_player(message.author.display_name, message.author.id)
+
+        if player == mapparser.MapObjectError.NOT_FOUND:
+            await message.channel.send("Ты не существуешь.")
+            return
+        elif player == mapparser.MapObjectError.WRONG_ID:
+            await message.channel.send("Ты меня обмануть пытаешься?")
+            return
+        if 'карта' not in command_help.list_inventory_commands(player):
+            await message.channel.send("У тебя нет карты.")
+            return
+
+        resp = '```\n'+map.construct_ascii_map(player)+'```'
+        await message.reply(resp)
 
 if __name__ == '__main__':
     bot_token = config['bot']['token']
