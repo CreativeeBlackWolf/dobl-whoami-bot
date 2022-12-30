@@ -194,9 +194,8 @@ async def on_message(message: discord.Message):
 
                 for user in message.guild.members:
                     if user.status == discord.Status.online and \
-                       excludeRole not in user.roles \
-                       and not [role for role in user.roles if role.name == "ДМ"]: # what the actual fuck is this...
-                        if not isinstance(player := map.get_player(user.name, user.id), 
+                       excludeRole not in user.roles:
+                        if not isinstance(player := map.get_player(user.display_name, user.id), 
                                           mapparser.MapObjectError):
                             if (levelNeeded == 0) or (levelNeeded == player.level):
                                 candidates.append(player)
