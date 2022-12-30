@@ -1,10 +1,7 @@
 import configparser
-import player
+import player as pl
 import re
-
-config = configparser.ConfigParser()
-config.read("botconfig.cfg")
-prefix = config.get("bot", "prefix", fallback=".")
+from main import prefix
 
 commands = {
     "кто я": f"Вывести своего персонажа // `{prefix}кто я`",
@@ -24,7 +21,7 @@ invCommands = {
     "карта": f"Показать карту // `{prefix}карта`",
 }
 
-def get_commands(plr, command: str = None) -> str:
+def get_commands(command: str = None, player: pl.Player = None) -> str:
     if command is not None:
         com = commands.get(command)
         if com is None:
@@ -33,15 +30,15 @@ def get_commands(plr, command: str = None) -> str:
     s = ""
     for _, v in commands.items():
         s += v + "\n"
-    if not isinstance(plr, player.Player):
+    if not isinstance(player, pl.Player):
         return s
-    invCmds = list_inventory_commands(plr)
+    invCmds = list_inventory_commands(player)
     if len(invCmds) > 0:
         for i in invCmds:
             s += invCommands.get(i) + "\n"
     return s
 
-def list_inventory_commands(player: player.Player) -> list:
+def list_inventory_commands(player: pl.Player) -> list:
     """
     List all commands added by inventory items
 

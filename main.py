@@ -37,12 +37,12 @@ async def on_message(message: discord.Message):
 
         splittedMessage = message.content.split()
         if len(splittedMessage) == 1:
-            await message.channel.send(command_help.get_commands(player))
+            await message.channel.send(command_help.get_commands(player=player))
         elif len(splittedMessage) >= 2:
             if splittedMessage[1] == "мне":
                 await message.channel.send("Сам справишься.")
             else:
-                await message.channel.send(command_help.get_commands(player, " ".join(splittedMessage[1::])))
+                await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::]), player))
 
     elif message.content.lower().startswith((prefix + 'кто я', prefix + 'я кто')):
         map = mapparser.Map(config["map"]["path"])
@@ -188,7 +188,7 @@ async def on_message(message: discord.Message):
         elif player == mapparser.MapObjectError.WRONG_ID:
             await message.channel.send("Ты меня обмануть пытаешься?")
             return
-        
+
         resp = '```\n'+map.construct_ascii_map(player)+'```'
         await message.reply(resp)
 
