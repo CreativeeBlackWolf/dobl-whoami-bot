@@ -144,7 +144,9 @@ async def on_message(message: discord.Message):
         msg = "```ansi\n"
         for member in groupMembers:
             player = map.get_player(member.display_name, member.id)
-            msg += f"{member.display_name}: <[31m{player.HP.split()[0]}[0m> <[34m{player.MP.split()[0]}[0m>\n"
+            msg += \
+            f"{member.display_name}: <[31m{player.HP.split()[0]}[0m> " + \
+            f"{'<[34m' + player.MP.split()[0] + '[0m>' if float(player.MP.split()[0].split('/')[1]) > 0 else ''}\n"
 
         msg += "\n```"
         await message.channel.send(msg)
