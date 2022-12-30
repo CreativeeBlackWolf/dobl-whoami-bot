@@ -186,19 +186,21 @@ async def on_message(message: discord.Message):
         if len(args) >= 2:
             map = mapparser.Map(config["map"]["path"])
             if args[1] == "игрока":
+                await message.delete()
+
                 candidates = []
                 levelNeeded: int = int(args[2]) if len(args) >= 3 and not args[2].startswith("<@&") else 0
                 excludeRole: discord.Role = message.role_mentions[0] if message.role_mentions else None
+
                 for user in message.guild.members:
                     if user.status == discord.Status.online and \
                        excludeRole not in user.roles \
                        and not [role for role in user.roles if role.name == "ДМ"]: # what the actual fuck is this...
                         if not isinstance(player := map.get_player(user.name, user.id), 
                                           mapparser.MapObjectError):
-                            if player.level == levelNeeded:
+                            if (levelNeeded == 0) or (levelNeeded == player.level):
                                 candidates.append(player)
                 if candidates:
-                    await message.delete()
                     await message.channel.send(random.choice(candidates))
                 else:
                     await message.channel.send("По таким критериям я никого не нашёл.")
