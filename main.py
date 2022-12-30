@@ -178,6 +178,7 @@ async def on_message(message: discord.Message):
 
         await send_inventory(message, message.content.split("\n")[1::])
 
+    # FIXME: map item should be in players inventory
     elif message.content.lower().startswith(prefix + 'карта'):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
