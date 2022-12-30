@@ -1,5 +1,5 @@
-import player as pl
 import re
+import player as pl
 from main import prefix
 
 commands = {

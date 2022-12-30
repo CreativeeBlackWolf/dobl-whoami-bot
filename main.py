@@ -2,6 +2,7 @@
 import configparser
 import discord
 import asyncio
+import random
 from dialog_manager import send_abilities, send_inventory
 import mapparser
 import command_help
@@ -12,9 +13,7 @@ config.read('botconfig.cfg')
 prefix = config.get("bot", "prefix", fallback=".")
 admins = config.get("bot", "admins", fallback="")
 
-intents = discord.Intents.default()
-intents.message_content = True
-intents.members = True
+intents = discord.Intents.all()
 
 client = discord.Client(intents=intents)
 
@@ -177,6 +176,31 @@ async def on_message(message: discord.Message):
             return
 
         await send_inventory(message, message.content.split("\n")[1::])
+
+    elif message.content.lower().startswith(prefix + "выбери"):
+        args = message.content.split()
+        if len(args) >= 2:
+            map = mapparser.Map(config["map"]["path"])
+            if args[1] == "игрока":
+                candidates = []
+                levelNeeded: int = int(args[2]) if len(args) >= 3 and not args[2].startswith("<@&") else 0
+                excludeRole: discord.Role = message.role_mentions[0] if message.role_mentions else None
+                for user in message.guild.members:
+                    if user.status == discord.Status.online and \
+                       excludeRole not in user.roles \
+                       and not [role for role in user.roles if role.name == "ДМ"]: # what the actual fuck is this...
+                        if not isinstance(player := map.get_player(user.name, user.id), 
+                                          mapparser.MapObjectError):
+                            if player.level > levelNeeded:
+                                candidates.append(player)
+                if candidates:
+                    await message.channel.send(random.choice(candidates))
+                else:
+                    await message.channel.send("По таким критериям я никого не нашёл.")
+            else:
+                await message.channel.send("Выбрать что?")
+        else:
+            await message.channel.send("Выбрать что?")
 
     elif message.content.lower().startswith(prefix + 'карта'):
         map = mapparser.Map(config["map"]["path"])
