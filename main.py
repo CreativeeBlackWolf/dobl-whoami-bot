@@ -35,6 +35,11 @@ async def on_message(message: discord.Message):
         elif len(splittedMessage) >= 2:
             if splittedMessage[1] == "мне":
                 await message.channel.send("Сам справишься.")
+            elif splittedMessage[1] == "админу":
+                if str(message.author.id) in config.Bot.admins:
+                    await message.channel.send(command_help.get_admin_command())
+                else:
+                    await message.channel.send("Ты кто вообще такой?")
             else:
                 await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::]), player))
 
@@ -184,16 +189,19 @@ async def on_message(message: discord.Message):
                 await message.delete()
 
                 candidates = []
-                levelNeeded: int = int(args[2]) if len(args) >= 3 and not args[2].startswith("<@&") else 0
-                excludeRole: discord.Role = message.role_mentions[0] if message.role_mentions else None
+                try:
+                    levelNeeded: int = int(args[2]) if len(args) >= 3 and not args[2].startswith("<@&") else 0
+                    excludeRole: discord.Role = message.role_mentions[0] if message.role_mentions else None
 
-                for user in message.guild.members:
-                    if user.status == discord.Status.online and \
-                       excludeRole not in user.roles:
-                        if not isinstance(player := map.get_player(user.display_name, user.id), 
-                                          mapparser.MapObjectError):
-                            if (levelNeeded == 0) or (levelNeeded == player.level):
-                                candidates.append(player)
+                    for user in message.guild.members:
+                        if user.status == discord.Status.online and \
+                        excludeRole not in user.roles:
+                            if not isinstance(player := map.get_player(user.display_name, user.id), 
+                                            mapparser.MapObjectError):
+                                if (levelNeeded == 0) or (levelNeeded == player.level):
+                                    candidates.append(player)
+                except ValueError:
+                    ...
                 if candidates:
                     await message.channel.send(random.choice(candidates))
                 else:
