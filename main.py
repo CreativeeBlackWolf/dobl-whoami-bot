@@ -41,7 +41,7 @@ async def on_message(message: discord.Message):
             else:
                 await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::])))
 
-    if message.content.lower().startswith((prefix + 'кто я', prefix + 'я кто')):
+    elif message.content.lower().startswith((prefix + 'кто я', prefix + 'я кто')):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
 
@@ -93,7 +93,7 @@ async def on_message(message: discord.Message):
                     await msg.remove_reaction("🔸", client.user)
                     servedAbils = True
 
-    if message.content.lower().startswith(prefix + 'покажи'):
+    elif message.content.lower().startswith(prefix + 'покажи'):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
 
@@ -115,7 +115,7 @@ async def on_message(message: discord.Message):
         else:
             await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
     
-    if message.content.lower().startswith(prefix + 'где я'):
+    elif message.content.lower().startswith(prefix + 'где я'):
         map = mapparser.Map(config["map"]["path"])
         player = map.get_player(message.author.display_name, message.author.id)
 
@@ -129,7 +129,7 @@ async def on_message(message: discord.Message):
         resp = '```ansi\n'+map.construct_ascii_repr(player)+'\n```\n'+map.list_doors_string(player)
         await message.reply(resp)
 
-    if message.content.lower().startswith(prefix + "группа"):
+    elif message.content.lower().startswith(prefix + "группа"):
         groupRole: discord.Role = None
         for role in message.author.roles:
             if role.name.startswith("группа"):
@@ -153,7 +153,7 @@ async def on_message(message: discord.Message):
         msg += "\n```"
         await message.channel.send(msg)
 
-    if message.content.lower().startswith(prefix + 'инвентарь'):
+    elif message.content.lower().startswith(prefix + 'инвентарь'):
         if str(message.author.id) not in admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
