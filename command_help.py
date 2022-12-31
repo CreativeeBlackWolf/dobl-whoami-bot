@@ -1,22 +1,31 @@
-import player as pl
 import re
-from main import prefix
+import player as pl
+from main import config
+
+prefix = config.Bot.prefix
 
 commands = {
     "кто я": f"Вывести своего персонажа // `{prefix}кто я`",
-    "покажи": f"Показать инвентарь или особенности/навыки персонажа // `{prefix}покажи [инвентарь|навыки]`",
-    "помоги": f"Вывести это сообщение или помощь для конкретной команды // `{prefix}помоги <команда>`",
+    "покажи": f"Показать инвентарь или особенности/навыки персонажа // `{prefix}покажи <инвентарь|навыки>`",
+    "помоги": f"Вывести это сообщение или помощь для конкретной команды // `{prefix}помоги [команда]`",
     "группа": f"Показать состояние группы // `{prefix}группа`"
+}
+
+adminCommands = {
+    "выбери": f"Выбрать случайного игрока онлайн // `{prefix}выбери <игрока> \
+[роль|уровень] [роль]`",
+    "инвентарь": f"Вывести инвентарь игрока или НПЦ, или отформатировать его // `{prefix}инвентарь \
+<имя_объекта|инвентарь для форматирования с новой строки>`"
 }
 
 aliases = {
     "кто я": f"`{prefix}я кто`",
-    "покажи": f"""Показать инвентарь: `{prefix}покажи [шмот|инвентарь|рюкзак]`
-Показать навыки/особенности: `{prefix}покажи [скиллы|способности|особенности|навыки|спеллы|абилки]`
+    "покажи": f"""Показать инвентарь: `{prefix}покажи <шмот|инвентарь|рюкзак>`
+Показать навыки/особенности: `{prefix}покажи <скиллы|способности|особенности|навыки|спеллы|абилки>`
 """
 }
 
-invCommands = {
+inventoryCommands = {
     "карта": f"Показать карту // `{prefix}карта`",
 }
 
@@ -34,7 +43,17 @@ def get_commands(command: str = None, player: pl.Player = None) -> str:
     invCmds = list_inventory_commands(player)
     if len(invCmds) > 0:
         for i in invCmds:
-            s += invCommands.get(i) + "\n"
+            s += inventoryCommands.get(i) + "\n"
+    return s
+
+def get_admin_command(command: str = None):
+    if command is not None:
+        com = adminCommands.get(command)
+        if com is None:
+            return "Такой команды нет."
+    s = ""
+    for _, v in adminCommands.items():
+        s += v + "\n"
     return s
 
 def list_inventory_commands(player: pl.Player) -> list:
