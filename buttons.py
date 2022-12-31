@@ -11,7 +11,7 @@ import player
 
 class WhoamiCommandView(View):
     def __init__(self, map: mapparser.Map, player: player.Player, ctx: commands.Context):
-        super().__init__(timeout=5.0)
+        super().__init__(timeout=10.0)
         self.map = map
         self.player = player
         self.ctx = ctx
