@@ -10,7 +10,8 @@ class Config:
         self.Bot = self.Bot(
             token=self.config.get('bot', 'token'),
             prefix=self.config.get('bot', 'prefix', fallback="."),
-            admins=self.config.get('bot', 'admins', fallback=[])
+            admins=self.config.get('bot', 'admins', fallback=[]),
+            guild_id=self.config.get('bot', 'guild_id', fallback="0")
         )
     
         self.Map = self.Map(
@@ -18,10 +19,11 @@ class Config:
         )
 
     class Bot:
-        def __init__(self, token: str, prefix: str, admins: list[str]):
+        def __init__(self, token: str, prefix: str, admins: list[str], guild_id: str):
             self.token: str = token
             self.prefix: str = prefix
             self.admins: list[str] = admins
+            self.guild_id: str = guild_id
 
             if not self.token:
                 raise ValueError("Token must be specified in configuration file.")
