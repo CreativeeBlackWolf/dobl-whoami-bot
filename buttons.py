@@ -10,7 +10,7 @@ import player
 
 class WhoamiCommandView(View):
     def __init__(self, map: mapparser.Map, player: player.Player, author: discord.User):
-        super().__init__(timeout=10.0)
+        super().__init__(timeout=30.0)
         self.map = map
         self.player = player
         self.author = author
@@ -24,6 +24,9 @@ class WhoamiCommandView(View):
             for childButton in self.children:
                 childButton.style = ButtonStyle.green if childButton != button else ButtonStyle.blurple
             await interaction.response.edit_message(view=self, content=dialog.get_player_info(self.map, self.player))
+        else:
+            button.style = ButtonStyle.red
+            await interaction.response.send_message(view=self, content="Это не ты.")
 
     @button(label="Инвентарь", custom_id="inventory", style=ButtonStyle.success, emoji="📦")
     async def inventory_button_callback(self, interaction: discord.Interaction, button: Button):
@@ -31,6 +34,9 @@ class WhoamiCommandView(View):
             for childButton in self.children:
                 childButton.style = ButtonStyle.green if childButton != button else ButtonStyle.blurple
             await interaction.response.edit_message(view=self, content=dialog.get_inventory_string(self.player))
+        else:
+            button.style = ButtonStyle.red
+            await interaction.response.send_message(view=self, content="Это не ты.")
 
     @button(label="Навыки", custom_id="abilities", style=ButtonStyle.success, emoji="🔶")
     async def abilities_button_callback(self, interaction: discord.Interaction, button: Button):
@@ -38,6 +44,9 @@ class WhoamiCommandView(View):
             for childButton in self.children:
                 childButton.style = ButtonStyle.green if childButton != button else ButtonStyle.blurple
             await interaction.response.edit_message(view=self, content=dialog.get_abilities_string(self.player))
+        else:
+            button.style = ButtonStyle.red
+            await interaction.response.send_message(view=self, content="Это не ты.")
 
     @button(label="Где я", custom_id="whereami", style=ButtonStyle.success, emoji="🗺️")
     async def whereami_button_callback(self, interaction: discord.Interaction, button: Button):
@@ -48,6 +57,10 @@ class WhoamiCommandView(View):
             f"""```ansi
 {self.map.construct_ascii_repr(self.player)}
 ```""")
+        else:
+            button.style = ButtonStyle.red
+            await interaction.response.send_message(view=self, content="Это не ты.")
+
 
     async def on_timeout(self) -> None:
         for button in self.children:
