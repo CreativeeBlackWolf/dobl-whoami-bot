@@ -2,10 +2,11 @@
 import discord
 import asyncio
 import random
-from dialog_manager import send_abilities, send_inventory
+from dialog_manager import send_abilities, send_inventory, get_player_info
 from config import Config
 import mapparser
 import command_help
+from buttons import WhoamiCommandView
 
 
 config = Config("botconfig.cfg")
@@ -54,46 +55,8 @@ async def on_message(message: discord.Message):
             await message.channel.send("Ты меня обмануть пытаешься?")
             return
 
-        msg = await message.channel.send(f'''```
-ОЗ: {player.format_HP()}
-ОМ: {player.format_MP()}
-ОД: {player.SP}
-УР: {player.level}
-ФРА: {player.frags}
-Рероллы: {player.rerolls}
-
-Если хочешь увидеть инвентарь, нажми на 📦, или введи `{config.Bot.prefix}покажи инвентарь`
-Если хочешь увидеть навыки и особенности, нажми на 🔸, или введи `{config.Bot.prefix}покажи навыки`
-
-Персонаж актуален на момент времени: {map.map_datetime}.
-Учитывай, что данные за время могли измениться.
-```''')
-
-        await msg.add_reaction("📦")
-        await msg.add_reaction("🔸")
-
-        servedInv, servedAbils = False, False
-        while True:
-            try:
-                reaction, user = await client.wait_for(
-                    "reaction_add", 
-                    check = lambda reaction, user: True if user == message.author and
-                                                        str(reaction.emoji) in ["📦", "🔸"] and
-                                                        reaction.message == msg
-                                                        else False, timeout = 10)
-            except asyncio.TimeoutError:
-                await msg.remove_reaction("📦", client.user)
-                await msg.remove_reaction("🔸", client.user)
-                break
-            else:
-                if not servedInv and str(reaction.emoji) == "📦":
-                    await send_inventory(message, player)
-                    await msg.remove_reaction("📦", client.user)
-                    servedInv = True
-                elif not servedAbils and str(reaction.emoji) == "🔸":
-                    await send_abilities(message, player)
-                    await msg.remove_reaction("🔸", client.user)
-                    servedAbils = True
+        view = WhoamiCommandView(map, player, message.author)
+        view.message = await message.reply(get_player_info(map, player), view=view)
 
     elif message.content.lower().startswith(config.Bot.prefix + 'покажи'):
         map = mapparser.Map(config.Map.path)

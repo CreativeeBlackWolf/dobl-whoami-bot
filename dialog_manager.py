@@ -1,6 +1,7 @@
 import discord
-import player
 from multipledispatch import dispatch
+import mapparser
+import player
 
 @dispatch(discord.Message, player.Player)
 async def send_inventory(message: discord.Message, player: player.Player) -> None:
@@ -35,3 +36,34 @@ async def send_abilities(message: discord.Message, player: player.Player) -> Non
 Особенности:
 {passive}
 ```''')
+
+def get_inventory_string(player: player.Player):
+    inv = "\n".join(player.inventory)
+    return f'''```ansi
+Инвентарь:
+{inv}
+```'''
+
+def get_player_info(map: mapparser.Map, player: player.Player):
+    return f'''```
+ОЗ: {player.format_HP()}
+ОМ: {player.format_MP()}
+ОД: {player.SP}
+УР: {player.level}
+ФРА: {player.frags}
+Рероллы: {player.rerolls}
+
+Персонаж актуален на момент времени: {map.map_datetime}.
+Учитывай, что данные за время могли измениться.
+```'''
+
+def get_abilities_string(player: player.Player):
+    active = "\n".join(player.active_abilities)
+    passive = "\n".join(player.passive_abilities)
+    return f'''```
+Навыки:
+{active}
+
+Особенности:
+{passive}
+```'''
