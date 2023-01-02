@@ -45,9 +45,10 @@ class WhoamiCommandView(View):
 {self.map.construct_ascii_repr(self.player)}
 ```""")
 
-    async def interaction_check(self, interaction: discord.Interaction, /) -> bool:
+    async def interaction_check(self, interaction: discord.Interaction  ) -> bool:
         if interaction.user == self.author:
             return True
+        await interaction.response.send_message(content=f"<@{interaction.user.id}>, это не ты.")
         return False
 
     async def on_timeout(self) -> None:
