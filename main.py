@@ -55,7 +55,7 @@ async def on_message(message: discord.Message):
             await message.channel.send("Ты меня обмануть пытаешься?")
             return
 
-        view = WhoamiCommandView(map, player)
+        view = WhoamiCommandView(map, player, message.author)
         view.message = await message.reply(get_player_info(map, player), view=view)
 
     elif message.content.lower().startswith(config.Bot.prefix + 'покажи'):
