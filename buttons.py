@@ -10,7 +10,7 @@ import player
 
 class WhoamiCommandView(View):
     def __init__(self, map: mapparser.Map, player: player.Player, author: discord.User):
-        super().__init__(timeout=10.0)
+        super().__init__(timeout=30.0)
         self.map = map
         self.player = player
         self.author = author
