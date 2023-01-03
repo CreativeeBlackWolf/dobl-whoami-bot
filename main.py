@@ -161,7 +161,7 @@ async def on_message(message: discord.Message):
         with open(".rst", "w") as f:
             f.write(str(message.channel.id))
 
-        os.execv(sys.executable, ["python"] + sys.argv)
+        os.execv(sys.executable, ["python3"] + sys.argv)
 
     elif message.content.lower().startswith(config.Bot.prefix + "выбери"):
         if str(message.author.id) not in config.Bot.admins:
