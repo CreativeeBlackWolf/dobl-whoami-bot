@@ -79,7 +79,7 @@ async def on_message(message: discord.Message):
                 await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
         else:
             await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
-    
+
     elif message.content.lower().startswith(config.Bot.prefix + 'где я'):
         map = mapparser.Map(config.Map.path)
         player = map.get_player(message.author.display_name, message.author.id)
@@ -95,26 +95,30 @@ async def on_message(message: discord.Message):
         await message.reply(resp)
 
     elif message.content.lower().startswith(config.Bot.prefix + "группа"):
+        ingame: bool = False
         groupRole: discord.Role = None
         for role in message.author.roles:
-            if role.name.startswith(("группа", "в игре")):
+            if role.name.startswith("в игре"):
+                ingame = True
+            elif role.name.startswith("группа"):
                 groupRole = role
                 break
-        else:
-            await message.channel.send("Ты не находишься в игре.")
+
+        if not ingame:
+            await message.channel.send("Ты не в игре.")
             return
 
         map = mapparser.Map(config.Map.path)
-        groupMembers = list(groupRole.members)
+        groupMembers = list(groupRole.members) if groupRole is not None else [message.author]
         msg = "```ansi\n"
-        
+
         for member in groupMembers:
             player = map.get_player(member.display_name, member.id)
             msg += f"{member.display_name}: <[31m{player.HP}/{player.maxHP}[0m> "
             if player.maxMP > 0:
                 msg += f"<[34m{player.MP}/{player.maxMP}[0m>"
             msg += "\n"
-        
+
         msg += "\n```"
         await message.channel.send(msg)
 
@@ -127,7 +131,7 @@ async def on_message(message: discord.Message):
             if len(message.content.split()) >= 2:
                 map = mapparser.Map(config.Map.path)
                 inv = map.get_objects_inventory(" ".join(message.content.split()[1::]))
-                
+
                 if inv is mapparser.MapObjectError.NOT_FOUND:
                     await message.channel.send("Объекта с таким именем нет на карте.")
                     return
@@ -144,7 +148,7 @@ async def on_message(message: discord.Message):
         if str(message.author.id) not in config.Bot.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
-        
+
         args = message.content.split()
         if len(args) >= 2:
             map = mapparser.Map(config.Map.path)
@@ -159,7 +163,7 @@ async def on_message(message: discord.Message):
                     for user in message.guild.members:
                         if user.status == discord.Status.online and \
                         excludeRole not in user.roles:
-                            if not isinstance(player := map.get_player(user.display_name, user.id), 
+                            if not isinstance(player := map.get_player(user.display_name, user.id),
                                             mapparser.MapObjectError):
                                 if (levelNeeded == 0) or (levelNeeded == player.level):
                                     candidates.append(player)
