@@ -97,11 +97,11 @@ async def on_message(message: discord.Message):
     elif message.content.lower().startswith(config.Bot.prefix + "группа"):
         groupRole: discord.Role = None
         for role in message.author.roles:
-            if role.name.startswith("группа"):
+            if role.name.startswith(("группа", "в игре")):
                 groupRole = role
                 break
         else:
-            await message.channel.send("Ты не находишься в группе.")
+            await message.channel.send("Ты не находишься в игре.")
             return
 
         map = mapparser.Map(config.Map.path)
