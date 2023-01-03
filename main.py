@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import sys
 import discord
 import asyncio
 import random
@@ -16,6 +18,11 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
+    if os.path.exists(".rst"):
+        with open(".rst", "r") as f:
+            channel: discord.channel.TextChannel = client.get_channel(int(f.read()))
+        await channel.send("Перезапуск завершён.")
+        os.remove(".rst")
     print(f'We have logged in as {client.user}')
     await client.change_presence(activity=discord.Game(name="напиши .помоги"))
 
@@ -143,6 +150,18 @@ async def on_message(message: discord.Message):
             return
 
         await send_inventory(message, message.content.split("\n")[1::])
+
+    elif message.content.lower().startswith(config.Bot.prefix + "перезапусти"):
+        if str(message.author.id) not in config.Bot.admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+        
+        await message.channel.send("R.E.S.T.A.R.T protocol engaged...")
+
+        with open(".rst", "w") as f:
+            f.write(str(message.channel.id))
+
+        os.execv(sys.executable, ["python"] + sys.argv)
 
     elif message.content.lower().startswith(config.Bot.prefix + "выбери"):
         if str(message.author.id) not in config.Bot.admins:
