@@ -239,7 +239,9 @@ class Map:
         roomPos = [ int(player.position[0]) // 32,
                     int(player.position[1]) // 32]
         doors = []
-        if self.__get_tile([roomPos[0], roomPos[1]-1]) not in (TileIDs.NULL, TileIDs.ABYSS):
+        if self.__get_tile([roomPos[0], roomPos[1]-1]) not in (TileIDs.NULL, TileIDs.ABYSS) and not (
+                roomPos[0] % 4 == 0 and
+                roomPos[1] % 5 == 1):
             doors.append("север")
         if self.__get_tile([roomPos[0], roomPos[1]+1]) not in (TileIDs.NULL, TileIDs.ABYSS):
             doors.append("юг")
