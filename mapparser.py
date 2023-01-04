@@ -118,7 +118,7 @@ class Map:
         mp                = int(mpString.split()[0].split("/")[0])
         maxMP             = float(mpString.split()[0].split("/")[1])
         trueMP            = int(mpString.split()[1][1:-1])
-        sp                = int(props.get("Очки Души", "3"))
+        sp                = float(props.get("Очки Души", "3"))
         rerolls           = int(props.get("Рероллы", "2"))
         active_abilities  = props.get("Навыки", "").split("\n")
         passive_abilities = props.get("Особенности", "").split("\n")

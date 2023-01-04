@@ -12,7 +12,7 @@ class Player:
                  MP:                str,
                  maxMP:             float,
                  trueMP:            int,
-                 SP:                int,
+                 SP:                float,
                  level:             int,
                  frags:             str, # frags/frags until levelup
                  active_abilities:  list,
