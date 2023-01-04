@@ -17,6 +17,7 @@ class TileIDs(Enum):
     ABYSS = 2
     ENEMY = 3
     MERCHANT = 4
+    EVENT = 5
 
 class Map:
     # name's actually misleading since it's not strictly ASCII
