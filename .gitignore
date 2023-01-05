@@ -1,6 +1,4 @@
 **/__pycache__
 **/.*
 **/*.cfg
-**/*.tmx
 !config_example.cfg
-**/test*
