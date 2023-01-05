@@ -1,0 +1,2 @@
+# dobl-whoami-bot
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cea73097a81d4fc9b823eaf5449b153a)](https://app.codacy.com/gh/CreativeeBlackWolf/dobl-whoami-bot?utm_source=github.com&utm_medium=referral&utm_content=CreativeeBlackWolf/dobl-whoami-bot&utm_campaign=Badge_Grade_Settings)
