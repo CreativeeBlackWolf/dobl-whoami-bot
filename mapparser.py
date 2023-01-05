@@ -250,7 +250,9 @@ class Map:
                 roomPos[0] % 4 == 0 and
                 roomPos[1] % 5 == 1):
             doors.append("север")
-        if self.__get_tile([roomPos[0], roomPos[1]+1]) not in (TileIDs.NULL, TileIDs.ABYSS):
+        if self.__get_tile([roomPos[0], roomPos[1]+1]) not in (TileIDs.NULL, TileIDs.ABYSS) and not (
+                roomPos[0] % 4 == 0 and
+                roomPos[1] % 5 == 0):
             doors.append("юг")
         if self.__get_tile([roomPos[0]-1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS):
             doors.append("запад")
