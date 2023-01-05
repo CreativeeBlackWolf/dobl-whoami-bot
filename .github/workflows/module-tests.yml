@@ -4,4 +4,4 @@ jobs:
   mapparser-test:
     runs-on: ubuntu-latest
     steps:
-      - run: python3 tests/test_mapparser.py
+      - run: python3 ./tests/test_mapparser.py
