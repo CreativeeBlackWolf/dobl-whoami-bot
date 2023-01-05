@@ -3,6 +3,7 @@ import os
 import sys
 import random
 import platform
+from typing import Union
 import discord
 from dialog_manager import send_abilities, send_inventory, get_player_info
 from buttons import WhoamiCommandView
@@ -199,6 +200,38 @@ async def on_message(message: discord.Message):
                 await message.channel.send("Выбрать что?")
         else:
             await message.channel.send("Выбрать что?")
+
+    elif message.content.lower().startswith(config.Bot.prefix + "создай"):
+        if str(message.author.id) not in config.Bot.admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+        
+        args = message.content.split()
+
+        if len(args) >= 2:
+            if args[1] == "группу":
+                await message.delete()
+
+                appendRole: discord.Role = message.role_mentions[0] if message.role_mentions else None
+                inGameRole: discord.Role = [role for role in message.guild.roles if role.name == "в игре"][0]
+                if appendRole is None:
+                    await message.channel.send("Упомяни роль, она всё равно удалится.")
+                    return
+                
+                appenders: list[Union[discord.User, discord.Member]] = message.mentions
+                if not appenders:
+                    await message.channel.send("Упомяни пользователей, которым присвоить роль. " + \
+                                               "Упоминания всё равно удалятся")
+                    return
+
+                for user in appenders:
+                    await user.add_roles(appendRole, inGameRole)
+
+                await message.channel.send(f"Группа <@&{appendRole.id}> сформирована.")
+            else:
+                await message.channel.send("Сделать что?")
+        else:
+            await message.channel.send("Сделать что?")
 
     elif message.content.lower().startswith(config.Bot.prefix + 'карта'):
         map = mapparser.Map(config.Map.path)
