@@ -2,9 +2,9 @@ import re
 
 
 class Player:
-    def __init__(self, 
+    def __init__(self,
                  position:          list, # [x, y]
-                 name:              str, 
+                 name:              str,
                  inventory:         list,
                  HP:                int,
                  maxHP:             float,
@@ -73,7 +73,7 @@ class Player:
         for item in inventory:
             item = item.replace("&lt;", "<")
             item = item.replace("&gt;", ">")
-            # replacing hidden properties with `???` 
+            # replacing hidden properties with `???`
             # (or `?`, if the property partially disclosed)
             item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
             item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
@@ -88,14 +88,14 @@ class Player:
             # colorizing hidden properties
             item = re.sub(r"\?{3}", "[35m???[0m", item)
 
-            # colorizing durability (if its less than 25%) 
+            # colorizing durability (if its less than 25%)
             durability = re.findall(r"\([0-9]+?\/[0-9]+?\)", item)
             if durability:
                 itemDurability, itemMaxDurability = [int(i) for i in durability[0].replace("(", "").replace(")", "").split("/")]
                 if itemDurability / itemMaxDurability <= 0.25:
                     durabilityIndex = item.find("(")
                     item = item[:durabilityIndex] + "[31m" + item[durabilityIndex:] + "[0m"
-                
+
             formattedInventory.append(item)
 
         return formattedInventory
