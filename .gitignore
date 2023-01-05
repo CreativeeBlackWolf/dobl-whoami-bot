@@ -1,6 +1,13 @@
+# Exclude directories
 **/__pycache__
+**/.*
+
+# Exclude files
 **/*.cfg
-!config_example.cfg
 **/*.tmx
 **/test*
+
+# Exceptions
+!config_example.cfg
 !tests/test.tmx
+!.github/*
