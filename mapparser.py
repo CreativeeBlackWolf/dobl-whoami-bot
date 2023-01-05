@@ -43,8 +43,11 @@ class Map:
         for objectgroup in self.root.findall("objectgroup"):
             if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
                 for object in objectgroup.findall("object"):
-                    if object.attrib["name"] == objectname:
-                        return object
+                    try:
+                        if object.attrib["name"] == objectname:
+                            return object
+                    except KeyError:
+                        pass
 
     def __loose_char_equals(self, char1: str, char2: str) -> bool:
         """
