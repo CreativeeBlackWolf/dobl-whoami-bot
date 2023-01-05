@@ -199,7 +199,11 @@ class Map:
                 # if so, use the same char
                 # if this is the player, colorize the char
                 if obj[0] == player.name:
-                    coloredChar = '[2;47m[2;30m' + existingChar + '[0m'
+                    if '[0m' in existingChar:
+                        actualChar = existingChar[-5]
+                    else:
+                        actualChar = existingChar
+                    coloredChar = '[2;47m[2;30m' + actualChar + '[0m'
                     repr[obj[2]][obj[1]] = coloredChar
                     legend[coloredChar] = legend[existingChar]+[obj[0]]
                     del legend[existingChar]
