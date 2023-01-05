@@ -1,12 +1,11 @@
 run-name: Module Tests
 on: [push, pull_request]
 jobs:
-  checkout:
+  test-modules:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-  mapparser-test:
-    needs: checkout
-    runs-on: ubuntu-latest
-    steps:
-      - run: python3 ./tests/test_mapparser.py
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Test mapparser
+        run: python3 ./tests/test_mapparser.py
