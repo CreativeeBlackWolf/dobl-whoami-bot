@@ -73,7 +73,7 @@ class Map:
         """
         obj = self.__search_object(objectname)
 
-        if not obj:
+        if obj is None:
             return MapObjectError.NOT_FOUND
 
         try:
