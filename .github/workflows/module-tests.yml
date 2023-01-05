@@ -1,5 +1,11 @@
 run-name: Module Tests
-on: [push, pull_request]
+
+on:
+  push:
+    branches:
+      master
+  pull_request:
+
 jobs:
   test-modules:
     runs-on: ubuntu-latest
