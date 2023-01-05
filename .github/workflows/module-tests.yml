@@ -1,0 +1,7 @@
+run-name: Module Tests
+on: [push, pull_request]
+jobs:
+  mapparser-test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: python3 tests/test_mapparser.py
