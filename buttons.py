@@ -51,8 +51,8 @@ class WhoamiCommandView(View):
         return False
 
     async def on_timeout(self) -> None:
-        for button in self.children:
-            button.disabled = True
+        for butt in self.children:
+            butt.disabled = True
         await self.message.edit(view=self)
         return
 

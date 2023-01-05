@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 import os
 import sys
-import discord
-import asyncio
 import random
+import platform
+import discord
 from dialog_manager import send_abilities, send_inventory, get_player_info
+from buttons import WhoamiCommandView
 from config import Config
 import mapparser
 import command_help
-from buttons import WhoamiCommandView
 
 
 config = Config("botconfig.cfg")
@@ -161,7 +161,10 @@ async def on_message(message: discord.Message):
         with open(".rst", "w") as f:
             f.write(str(message.channel.id))
 
-        os.execv(sys.executable, ["python3"] + sys.argv)
+        if platform.system() == "Linux":
+            os.execv(__file__, sys.argv)
+        elif platform.system() == "Windows":
+            os.execv(sys.executable, ["python"] + sys.argv)
 
     elif message.content.lower().startswith(config.Bot.prefix + "выбери"):
         if str(message.author.id) not in config.Bot.admins:
