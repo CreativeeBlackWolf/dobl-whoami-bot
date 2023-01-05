@@ -328,7 +328,7 @@ class Map:
                 if tile in (TileIDs.NULL, TileIDs.ABYSS):
                     repr += ' '
                 else:
-                    repr += '#'
+                    repr += '??'
             repr += '\n'
         tile = self.__get_tile([floorStart[0]+1, floorStart[1]+4])
         return repr
