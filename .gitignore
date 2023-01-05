@@ -2,3 +2,6 @@
 **/.*
 **/*.cfg
 !config_example.cfg
+**/*.tmx
+**/test*
+!tests/test.tmx
