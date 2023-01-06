@@ -1,10 +1,8 @@
 import discord
-from multipledispatch import dispatch
 import mapparser
 import player
 
-@dispatch(discord.Message, player.Player)
-async def send_inventory(message: discord.Message, player: player.Player) -> None:
+async def send_player_inventory(message: discord.Message, player: player.Player) -> None:
     """
     Send inventory of a given player
     """
@@ -14,12 +12,11 @@ async def send_inventory(message: discord.Message, player: player.Player) -> Non
 {inv}
 ```''')
 
-@dispatch(discord.Message, list)
-async def send_inventory(message: discord.Message, inventory: list, format = True) -> None:
+async def send_formatted_inventory(message: discord.Message, inventory: list, formatInventory = True) -> None:
     """
     Format inventory list
     """
-    inv = "\n".join(player.Player.format_inventory_list(inventory) if format else inventory)
+    inv = "\n".join(player.Player.format_inventory_list(inventory) if formatInventory else inventory)
     await message.delete()
     await message.channel.send(f'''```ansi
 {inv}
@@ -43,7 +40,7 @@ def get_inventory_string(player: player.Player):
 {inv}
 ```'''
 
-def get_player_info(map: mapparser.Map, player: player.Player):
+def get_player_info(gameMap: mapparser.Map, player: player.Player):
     return f'''```
 ОЗ: {player.format_HP()}
 ОМ: {player.format_MP()}
@@ -52,7 +49,7 @@ def get_player_info(map: mapparser.Map, player: player.Player):
 ФРА: {player.frags}
 Рероллы: {player.rerolls}
 
-Персонаж актуален на момент времени: {map.map_datetime}.
+Персонаж актуален на момент времени: {gameMap.map_datetime}.
 Учитывай, что данные за время могли измениться.
 ```'''
 

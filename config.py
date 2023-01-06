@@ -12,7 +12,7 @@ class Config:
             prefix=self.config.get('bot', 'prefix', fallback="."),
             admins=self.config.get('bot', 'admins', fallback=[])
         )
-    
+
         self.Map = self.Map(
             path=self.config.get('map', 'path')
         )

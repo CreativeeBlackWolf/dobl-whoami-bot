@@ -42,10 +42,10 @@ class Map:
         """
         for objectgroup in self.root.findall("objectgroup"):
             if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
-                for object in objectgroup.findall("object"):
+                for obj in objectgroup.findall("object"):
                     try:
-                        if object.attrib["name"] == objectname:
-                            return object
+                        if obj.attrib["name"] == objectname:
+                            return obj
                     except KeyError:
                         pass
 
@@ -159,13 +159,13 @@ class Map:
         objects = []
         for objectgroup in self.root.findall("objectgroup"):
             if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
-                for object in objectgroup.findall("object"):
-                    objX, objY = int(object.attrib["x"]), int(object.attrib["y"])
+                for obj in objectgroup.findall("object"):
+                    objX, objY = int(obj.attrib["x"]), int(obj.attrib["y"])
                     if objX-objX % 32 == roomPos[0] and objY-objY % 32 == roomPos[1]:
-                        name = object.attrib.get("name", "???")
+                        name = obj.attrib.get("name", "???")
                         try:
                             props = {prop.attrib["name"]: prop.attrib.get("value")
-                                for prop in object.find("properties").findall("property")}
+                                for prop in obj.find("properties").findall("property")}
                         except AttributeError:
                             props = {}
                         group = props.get("Группа", "")
@@ -176,7 +176,7 @@ class Map:
                             (group != "" and group == player.group) or \
                             (name != "???" and name == player.name):
                             objX, objY = objX % 32 // 4, objY % 32 // 4
-                            objects.append((object.attrib.get("name", "???"), objX, objY, object.attrib.get("class", "")))
+                            objects.append((obj.attrib.get("name", "???"), objX, objY, obj.attrib.get("class", "")))
 
         return sorted(objects, key=lambda x: x[0]+str(x[1])+str(x[2]))
 
@@ -288,7 +288,7 @@ class Map:
             resp = "Двери ведут на 4 стороны света."
         resp = resp if not ladder else resp + " Здесь также находится лестница вниз."
         return resp
-    
+
     def __get_tile(self, pos: list) -> TileIDs:
         """
         Get tile ID at given position
