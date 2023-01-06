@@ -232,9 +232,9 @@ async def on_message(message: discord.Message):
 
                 await message.channel.send(f"Группа <@&{appendRole.id}> сформирована.")
             else:
-                await message.channel.send("Сделать что?")
+                await message.channel.send("Создать что?")
         else:
-            await message.channel.send("Сделать что?")
+            await message.channel.send("Создать что?")
 
     elif message.content.lower().startswith(config.Bot.prefix + 'карта'):
         gameMap = mapparser.Map(config.Map.path)
