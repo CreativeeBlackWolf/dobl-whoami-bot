@@ -83,7 +83,7 @@ class Player:
 
             # colorize inventory items
             # checking if item equipped
-            item = re.sub(r"(\d+э)\.", r"[32m\1[0m", item)
+            item = re.sub(r"(\d+э)\.", r"[32m\1[0m.", item)
 
             # colorizing hidden properties
             item = re.sub(r"\?{3}", "[35m???[0m", item)
