@@ -7,9 +7,9 @@ import datetime
 import player
 
 
-class MapObjectError(Enum):
-    NOT_FOUND = "NOT_FOUND"
-    WRONG_ID = "WRONG_ID"
+class MapObjectException(Exception): pass
+class MapObjectNotFoundException(MapObjectException): pass
+class MapObjectWrongIDException(MapObjectException): pass
 
 
 class TileIDs(Enum):
@@ -69,16 +69,17 @@ class Map:
                 return True
         return False
 
-    def get_objects_inventory(self, objectname: str) -> Union[list, MapObjectError]:
+    def get_objects_inventory(self, objectname: str) -> list:
         """
         Get formatted inventory of a given object by name
         :param objectname: name of the object
         :return: formatted inventory
+        :raises: MapObjectNotFoundException if the object does not found
         """
         obj = self.__search_object(objectname)
 
         if obj is None:
-            return MapObjectError.NOT_FOUND
+            raise MapObjectNotFoundException(f"No object with name `{objectname}` found.")
 
         try:
             props = {prop.attrib["name"]: prop.attrib.get("value") or prop.text
@@ -89,17 +90,20 @@ class Map:
         return player.Player.format_inventory_list(props.get("Инвентарь", "").split("\n"))
 
 
-    def get_player(self, playername: str, playerID: str) -> Union[player.Player, MapObjectError]:
+    def get_player(self, playername: str, playerID: str) -> player.Player:
         """
         Get serialized Player object
 
         :param playername: the name of the player to search for
         :param playerID: Discord id of the player
-        :return: Player object or None if player not found
+        :return: player.Player object
+        :raises: MapObjectNotFoundException if player not found
+        :raises: MapObjectWrongIDException if expected playerID
         """
         pl = self.__search_object(playername)
         if not pl:
-            return MapObjectError.NOT_FOUND
+            raise MapObjectNotFoundException(f"No object with name `{playername}` found.")
+
         name = pl.attrib["name"]
         position = [pl.attrib["x"], pl.attrib["y"]]
         try:
@@ -110,7 +114,8 @@ class Map:
 
         foundPlayerID = props.get("ID игрока", "")
         if str(playerID) != str(foundPlayerID):
-            return MapObjectError.WRONG_ID
+            raise MapObjectWrongIDException(f"ID `{foundPlayerID}` expected for `{playername}`, " +
+                                            f"got {playerID} instead.")
 
         inventory = player.Player.format_inventory_list(props.get("Инвентарь", "").split("\n"))
 

@@ -3,7 +3,7 @@ import os
 import sys
 import random
 import platform
-from typing import Union
+from typing import Tuple, Union
 import discord
 from dialog_manager import (send_abilities,
                             send_player_inventory,
@@ -13,12 +13,28 @@ from buttons import WhoamiCommandView
 from config import Config
 import mapparser
 import command_help
+from player import Player
 
 
 config = Config("botconfig.cfg")
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
+
+async def get_map_and_player(message: discord.Message) -> (
+        Union[Tuple[mapparser.Map, Player], None]
+    ):
+    try:
+        gameMap = mapparser.Map(config.Map.path)
+        player = gameMap.get_player(message.author.display_name, message.author.id)
+        
+        return (gameMap, player)
+    except mapparser.MapObjectNotFoundException:
+        await message.channel.send("Ты не существуешь.")
+        return None
+    except mapparser.MapObjectWrongIDException:
+        await message.channel.send("Ты меня обмануть пытаешься?")
+        return None
 
 @client.event
 async def on_ready():
@@ -36,6 +52,7 @@ async def on_message(message: discord.Message):
     if message.author == client.user:
         return
 
+    #region [user commands]
 
     if message.content.lower().startswith(config.Bot.prefix + "помоги"):
         gameMap = mapparser.Map(config.Map.path)
@@ -56,54 +73,41 @@ async def on_message(message: discord.Message):
                 await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::]), player))
 
     elif message.content.lower().startswith((config.Bot.prefix + 'кто я', config.Bot.prefix + 'я кто')):
-        gameMap = mapparser.Map(config.Map.path)
-        player = gameMap.get_player(message.author.display_name, message.author.id)
-
-        if player == mapparser.MapObjectError.NOT_FOUND:
-            await message.channel.send("Ты не существуешь.")
-            return
-        elif player == mapparser.MapObjectError.WRONG_ID:
-            await message.channel.send("Ты меня обмануть пытаешься?")
-            return
-
-        view = WhoamiCommandView(gameMap, player, message.author)
-        view.message = await message.reply(get_player_info(gameMap, player), view=view)
+        data = await get_map_and_player(message)
+        if data is not None:
+            gameMap, player = data
+            view = WhoamiCommandView(gameMap, player, message.author)
+            view.message = await message.reply(get_player_info(gameMap, player), view=view)
 
     elif message.content.lower().startswith(config.Bot.prefix + 'покажи'):
-        gameMap = mapparser.Map(config.Map.path)
-        player = gameMap.get_player(message.author.display_name, message.author.id)
-
-        if player == mapparser.MapObjectError.NOT_FOUND:
-            await message.channel.send("Ты не существуешь.")
-            return
-        elif player == mapparser.MapObjectError.WRONG_ID:
-            await message.channel.send("Ты меня обмануть пытаешься?")
-            return
-
-        args = message.content.lower().split()
-        if len(args) == 2:
-            if args[1] in ["скиллы", "способности", "особенности", "навыки", "спеллы", "абилки"]:
-                await send_abilities(message, player)
-            elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:
-                await send_player_inventory(message, player)
+        data = await get_map_and_player(message)
+        if data is not None:
+            _, player = data
+            args = message.content.lower().split()
+            if len(args) == 2:
+                if args[1] in ["скиллы", "способности", "особенности", 
+                               "навыки", "спеллы", "абилки"]:
+                    await send_abilities(message, player)
+                elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:
+                    await send_player_inventory(message, player)
+                else:
+                    await message.channel.send(
+                        f'Неправильное использование команды:\n{command_help.get_commands("покажи")}'
+                    )
             else:
-                await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
-        else:
-            await message.channel.send(f'Неправильное использование команды:\n{command_help.get_commands("покажи")}')
+                await message.channel.send(
+                    f'Неправильное использование команды:\n{command_help.get_commands("покажи")}'
+                )
 
     elif message.content.lower().startswith(config.Bot.prefix + 'где я'):
-        gameMap = mapparser.Map(config.Map.path)
-        player = gameMap.get_player(message.author.display_name, message.author.id)
-
-        if player == mapparser.MapObjectError.NOT_FOUND:
-            await message.channel.send("Ты не существуешь.")
-            return
-        elif player == mapparser.MapObjectError.WRONG_ID:
-            await message.channel.send("Ты меня обмануть пытаешься?")
-            return
-
-        resp = '```ansi\n'+gameMap.construct_ascii_repr(player)+'\n```\n'+gameMap.list_doors_string(player)
-        await message.reply(resp)
+        data = await get_map_and_player(message)
+        if data is not None:
+            gameMap, player = data
+            resp = '```ansi\n' +                           \
+                    gameMap.construct_ascii_repr(player) + \
+                    '\n```\n' +                            \
+                    gameMap.list_doors_string(player)
+            await message.reply(resp)
 
     elif message.content.lower().startswith(config.Bot.prefix + "группа"):
         ingame: bool = False
@@ -132,6 +136,10 @@ async def on_message(message: discord.Message):
 
         msg += "\n```"
         await message.channel.send(msg)
+
+    #endregion
+
+    #region [admin commands]
 
     elif message.content.lower().startswith(config.Bot.prefix + 'инвентарь'):
         if str(message.author.id) not in config.Bot.admins:
@@ -236,22 +244,22 @@ async def on_message(message: discord.Message):
         else:
             await message.channel.send("Создать что?")
 
+    #endregion
+
+    #region [item-related commands]
+
     elif message.content.lower().startswith(config.Bot.prefix + 'карта'):
-        gameMap = mapparser.Map(config.Map.path)
-        player = gameMap.get_player(message.author.display_name, message.author.id)
+        data = get_map_and_player(message)
+        if data is not None:
+            gameMap, player = data
+            if 'карта' not in command_help.list_inventory_commands(player):
+                await message.channel.send("У тебя нет карты.")
+                return
 
-        if player == mapparser.MapObjectError.NOT_FOUND:
-            await message.channel.send("Ты не существуешь.")
-            return
-        elif player == mapparser.MapObjectError.WRONG_ID:
-            await message.channel.send("Ты меня обмануть пытаешься?")
-            return
-        if 'карта' not in command_help.list_inventory_commands(player):
-            await message.channel.send("У тебя нет карты.")
-            return
+            resp = '```\n'+gameMap.construct_ascii_map(player)+'```'
+            await message.reply(resp)
 
-        resp = '```\n'+gameMap.construct_ascii_map(player)+'```'
-        await message.reply(resp)
+    #endregion
 
 if __name__ == '__main__':
     client.run(config.Bot.token)

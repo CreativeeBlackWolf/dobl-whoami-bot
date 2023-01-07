@@ -14,13 +14,22 @@ class TestMapParser(unittest.TestCase):
     map = mapparser.Map(os.path.join(current, "test.tmx"))
 
     def test_get_objects_inventory(self):
-        self.assertEqual(self.map.get_objects_inventory("not_found"), mapparser.MapObjectError.NOT_FOUND)
+        with self.assertRaises(mapparser.MapObjectNotFoundException) as context:
+            self.map.get_objects_inventory("not_found")
+        self.assertTrue("No object with name `not_found` found." in str(context.exception))
+
         self.assertEqual(self.map.get_objects_inventory("token_pile"), ["50ж"])
         self.assertEqual(self.map.get_objects_inventory("no_inventory"), [''])
 
     def test_get_player(self):
-        self.assertEqual(self.map.get_player("not_found", 1), mapparser.MapObjectError.NOT_FOUND)
-        self.assertEqual(self.map.get_player("test_player1", 2), mapparser.MapObjectError.WRONG_ID)
+        with self.assertRaises(mapparser.MapObjectNotFoundException) as context:
+            self.assertEqual(self.map.get_player("not_found", 1), mapparser.MapObjectError.NOT_FOUND)
+        self.assertTrue("No object with name `not_found` found." in str(context.exception))
+
+        with self.assertRaises(mapparser.MapObjectWrongIDException) as context:
+            self.assertEqual(self.map.get_player("test_player1", 2), mapparser.MapObjectError.WRONG_ID)
+        self.assertTrue("ID `1` expected for `test_player1`, got `2`.")
+
         testPlayerGot = self.map.get_player("test_player1", 1)
         testPlayerActual = player.Player(
             position = ['36', '-216'],
