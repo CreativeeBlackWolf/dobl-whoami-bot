@@ -188,13 +188,13 @@ class Map:
         :returns: an ASCII string representation of a room
         """
         objlist = self.get_same_room_objects(player)
-        repr = [["." for i in range(8)] for j in range(8)]
+        representation = [["." for i in range(8)] for j in range(8)]
         legend = {}
         usedChars = []
         nextDefaultIndex = 0
         for obj in objlist:
             # check if another object is at same position
-            existingChar = repr[obj[2]][obj[1]]
+            existingChar = representation[obj[2]][obj[1]]
             if existingChar != ".":
                 # if so, use the same char
                 # if this is the player, colorize the char
@@ -204,7 +204,7 @@ class Map:
                     else:
                         actualChar = existingChar
                     coloredChar = '[2;47m[2;30m' + actualChar + '[0m'
-                    repr[obj[2]][obj[1]] = coloredChar
+                    representation[obj[2]][obj[1]] = coloredChar
                     legend[coloredChar] = legend[existingChar]+[obj[0]]
                     del legend[existingChar]
                 else:
@@ -229,12 +229,12 @@ class Map:
                 coloredChar = '[2;30m' + firstChar + '[0m'
             else:
                 coloredChar = firstChar
-            repr[obj[2]][obj[1]] = coloredChar
+            representation[obj[2]][obj[1]] = coloredChar
             usedChars.append(firstChar)
             legend[coloredChar] = [obj[0]]
-        repr = "\n".join(["".join(row) for row in repr])
+        representation = "\n".join(["".join(row) for row in representation])
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
-        return f"{repr}\n\n{legend}"
+        return f"{representation}\n\n{legend}"
 
     def __list_doors(self, player: player.Player) -> list:
         """
@@ -321,14 +321,14 @@ class Map:
                     int(player.position[1]) // 32]
         floorStart = [  roomPos[0] - (roomPos[0]+1) % 4,
                         roomPos[1] - (roomPos[1]+4) % 5]
-        repr = ''
+        representation = ''
         for y in range(5):
             for x in range(3):
                 tile = self.__get_tile([floorStart[0]+x, floorStart[1]+y])
                 if tile in (TileIDs.NULL, TileIDs.ABYSS):
-                    repr += ' '
+                    representation += ' '
                 else:
-                    repr += '#'
-            repr += '\n'
+                    representation += '#'
+            representation += '\n'
         tile = self.__get_tile([floorStart[0]+1, floorStart[1]+4])
-        return repr
+        return representation
