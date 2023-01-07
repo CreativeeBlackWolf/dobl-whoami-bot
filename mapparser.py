@@ -1,5 +1,6 @@
 from typing import Union
 from enum import Enum
+import defusedxml.ElementTree as defused_etree
 import xml.etree.ElementTree as etree
 import os
 import datetime
@@ -28,7 +29,7 @@ class Map:
 
     def __init__(self, filepath):
         # read the file
-        tree = etree.parse(filepath)
+        tree = defused_etree.parse(filepath)
         self.root = tree.getroot()
         time = os.path.getmtime(filepath)
         self.map_datetime = datetime.datetime.fromtimestamp(time).strftime('%H:%M:%S %d/%m/%Y')
@@ -144,7 +145,8 @@ class Map:
             active_abilities=active_abilities,
             passive_abilities=passive_abilities,
             rerolls=rerolls,
-            group=group)
+            group=group
+        )
 
     def get_same_room_objects(self, player: player.Player) -> list:
         """
