@@ -249,7 +249,7 @@ async def on_message(message: discord.Message):
     #region [item-related commands]
 
     elif message.content.lower().startswith(config.Bot.prefix + 'карта'):
-        data = get_map_and_player(message)
+        data = await get_map_and_player(message)
         if data is not None:
             gameMap, player = data
             if 'карта' not in command_help.list_inventory_commands(player):
