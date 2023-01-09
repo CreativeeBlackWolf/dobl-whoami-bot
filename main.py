@@ -7,8 +7,10 @@ from typing import Tuple, Union
 import discord
 from dialog_manager import (send_abilities,
                             send_player_inventory,
-                            get_player_info,
-                            send_formatted_inventory)
+                            send_formatted_inventory,
+                            get_player_info_string,
+                            get_inventory_string,
+                            get_abilities_string)
 from buttons import WhoamiCommandView
 from config import Config
 import mapparser
@@ -27,7 +29,7 @@ async def get_map_and_player(message: discord.Message) -> (
     try:
         gameMap = mapparser.Map(config.Map.path)
         player = gameMap.get_player(message.author.display_name, message.author.id)
-        
+
         return (gameMap, player)
     except mapparser.MapObjectNotFoundException:
         await message.channel.send("Ты не существуешь.")
@@ -77,7 +79,7 @@ async def on_message(message: discord.Message):
         if data is not None:
             gameMap, player = data
             view = WhoamiCommandView(gameMap, player, message.author)
-            view.message = await message.reply(get_player_info(gameMap, player), view=view)
+            view.message = await message.reply(get_player_info_string(gameMap, player), view=view)
 
     elif message.content.lower().startswith(config.Bot.prefix + 'покажи'):
         data = await get_map_and_player(message)
@@ -243,6 +245,30 @@ async def on_message(message: discord.Message):
                 await message.channel.send("Создать что?")
         else:
             await message.channel.send("Создать что?")
+
+    elif message.content.lower().startswith(config.Bot.prefix + "кто"):
+        if str(message.author.id) not in config.Bot.admins:
+            await message.channel.send(
+                f"Ты можешь осматривать только себя ({config.Bot.prefix}кто я)."
+            )
+            return
+
+        mentions = message.mentions
+        if not mentions:
+            await message.channel.send(
+                "Необходимо упомянуть игрока, которого ты хочешь осмотреть."
+            )
+            return
+        gameMap = mapparser.Map(config.Map.path)
+        user = mentions[0]
+        try:
+            player = gameMap.get_player(user.display_name, user.id)
+            await message.channel.send(get_player_info_string(gameMap, player))
+            await message.channel.send(get_inventory_string(player))
+            await message.channel.send(get_abilities_string(player))
+        except mapparser.MapObjectNotFoundException:
+            await message.channel.send("Такой игрок не найден.")
+            return
 
     #endregion
 

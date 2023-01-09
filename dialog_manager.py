@@ -40,7 +40,7 @@ def get_inventory_string(player: player.Player):
 {inv}
 ```'''
 
-def get_player_info(gameMap: mapparser.Map, player: player.Player):
+def get_player_info_string(gameMap: mapparser.Map, player: player.Player):
     return f'''```
 ОЗ: {player.format_HP()}
 ОМ: {player.format_MP()}

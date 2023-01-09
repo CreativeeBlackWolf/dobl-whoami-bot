@@ -22,7 +22,7 @@ class WhoamiCommandView(View):
     async def player_button_callback(self, interaction: discord.Interaction, button: Button):
         for childButton in self.children:
             childButton.style = ButtonStyle.green if childButton != button else ButtonStyle.blurple
-        await interaction.response.edit_message(view=self, content=dialog.get_player_info(self.map, self.player))
+        await interaction.response.edit_message(view=self, content=dialog.get_player_info_string(self.map, self.player))
 
     @button(label="Инвентарь", custom_id="inventory", style=ButtonStyle.success, emoji="📦")
     async def inventory_button_callback(self, interaction: discord.Interaction, button: Button):
