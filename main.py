@@ -256,7 +256,7 @@ async def on_message(message: discord.Message):
         mentions = message.mentions
         if not mentions:
             await message.channel.send(
-                "Необходимо упомянуть игрока, которого ты хочешь осмотреть"
+                "Необходимо упомянуть игрока, которого ты хочешь осмотреть."
             )
             return
         gameMap = mapparser.Map(config.Map.path)
