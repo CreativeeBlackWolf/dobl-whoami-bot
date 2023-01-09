@@ -151,9 +151,10 @@ async def on_message(message: discord.Message):
         if len(message.content.split("\n")) < 2:
             if len(message.content.split()) >= 2:
                 gameMap = mapparser.Map(config.Map.path)
-                inv = gameMap.get_objects_inventory(" ".join(message.content.split()[1::]))
+                try:
+                    inv = gameMap.get_objects_inventory(" ".join(message.content.split()[1::]))
 
-                if inv is mapparser.MapObjectError.NOT_FOUND:
+                except mapparser.MapObjectNotFoundException:
                     await message.channel.send("Объекта с таким именем нет на карте.")
                     return
 
