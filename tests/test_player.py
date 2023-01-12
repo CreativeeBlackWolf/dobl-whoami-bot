@@ -1,8 +1,6 @@
 import unittest
 import os
 import sys
-import mapparser
-import player
 
 
 # prepare sys.path for importing modules from parent directory
@@ -10,29 +8,9 @@ current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
 
-# ---FLAT LIST:---
+import mapparser
+import player
 
-# TEXT TYPES:
-# [30mBLACK TEXT[0m
-# [31mRED TEXT[0m
-# [32mGREEN TEXT[0m
-# [33mYELLOW TEXT[0m
-# [34mBLUE TEXT[0m
-# [35mMAGENTA TEXT[0m
-# [36mCYAN TEXT[0m
-# [37mWHITE TEXT (SIMILAR TO **BOLD** IN NORMAL TEXT)[0m
-# [4mUNDERLINED TEXT[0m
-
-# BACKGROUNDS (PREFIXES):
-# [40mBLACK BG[0m
-# [41mRED BG[0m
-# [44mGREY BG[0m
-# [45mMAGENTA BG[0m
-# [47mWHITE BG[0m
-# ([42m42[0m, [43m43[0m, AND [46m46[0m ARE SLIGHTLY DIFFERENT GREYS)
-
-# FINISHER:
-# [0m NECESSARY ON EVERY LINE BREAK
 
 class TestPlayer(unittest.TestCase):
     gameMap = mapparser.Map(os.path.join(current, "test.tmx"))
