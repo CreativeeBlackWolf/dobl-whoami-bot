@@ -75,7 +75,7 @@ class Player:
             item = item.replace("&gt;", ">")
             # replacing hidden properties with `???`
             # (or `?`, if the property partially disclosed)
-            item = re.sub(r"\?{3}(\(.+?\))|\?{3}(.+?),|\?{3}(.+?)}", replacer, item)
+            item = re.sub(r"\?{3}(\(.+?\))|\?{3}([^,}]*),|\?{3}(.+?)}", replacer, item)
             item = re.sub(r"([^ {]+)\?{3}", r"\1?", item)
             # hiding actual item name
             item = re.sub(r"\(.+?\)", "", item.split("{")[0]) + item[item.find("{")::] if item.find("{") != -1 else item
