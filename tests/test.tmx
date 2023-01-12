@@ -236,6 +236,13 @@
     <property name="ID игрока" value="10"/>
    </properties>
   </object>
+  <object id="208" name="test_player11" class="Игрок" x="10.5455" y="-195.091" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="11"/>
+    <property name="Очки Здоровья" value="127/151.3 (154)"/>
+    <property name="Очки Маны" value="47/47.0 (47)"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="4" name="верхний" offsetx="-1" offsety="-1"/>
 </map>

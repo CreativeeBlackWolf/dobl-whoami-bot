@@ -34,3 +34,8 @@ class TestPlayer(unittest.TestCase):
                 "4. test item 4 {shown, shown2, ?shown} (20/20)"
             ]
         )
+
+    def test_format_stats(self):
+        self.assertEqual(self.gameMap.get_player("test_player9", 9).format_HP(), "100/100.0 (100)")
+        self.assertEqual(self.gameMap.get_player("test_player11", 11).format_HP(), "127/151.3 (154)")
+        self.assertEqual(self.gameMap.get_player("test_player11", 11).format_MP(), "47/47.0 (47)")
