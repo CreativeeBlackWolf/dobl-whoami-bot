@@ -27,7 +27,7 @@ class Map:
                           ('C', 'С'), ('T', 'Т'), ('X', 'Х'), ('Y', 'У'), ('a', 'а'), ('b', 'в'), ('e', 'е'), ('k', 'к'),
                           ('m', 'м'), ('h', 'н'), ('o', 'о'), ('p', 'р'), ('c', 'с'), ('t', 'т'), ('x', 'х'), ('y', 'у'))
 
-    def __init__(self, filepath):
+    def __init__(self, filepath: str):
         # read the file
         tree = defused_etree.parse(filepath)
         self.root = tree.getroot()
