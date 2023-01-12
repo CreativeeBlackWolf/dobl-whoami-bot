@@ -20,7 +20,7 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(self.gameMap.get_player("test_player5", 5).inventory, [""])
         self.assertEqual(player.Player.format_inventory_list(
             [
-                "27ж", 
+                "27ж",
                 "1э. test item 1 {???, ???hidden} (1/1)",
                 "2. test item 2 {???, shown???hidden, ???(hidden)shown, full} (1/10)",
                 "3э. test item 3 (real item name) {something, ???} (2/10)",
