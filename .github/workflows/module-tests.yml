@@ -24,3 +24,6 @@ jobs:
 
       - name: Test mapparser
         run: python3 ./tests/test_mapparser.py
+      
+      - name: Test player
+        run: python3 ./tests/test_player.py
