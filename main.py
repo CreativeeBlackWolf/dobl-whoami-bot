@@ -237,7 +237,7 @@ async def on_message(message: discord.Message):
         args = message.content.split()
         if len(args) >= 2:
             if args[1] == "колоду":
-                blackjack.shuffle()
+                blackjack.shuffle_deck()
                 await message.channel.send("Колода перемешана.")
             else:
                 await message.channel.send("Сбросить что?")

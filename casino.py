@@ -7,7 +7,8 @@ CARDS = [v+s for v in CARDS_VALS for s in CARDS_SUITS]
 
 class Blackjack:
     def __init__(self) -> None:
-        self.__deck = self.shuffle()
+        self.__deck = []
+        self.shuffle_deck()
 
     @property
     def deck(self):
@@ -16,12 +17,11 @@ class Blackjack:
         """
         return self.__deck
 
-    def shuffle(self) -> list[str]:
+    def shuffle_deck(self) -> None:
         """
-        Shuffles the deck
-        :return: list of shuffled cards
+        Resets and shuffles the deck
         """
-        return random.sample(CARDS, len(CARDS))
+        self.__deck = random.sample(CARDS, len(CARDS))
 
     def draw_card(self) -> str:
         """
@@ -32,6 +32,6 @@ class Blackjack:
 
         # shuffle the deck when the deck is empty
         if len(self.__deck) == 0:
-            self.__deck = self.shuffle()
-        
+            self.__deck = self.shuffle_deck()
+
         return card
