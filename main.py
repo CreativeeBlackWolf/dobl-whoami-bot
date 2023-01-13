@@ -95,6 +95,13 @@ async def on_message(message: discord.Message):
                     await send_abilities(message, player)
                 elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:
                     await send_player_inventory(message, player)
+                elif args[1] in ["колоду"]:
+                    if str(message.author.id) not in config.Bot.admins:
+                        await message.channel.send("Размечтался.")
+                        return
+                    await message.author.send(
+                        "`" + ", ".join([i.replace("\\", "") for i in blackjack.deck]) + "`"
+                    )
                 else:
                     await message.channel.send(
                         f'Неправильное использование команды:\n{command_help.get_commands("покажи")}'
