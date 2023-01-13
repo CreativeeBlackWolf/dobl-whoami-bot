@@ -43,6 +43,8 @@ class WhoamiCommandView(View):
         await interaction.response.edit_message(view=self, content=
             f"""```ansi
 {self.map.construct_ascii_repr(self.player)}
+
+{self.map.list_doors_string(self.player)}
 ```""")
 
     async def interaction_check(self, interaction: discord.Interaction, /) -> bool:
