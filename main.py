@@ -222,6 +222,21 @@ async def on_message(message: discord.Message):
         else:
             await message.channel.send("Выбрать что?")
 
+    elif message.content.lower().startswith(config.Bot.prefix + "сбрось"):
+        if str(message.author.id) not in config.Bot.admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+
+        args = message.content.split()
+        if len(args) >= 2:
+            if args[1] == "колоду":
+                blackjack.shuffle()
+                await message.channel.send("Колода перемешана.")
+            else:
+                await message.channel.send("Сбросить что?")
+        else:
+            await message.channel.send("Сбросить что?")
+
     elif message.content.lower().startswith(config.Bot.prefix + "создай"):
         if str(message.author.id) not in config.Bot.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
