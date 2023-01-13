@@ -16,11 +16,14 @@ from config import Config
 import mapparser
 import command_help
 from player import Player
+import casino
 
 
 config = Config("botconfig.cfg")
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
+
+blackjack = casino.Blackjack()
 
 
 async def get_map_and_player(message: discord.Message) -> (
@@ -211,6 +214,9 @@ async def on_message(message: discord.Message):
                     await message.channel.send(random.choice(candidates))
                 else:
                     await message.channel.send("По таким критериям я никого не нашёл.")
+            elif args[1] == "карту":
+                card = blackjack.draw_card()
+                await message.channel.send(f"Ты вытянул {card[1]}")
             else:
                 await message.channel.send("Выбрать что?")
         else:
