@@ -76,7 +76,7 @@ class TestMapParser(unittest.TestCase):
 
     def test_construct_ascii_repr(self):
         testPlayer = self.map.get_player("test_player1", 1)
-        asciiGot = self.map.construct_ascii_repr(testPlayer)
+        asciiGot = self.map.construct_ascii_room(testPlayer)
         asciiActual = """\
 ........
 ........
@@ -95,7 +95,7 @@ S: something
 [2;30m![0m: test_player3"""
         self.assertEqual(asciiGot, asciiActual)
         testPlayer = self.map.get_player("test_player5", 5)
-        asciiGot = self.map.construct_ascii_repr(testPlayer)
+        asciiGot = self.map.construct_ascii_room(testPlayer)
         asciiActual = """\
 ........
 ........

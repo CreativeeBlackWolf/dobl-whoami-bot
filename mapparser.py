@@ -187,7 +187,7 @@ class Map:
 
         return sorted(objects, key=lambda x: x[0]+str(x[1])+str(x[2]))
 
-    def construct_ascii_repr(self, player: player.Player) -> str:
+    def construct_ascii_room(self, player: player.Player) -> str:
         """
         Generates an ASCII string representation of a room
 

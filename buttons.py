@@ -42,7 +42,7 @@ class WhoamiCommandView(View):
             childButton.style = ButtonStyle.green if childButton != button else ButtonStyle.blurple
         await interaction.response.edit_message(view=self, content=
             f"""```ansi
-{self.map.construct_ascii_repr(self.player)}
+{self.map.construct_ascii_room(self.player)}
 
 {self.map.list_doors_string(self.player)}
 ```""")

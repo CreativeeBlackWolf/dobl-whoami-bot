@@ -106,7 +106,7 @@ async def on_message(message: discord.Message):
         if data is not None:
             gameMap, player = data
             resp = f"""```ansi
-{gameMap.construct_ascii_repr(player)}
+{gameMap.construct_ascii_room(player)}
 
 {gameMap.list_doors_string(player)}
 ```"""
