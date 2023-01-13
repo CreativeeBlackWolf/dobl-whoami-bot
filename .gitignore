@@ -5,9 +5,7 @@
 # Exclude files
 **/*.cfg
 **/*.tmx
-**/test*
 
 # Exceptions
 !config_example.cfg
-!tests/test.tmx
 !.github/*
