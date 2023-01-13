@@ -105,10 +105,11 @@ async def on_message(message: discord.Message):
         data = await get_map_and_player(message)
         if data is not None:
             gameMap, player = data
-            resp = '```ansi\n' +                           \
-                    gameMap.construct_ascii_repr(player) + \
-                    '\n```\n' +                            \
-                    gameMap.list_doors_string(player)
+            resp = f"""```ansi
+{gameMap.construct_ascii_map(player)}
+
+{gameMap.list_doors_string(player)}
+```"""
             await message.reply(resp)
 
     elif message.content.lower().startswith(config.Bot.prefix + "группа"):
