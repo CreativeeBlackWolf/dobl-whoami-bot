@@ -32,6 +32,6 @@ class Blackjack:
 
         # shuffle the deck when the deck is empty
         if len(self.__deck) == 0:
-            self.__deck = self.shuffle_deck()
+            self.shuffle_deck()
 
         return card
