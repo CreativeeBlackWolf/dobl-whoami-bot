@@ -16,11 +16,14 @@ from config import Config
 import mapparser
 import command_help
 from player import Player
+import casino
 
 
 config = Config("botconfig.cfg")
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
+
+blackjack = casino.Blackjack()
 
 
 async def get_map_and_player(message: discord.Message) -> (
@@ -92,6 +95,13 @@ async def on_message(message: discord.Message):
                     await send_abilities(message, player)
                 elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:
                     await send_player_inventory(message, player)
+                elif args[1] in ["колоду"]:
+                    if str(message.author.id) not in config.Bot.admins:
+                        await message.channel.send("Размечтался.")
+                        return
+                    await message.author.send(
+                        "`" + ", ".join([i.replace("\\", "") for i in blackjack.deck]) + "`"
+                    )
                 else:
                     await message.channel.send(
                         f'Неправильное использование команды:\n{command_help.get_commands("покажи")}'
@@ -211,10 +221,28 @@ async def on_message(message: discord.Message):
                     await message.channel.send(random.choice(candidates))
                 else:
                     await message.channel.send("По таким критериям я никого не нашёл.")
+            elif args[1] == "карту":
+                card = blackjack.draw_card()
+                await message.channel.send(f"Ты вытянул {card}")
             else:
                 await message.channel.send("Выбрать что?")
         else:
             await message.channel.send("Выбрать что?")
+
+    elif message.content.lower().startswith(config.Bot.prefix + "сбрось"):
+        if str(message.author.id) not in config.Bot.admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+
+        args = message.content.split()
+        if len(args) >= 2:
+            if args[1] == "колоду":
+                blackjack.shuffle_deck()
+                await message.channel.send("Колода перемешана.")
+            else:
+                await message.channel.send("Сбросить что?")
+        else:
+            await message.channel.send("Сбросить что?")
 
     elif message.content.lower().startswith(config.Bot.prefix + "создай"):
         if str(message.author.id) not in config.Bot.admins:
