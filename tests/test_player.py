@@ -35,6 +35,21 @@ class TestPlayer(unittest.TestCase):
             ]
         )
 
+        self.assertEqual(player.Player.format_inventory_list(
+            [
+                "387ж",
+                "1. item1 (aitem1+1) {???prop, ???prop} (30/30) за 66ж",
+                "2. item2+1 {???prop, ???prop} (20/20) за 66ж",
+                "3. item3 (aitem3) {???prop, ???prop, ???prop} (5/20) за 55ж"
+            ]),
+            [
+                "387ж",
+                "1. item1 {[35m???[0m, [35m???[0m} (30/30) за 66ж",
+                "2. item2+1 {[35m???[0m, [35m???[0m} (20/20) за 66ж",
+                "3. item3 {[35m???[0m, [35m???[0m, [35m???[0m} [31m(5/20)[0m за 55ж"
+            ]
+        )
+
     def test_format_stats(self):
         self.assertEqual(self.gameMap.get_player("test_player9", 9).format_HP(), "100/100.0 (100)")
         self.assertEqual(self.gameMap.get_player("test_player11", 11).format_HP(), "127/151.3 (154)")
