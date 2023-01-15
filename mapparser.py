@@ -338,3 +338,16 @@ class Map:
             representation += '\n'
         tile = self.__get_tile([floorStart[0]+1, floorStart[1]+4])
         return representation
+
+    def get_floor_coords(self, player: player.Player) -> tuple[int, int]:
+        """
+        Get the coordinates of the player relative to the floor
+
+        :param player: the player in question
+        :return: the coordinates
+        """
+        roomPos = [ int(player.position[0]) // 32,
+                    int(player.position[1]) // 32]
+        floorStart = [  roomPos[0] - (roomPos[0]+1) % 4,
+                        roomPos[1] - (roomPos[1]+4) % 5]
+        return (roomPos[0]-floorStart[0], roomPos[1]-floorStart[1])
