@@ -133,28 +133,30 @@ S: something
 ###
 ## 
  # 
+
+
 """
         self.assertEqual(asciiGot, asciiActual)
 
-    def test_get_floor_coords(self):
+    def test_get_player_floor_coords(self):
         testPlayer = self.map.get_player("test_player6", 6)
-        coordsGot = self.map.get_floor_coords(testPlayer)
+        coordsGot = self.map.get_player_floor_coords(testPlayer)
         coordsActual = (1, 0)
         self.assertEqual(coordsGot, coordsActual)
         testPlayer = self.map.get_player("test_player7", 7)
-        coordsGot = self.map.get_floor_coords(testPlayer)
+        coordsGot = self.map.get_player_floor_coords(testPlayer)
         coordsActual = (1, 2)
         self.assertEqual(coordsGot, coordsActual)
         testPlayer = self.map.get_player("test_player8", 8)
-        coordsGot = self.map.get_floor_coords(testPlayer)
+        coordsGot = self.map.get_player_floor_coords(testPlayer)
         coordsActual = (1, 4)
         self.assertEqual(coordsGot, coordsActual)
         testPlayer = self.map.get_player("test_player9", 9)
-        coordsGot = self.map.get_floor_coords(testPlayer)
+        coordsGot = self.map.get_player_floor_coords(testPlayer)
         coordsActual = (1, 1)
         self.assertEqual(coordsGot, coordsActual)
         testPlayer = self.map.get_player("test_player10", 10)
-        coordsGot = self.map.get_floor_coords(testPlayer)
+        coordsGot = self.map.get_player_floor_coords(testPlayer)
         coordsActual = (1, 0)
         self.assertEqual(coordsGot, coordsActual)
 
