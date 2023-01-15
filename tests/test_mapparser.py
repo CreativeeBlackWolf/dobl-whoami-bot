@@ -19,7 +19,7 @@ class TestMapParser(unittest.TestCase):
             self.map.get_objects_inventory("not_found")
         self.assertTrue("No object with name `not_found` found." in str(context.exception))
 
-        self.assertEqual(self.map.get_objects_inventory("token_pile"), ["50ж"])
+        self.assertEqual(self.map.get_objects_inventory("token_pile"), [f"{Fore.YELLOW}50ж{Style.RESET_ALL}"])
         self.assertEqual(self.map.get_objects_inventory("no_inventory"), [''])
 
     def test_get_player(self):

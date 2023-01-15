@@ -97,6 +97,9 @@ class Player:
                 if itemDurability / itemMaxDurability <= 0.25:
                     item = re.sub(durabilitySearchRegex, Fore.RED + r"\1" + Style.RESET_ALL, item)
 
+            # colorize price
+            item = re.sub(r"([0-9]+?ж)", Fore.YELLOW + r"\1" + Style.RESET_ALL, item)
+
             formattedInventory.append(item)
 
         return formattedInventory
