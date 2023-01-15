@@ -367,7 +367,8 @@ class Map:
         legend = "\n".join([f"{char}: {''.join(objs)}" for char, objs in legend.items()])
         return f"{representation}\n\n{legend if level > 0 else ''}"
 
-    def get_player_floor_coords(self, player: player.Player) -> tuple[int, int]:
+    @staticmethod
+    def get_player_floor_coords(player: player.Player) -> tuple[int, int]:
         """
         Get the coordinates of the player relative to the floor
 
