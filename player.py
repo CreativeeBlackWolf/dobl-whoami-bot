@@ -1,4 +1,5 @@
 import re
+from colorama import Fore, Style
 
 
 class Player:
@@ -83,18 +84,19 @@ class Player:
 
             # colorize inventory items
             # checking if item equipped
-            item = re.sub(r"(\d+э)\.", r"[32m\1[0m.", item)
+            item = re.sub(r"(\d+э)\.", rf"{Fore.GREEN}\1{Style.RESET_ALL}.", item)
 
             # colorizing hidden properties
-            item = re.sub(r"\?{3}", "[35m???[0m", item)
+            item = re.sub(r"\?{3}", f"{Fore.MAGENTA}???{Style.RESET_ALL}", item)
 
             # colorizing durability (if its less than 25%)
+            # FIXME
             durability = re.findall(r"\([0-9]+?\/[0-9]+?\)", item)
             if durability:
                 itemDurability, itemMaxDurability = [int(i) for i in durability[0].replace("(", "").replace(")", "").split("/")]
                 if itemDurability / itemMaxDurability <= 0.25:
                     durabilityIndex = item.find("(")
-                    item = item[:durabilityIndex] + "[31m" + item[durabilityIndex:] + "[0m"
+                    item = item[:durabilityIndex] + Fore.RED + item[durabilityIndex:] + Style.RESET_ALL
 
             formattedInventory.append(item)
 

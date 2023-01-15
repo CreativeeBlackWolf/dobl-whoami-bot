@@ -4,6 +4,7 @@ import defusedxml.ElementTree as defused_etree
 import xml.etree.ElementTree as etree
 import os
 import datetime
+from colorama import Fore, Back, Style
 import player
 
 
@@ -201,16 +202,16 @@ class Map:
         nextDefaultIndex = 0
         for obj in objlist:
             # check if another object is at same position
-            existingChar = representation[obj[2]][obj[1]]
+            existingChar: str = representation[obj[2]][obj[1]]
             if existingChar != ".":
                 # if so, use the same char
                 # if this is the player, colorize the char
                 if obj[0] == player.name:
-                    if '[0m' in existingChar:
+                    if Style.RESET_ALL in existingChar:
                         actualChar = existingChar[-5]
                     else:
                         actualChar = existingChar
-                    coloredChar = '[2;47m[2;30m' + actualChar + '[0m'
+                    coloredChar = f'{Back.WHITE}{Fore.BLACK}' + actualChar + Style.RESET_ALL
                     representation[obj[2]][obj[1]] = coloredChar
                     legend[coloredChar] = legend[existingChar]+[obj[0]]
                     del legend[existingChar]
@@ -225,15 +226,15 @@ class Map:
                 firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
                 nextDefaultIndex += 1
             if obj[0] == player.name:
-                coloredChar = '[2;47m[2;30m' + firstChar + '[0m'
+                coloredChar = f'{Back.WHITE}{Fore.BLACK}' + firstChar + Style.RESET_ALL
             elif obj[3] == "НПЦ":
-                coloredChar = '[2;31m' + firstChar + '[0m'
+                coloredChar = Fore.RED + firstChar + Style.RESET_ALL
             elif obj[3] == "Предмет(-ы)":
-                coloredChar = '[2;34m' + firstChar + '[0m'
+                coloredChar = Fore.BLUE + firstChar + Style.RESET_ALL
             elif obj[3] == "Игрок":
-                coloredChar = '[2;37m' + firstChar + '[0m'
+                coloredChar = Fore.WHITE + firstChar + Style.RESET_ALL
             elif obj[3] == "Труп":
-                coloredChar = '[2;30m' + firstChar + '[0m'
+                coloredChar = Fore.BLACK + firstChar + Style.RESET_ALL
             else:
                 coloredChar = firstChar
             representation[obj[2]][obj[1]] = coloredChar
