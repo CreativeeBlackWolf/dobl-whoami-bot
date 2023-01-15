@@ -90,13 +90,12 @@ class Player:
             item = re.sub(r"\?{3}", f"{Fore.MAGENTA}???{Style.RESET_ALL}", item)
 
             # colorizing durability (if its less than 25%)
-            # FIXME
-            durability = re.findall(r"\([0-9]+?\/[0-9]+?\)", item)
+            durabilitySearchRegex = r"(\([0-9]+?\/[0-9]+?\))"
+            durability = re.findall(durabilitySearchRegex, item)
             if durability:
                 itemDurability, itemMaxDurability = [int(i) for i in durability[0].replace("(", "").replace(")", "").split("/")]
                 if itemDurability / itemMaxDurability <= 0.25:
-                    durabilityIndex = item.find("(")
-                    item = item[:durabilityIndex] + Fore.RED + item[durabilityIndex:] + Style.RESET_ALL
+                    item = re.sub(durabilitySearchRegex, Fore.RED + r"\1" + Style.RESET_ALL, item)
 
             formattedInventory.append(item)
 
