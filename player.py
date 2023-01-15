@@ -4,9 +4,9 @@ from colorama import Fore, Style
 
 class Player:
     def __init__(self,
-                 position:          list, # [x, y]
+                 position:          list[int], # [x, y]
                  name:              str,
-                 inventory:         list,
+                 inventory:         list[str],
                  HP:                int,
                  maxHP:             float,
                  trueHP:            int,
@@ -16,8 +16,8 @@ class Player:
                  SP:                float,
                  level:             int,
                  frags:             str, # frags/frags until levelup
-                 active_abilities:  list,
-                 passive_abilities: list,
+                 active_abilities:  list[str],
+                 passive_abilities: list[str],
                  rerolls:           int,
                  group:             str
         ):
@@ -103,3 +103,8 @@ class Player:
             formattedInventory.append(item)
 
         return formattedInventory
+
+    def get_map_level(self):
+        for item in self.inventory:
+            if "карта" in item.lower() and "+" in item:
+                return int(item[item.find("+")+1:item.find("+")+2])

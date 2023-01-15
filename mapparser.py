@@ -316,7 +316,7 @@ class Map:
                         return TileIDs(data[(pos[1] % 16) * 16 + pos[0] % 16])
         raise Exception("Unknown tile at position " + str(pos))
 
-    def construct_ascii_map(self, player: player.Player) -> str:
+    def construct_ascii_map(self, player: player.Player, level: int = 0) -> str:
         """
         Construct the map of a floor the player is in, represented as ASCII art
 
@@ -328,18 +328,46 @@ class Map:
         floorStart = [  roomPos[0] - (roomPos[0]+1) % 4,
                         roomPos[1] - (roomPos[1]+4) % 5]
         representation = ''
+        legend = {}
         for y in range(5):
             for x in range(3):
                 tile = self.__get_tile([floorStart[0]+x, floorStart[1]+y])
+                character = Back.WHITE if level >= 2 and self.get_player_floor_coords(player) == (x, y) else ""
                 if tile in (TileIDs.NULL, TileIDs.ABYSS):
                     representation += ' '
+                elif level >= 2 and tile == TileIDs.EVENT:
+                    character += Fore.GREEN + "С" + Style.RESET_ALL
+                    representation += character
+                    legend[Fore.GREEN + "С" + Style.RESET_ALL] = "Событие"
+                elif level >= 2 and tile == TileIDs.ENEMY:
+                    character += Fore.RED + "Н" + Style.RESET_ALL
+                    representation += character
+                    legend[Fore.RED + "Н" + Style.RESET_ALL] = "НПЦ"
+                elif level >= 2 and tile == TileIDs.MERCHANT:
+                    character += Fore.YELLOW + "Т" + Style.RESET_ALL
+                    representation += character
+                    legend[Fore.YELLOW + "Т" + Style.RESET_ALL] = "Торговец/Казино"
+                elif level >= 2 and tile == TileIDs.EMPTY:
+                    character += "П" + Style.RESET_ALL
+                    representation += character
+                    legend["П" + Style.RESET_ALL] = "Пусто"
+                elif level == 1 and self.get_player_floor_coords(player) == (x, y):
+                    chararter = Back.WHITE + Fore.BLACK + player.name[0].upper() + Style.RESET_ALL
+                    representation += chararter
+                    legend[chararter] = player.name
                 else:
                     representation += '#'
+                    legend["#"] = "???"
+
+                if character.startswith(Back.WHITE):
+                    legend[f"{Back.WHITE} {Style.RESET_ALL}"] = player.name
+
             representation += '\n'
         tile = self.__get_tile([floorStart[0]+1, floorStart[1]+4])
-        return representation
+        legend = "\n".join([f"{char}: {''.join(objs)}" for char, objs in legend.items()])
+        return f"{representation}\n\n{legend if level > 0 else ''}"
 
-    def get_floor_coords(self, player: player.Player) -> tuple[int, int]:
+    def get_player_floor_coords(self, player: player.Player) -> tuple[int, int]:
         """
         Get the coordinates of the player relative to the floor
 

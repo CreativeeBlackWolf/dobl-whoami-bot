@@ -311,8 +311,8 @@ async def on_message(message: discord.Message):
             if 'карта' not in command_help.list_inventory_commands(player):
                 await message.channel.send("У тебя нет карты.")
                 return
-
-            resp = '```\n'+gameMap.construct_ascii_map(player)+'```'
+            map_level = player.get_map_level() or 0
+            resp = '```ansi\n'+gameMap.construct_ascii_map(player, map_level)+'```'
             await message.reply(resp)
 
     #endregion
