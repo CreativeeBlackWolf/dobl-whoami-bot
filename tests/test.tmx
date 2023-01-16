@@ -239,6 +239,16 @@
   <object id="208" name="test_player11" class="Игрок" x="10" y="-195" width="4" height="4">
    <properties>
     <property name="ID игрока" value="11"/>
+    <property name="Инвентарь" value="1. Карта &lt;.карта&gt;"/>
+    <property name="Очки Здоровья" value="127/151.3 (154)"/>
+    <property name="Очки Маны" value="47/47.0 (47)"/>
+   </properties>
+  </object>
+  <object id="208" name="test_player12" class="Игрок" x="27" y="27" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="12"/>
+    <property name="Инвентарь">1. Карта &lt;.карта&gt;
+2. Карта+2 &lt;.карта+2&gt;</property>
     <property name="Очки Здоровья" value="127/151.3 (154)"/>
     <property name="Очки Маны" value="47/47.0 (47)"/>
    </properties>
