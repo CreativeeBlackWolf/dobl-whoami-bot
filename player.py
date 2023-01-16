@@ -103,8 +103,3 @@ class Player:
             formattedInventory.append(item)
 
         return formattedInventory
-
-    def get_map_level(self):
-        for item in self.inventory:
-            if "карта" in item.lower() and "+" in item:
-                return int(item[item.find("+")+1:item.find("+")+2])

@@ -279,7 +279,7 @@ async def on_message(message: discord.Message):
     elif message.content.lower().startswith(config.Bot.prefix + "кто"):
         if str(message.author.id) not in config.Bot.admins:
             await message.channel.send(
-                f"Ты можешь осматривать только себя ({config.Bot.prefix}кто я)."
+                f"Ты можешь осматривать только себя (`{config.Bot.prefix}кто я`)."
             )
             return
 
@@ -308,11 +308,11 @@ async def on_message(message: discord.Message):
         data = await get_map_and_player(message)
         if data is not None:
             gameMap, player = data
-            if 'карта' not in command_help.list_inventory_commands(player):
+            invItems = command_help.list_inventory_commands(player)
+            if 'карта' not in invItems:
                 await message.channel.send("У тебя нет карты.")
                 return
-            map_level = player.get_map_level() or 0
-            resp = '```ansi\n'+gameMap.construct_ascii_map(player, map_level)+'```'
+            resp = '```ansi\n'+gameMap.construct_ascii_map(player, invItems['карта'])+'```'
             await message.reply(resp)
 
     #endregion

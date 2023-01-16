@@ -1,4 +1,5 @@
 import re
+from typing import Union
 import player as pl
 from main import config
 
@@ -45,7 +46,7 @@ def get_commands(command: str = None, player: pl.Player = None) -> str:
         s += v + "\n"
     if not isinstance(player, pl.Player):
         return s
-    invCmds = list_inventory_commands(player)
+    invCmds = list_inventory_commands(player).keys()
     if len(invCmds) > 0:
         for i in invCmds:
             s += inventoryCommands.get(i) + "\n"
@@ -61,18 +62,23 @@ def get_admin_command(command: str = None):
         s += v + "\n"
     return s
 
-def list_inventory_commands(player: pl.Player) -> list:
+def list_inventory_commands(player: pl.Player) -> dict[str, int]:
     """
     List all commands added by inventory items
 
     :param player: the player in question
     :return: list of commands
     """
-    commands = []
+    commands = {}
     for item in player.inventory:
-        matches = re.findall("<"+re.escape(prefix)+".+>", item)
+        matches = re.findall(r"<\.(.*?)\+*([0-9]*?)>", item)
         for match in matches:
-            commands.append(match[2:-1])
+            if match[0] in commands:
+                commands[match[0]] = int(match[1]) \
+                                     if match[1] is not "" and int(match[1]) > commands[match[0]] \
+                                     else commands[match[0]]
+            else:
+                commands[match[0]] = int(match[1]) if match[1] is not "" else 0
     return commands
 
 def get_alias(command: str) -> str:
