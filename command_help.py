@@ -77,7 +77,7 @@ def list_inventory_commands(player: pl.Player) -> dict[str, int]:
                                      if match[1] != "" and int(match[1]) > commands[match[0]] \
                                      else commands[match[0]]
             else:
-                commands[match[0]] = int(match[1]) if match[1] is not "" else 0
+                commands[match[0]] = int(match[1]) if match[1] != "" else 0
     return commands
 
 def get_alias(command: str) -> str:
