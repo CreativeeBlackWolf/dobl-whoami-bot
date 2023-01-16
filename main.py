@@ -19,7 +19,7 @@ from player import Player
 import casino
 
 
-config = Config("botconfig.cfg")
+config = Config("botconfig.cfg" if os.path.exists("botconfig.cfg") else "config_example.cfg")
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 

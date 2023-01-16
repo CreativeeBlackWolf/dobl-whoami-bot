@@ -74,7 +74,7 @@ def list_inventory_commands(player: pl.Player) -> dict[str, int]:
         for match in matches:
             if match[0] in commands:
                 commands[match[0]] = int(match[1]) \
-                                     if match[1] is not "" and int(match[1]) > commands[match[0]] \
+                                     if match[1] != "" and int(match[1]) > commands[match[0]] \
                                      else commands[match[0]]
             else:
                 commands[match[0]] = int(match[1]) if match[1] is not "" else 0
