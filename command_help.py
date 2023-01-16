@@ -1,5 +1,4 @@
 import re
-from typing import Union
 import player as pl
 from main import config
 
