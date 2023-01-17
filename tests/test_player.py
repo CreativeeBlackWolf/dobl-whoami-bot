@@ -10,6 +10,7 @@ sys.path.append(parent)
 
 import mapparser
 import player
+import command_help
 
 
 class TestPlayer(unittest.TestCase):
@@ -54,6 +55,16 @@ class TestPlayer(unittest.TestCase):
         self.assertEqual(self.gameMap.get_player("test_player9", 9).format_HP(), "100/100.0 (100)")
         self.assertEqual(self.gameMap.get_player("test_player11", 11).format_HP(), "127/151.3 (154)")
         self.assertEqual(self.gameMap.get_player("test_player11", 11).format_MP(), "47/47.0 (47)")
+
+    def test_list_inventory_commands(self):
+        self.assertEqual(command_help.list_inventory_commands(self.gameMap.get_player("test_player11", 11)),
+                         {
+                            "карта": 0
+                         })
+        self.assertEqual(command_help.list_inventory_commands(self.gameMap.get_player("test_player12", 12)),
+                         {
+                            "карта": 2
+                         })
 
 if __name__ == '__main__':
     unittest.main()
