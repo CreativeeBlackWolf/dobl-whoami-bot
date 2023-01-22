@@ -136,7 +136,7 @@ class Map:
         level             = int(props.get("Уровень", "1"))
         frags             = props.get("Фраги", "0/4")
         group             = props.get("Группа", "")
-        isBlind           = props.get("Ослеплён", False).lower() in ["true", "1"]
+        isBlind           = props.get("Ослеплён", "false").lower() in ["true", "1"]
         return player.Player(
             position=position,
             name=name,
