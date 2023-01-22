@@ -290,7 +290,7 @@ class Map:
             not (roomPos[1] % 5 == 0):
             if player.isBlind:
                 if playerPos[1] == 7:
-                    doors.append("ююг")
+                    doors.append("юг")
             else:
                 doors.append("юг")
         if self.__get_tile([roomPos[0]-1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS):
