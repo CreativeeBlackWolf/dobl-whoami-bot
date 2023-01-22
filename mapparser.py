@@ -137,6 +137,7 @@ class Map:
         frags             = props.get("Фраги", "0/4")
         group             = props.get("Группа", "")
         isBlind           = props.get("Ослеплён", "false").lower() in ["true", "1"]
+        isDead            = pl.attrib.get("class", "Игрок").lower() == "труп"
         return player.Player(
             position=position,
             name=name,
@@ -154,7 +155,8 @@ class Map:
             passive_abilities=passive_abilities,
             rerolls=rerolls,
             group=group,
-            isBlind=isBlind
+            isBlind=isBlind,
+            isDead=isDead
         )
 
     def get_same_room_objects(self, player: player.Player) -> list:

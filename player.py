@@ -21,7 +21,8 @@ class Player:
                  passive_abilities: list[str],
                  rerolls:           int,
                  group:             str,
-                 isBlind:             bool,
+                 isBlind:           bool,
+                 isDead:            bool,
         ):
         self.position = position
         self.name = name
@@ -40,6 +41,7 @@ class Player:
         self.rerolls = rerolls
         self.group = group
         self.isBlind = isBlind
+        self.isDead = isDead
 
     def __str__(self):
         return f"Player: {self.name}"
