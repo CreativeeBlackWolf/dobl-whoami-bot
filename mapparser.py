@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Union
 from enum import Enum
 import defusedxml.ElementTree as defused_etree
@@ -135,6 +136,7 @@ class Map:
         level             = int(props.get("Уровень", "1"))
         frags             = props.get("Фраги", "0/4")
         group             = props.get("Группа", "")
+        blind             = props.get("Ослеплён", False)
         return player.Player(
             position=position,
             name=name,
@@ -151,7 +153,8 @@ class Map:
             active_abilities=active_abilities,
             passive_abilities=passive_abilities,
             rerolls=rerolls,
-            group=group
+            group=group,
+
         )
 
     def get_same_room_objects(self, player: player.Player) -> list:

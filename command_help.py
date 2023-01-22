@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re
 import player as pl
 from main import config

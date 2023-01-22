@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re
 from colorama import Fore, Style
 
@@ -19,7 +20,8 @@ class Player:
                  active_abilities:  list[str],
                  passive_abilities: list[str],
                  rerolls:           int,
-                 group:             str
+                 group:             str,
+
         ):
         self.position = position
         self.name = name
