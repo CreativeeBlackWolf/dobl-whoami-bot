@@ -136,7 +136,7 @@ class Map:
         level             = int(props.get("Уровень", "1"))
         frags             = props.get("Фраги", "0/4")
         group             = props.get("Группа", "")
-        blind             = props.get("Ослеплён", False)
+        isBlind           = bool(props.get("Ослеплён", False))
         return player.Player(
             position=position,
             name=name,
@@ -154,7 +154,7 @@ class Map:
             passive_abilities=passive_abilities,
             rerolls=rerolls,
             group=group,
-
+            isBlind=isBlind
         )
 
     def get_same_room_objects(self, player: player.Player) -> list:
@@ -199,11 +199,28 @@ class Map:
         :returns: an ASCII string representation of a room
         """
         objlist = self.get_same_room_objects(player)
-        representation = [["." for i in range(8)] for j in range(8)]
+        playerPos = [ int(player.position[0]) % 32 // 4,
+                      int(player.position[1]) % 32 // 4]
+        representation = [
+            [
+                "." 
+                if not player.isBlind or 
+                      (player.isBlind and (x - playerPos[0] in range(-1, 2) and y - playerPos[1] in range(-1, 2))) 
+                else "?" 
+                for x in range(8)
+            ] 
+            for y in range(8)
+        ]
         legend = {}
         usedChars = []
         nextDefaultIndex = 0
         for obj in objlist:
+            if player.isBlind:
+                if obj[1] - playerPos[0] in range(-1, 2) and \
+                   obj[2] - playerPos[1] in range(-1, 2):
+                    representation[obj[2]][obj[1]] = "."
+                else:
+                    continue
             # check if another object is at same position
             existingChar: str = representation[obj[2]][obj[1]]
             if existingChar != ".":
