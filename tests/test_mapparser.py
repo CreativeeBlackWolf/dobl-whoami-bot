@@ -114,7 +114,7 @@ S: something
 
     def test_list_doors_string(self):
         testPlayer = self.map.get_player("test_player1", 1)
-        self.assertEqual(self.map.list_doors_string(testPlayer), "В этой комнате нет дверей?")
+        self.assertEqual(self.map.list_doors_string(testPlayer), "В этой комнате нет дверей.")
         testPlayer = self.map.get_player("test_player6", 6)
         self.assertEqual(self.map.list_doors_string(testPlayer), "Двери ведут на юг и восток.")
         testPlayer = self.map.get_player("test_player7", 7)
