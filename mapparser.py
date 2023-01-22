@@ -203,12 +203,12 @@ class Map:
                       int(player.position[1]) % 32 // 4]
         representation = [
             [
-                "." 
-                if not player.isBlind or 
-                      (player.isBlind and (x - playerPos[0] in range(-1, 2) and y - playerPos[1] in range(-1, 2))) 
-                else "?" 
+                "."
+                if not player.isBlind or
+                      (player.isBlind and (x - playerPos[0] in range(-1, 2) and y - playerPos[1] in range(-1, 2)))
+                else "?"
                 for x in range(8)
-            ] 
+            ]
             for y in range(8)
         ]
         legend = {}

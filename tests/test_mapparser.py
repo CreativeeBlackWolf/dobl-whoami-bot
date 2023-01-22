@@ -49,7 +49,7 @@ class TestMapParser(unittest.TestCase):
             trueMP = 100,
             rerolls = 2,
             group = "группа 1",
-            isBlind=False
+            isBlind = False
         )
         for attr in testPlayerGot.__dict__:
             self.assertEqual(getattr(testPlayerGot, attr), getattr(testPlayerActual, attr))
