@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="6" nextobjectid="208">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="6" nextobjectid="210">
  <tileset firstgid="1" name="rooms" tilewidth="32" tileheight="32" tilecount="5" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
@@ -251,6 +251,18 @@
 2. Карта+2 &lt;.карта+2&gt;</property>
     <property name="Очки Здоровья" value="127/151.3 (154)"/>
     <property name="Очки Маны" value="47/47.0 (47)"/>
+   </properties>
+  </object>
+  <object id="208" name="test_player13" class="Игрок" x="512" y="-100" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="13"/>
+    <property name="Ослеплён" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="209" name="test_player14" class="Игрок" x="516" y="-108" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="14"/>
+    <property name="Ослеплён" type="bool" value="true"/>
    </properties>
   </object>
  </objectgroup>

@@ -136,7 +136,8 @@ class Map:
         level             = int(props.get("Уровень", "1"))
         frags             = props.get("Фраги", "0/4")
         group             = props.get("Группа", "")
-        blind             = props.get("Ослеплён", False)
+        isBlind           = props.get("Ослеплён", "false").lower() in ["true", "1"]
+        isDead            = pl.attrib.get("class", "Игрок").lower() == "труп"
         return player.Player(
             position=position,
             name=name,
@@ -154,7 +155,8 @@ class Map:
             passive_abilities=passive_abilities,
             rerolls=rerolls,
             group=group,
-
+            isBlind=isBlind,
+            isDead=isDead
         )
 
     def get_same_room_objects(self, player: player.Player) -> list:
@@ -199,11 +201,28 @@ class Map:
         :returns: an ASCII string representation of a room
         """
         objlist = self.get_same_room_objects(player)
-        representation = [["." for i in range(8)] for j in range(8)]
+        playerPos = [ int(player.position[0]) % 32 // 4,
+                      int(player.position[1]) % 32 // 4]
+        representation = [
+            [
+                "."
+                if not player.isBlind or
+                      (player.isBlind and (x - playerPos[0] in range(-1, 2) and y - playerPos[1] in range(-1, 2)))
+                else "?"
+                for x in range(8)
+            ]
+            for y in range(8)
+        ]
         legend = {}
         usedChars = []
         nextDefaultIndex = 0
         for obj in objlist:
+            if player.isBlind:
+                if obj[1] - playerPos[0] in range(-1, 2) and \
+                   obj[2] - playerPos[1] in range(-1, 2):
+                    ...
+                else:
+                    continue
             # check if another object is at same position
             existingChar: str = representation[obj[2]][obj[1]]
             if existingChar != ".":
@@ -256,17 +275,36 @@ class Map:
         """
         roomPos = [ int(player.position[0]) // 32,
                     int(player.position[1]) // 32]
+        playerPos = [ int(player.position[0]) % 32 // 4,
+                      int(player.position[1]) % 32 // 4]
+        print(playerPos)
         doors = []
-        if self.__get_tile([roomPos[0], roomPos[1]-1]) not in (TileIDs.NULL, TileIDs.ABYSS) and not (
-                roomPos[1] % 5 == 1):
-            doors.append("север")
-        if self.__get_tile([roomPos[0], roomPos[1]+1]) not in (TileIDs.NULL, TileIDs.ABYSS) and not (
-                roomPos[1] % 5 == 0):
-            doors.append("юг")
+        if self.__get_tile([roomPos[0], roomPos[1]-1]) not in (TileIDs.NULL, TileIDs.ABYSS) and \
+            not (roomPos[1] % 5 == 1):
+            if player.isBlind:
+                if playerPos[1] == 0:
+                    doors.append("север")
+            else:
+                doors.append("север")
+        if self.__get_tile([roomPos[0], roomPos[1]+1]) not in (TileIDs.NULL, TileIDs.ABYSS) and \
+            not (roomPos[1] % 5 == 0):
+            if player.isBlind:
+                if playerPos[1] == 7:
+                    doors.append("юг")
+            else:
+                doors.append("юг")
         if self.__get_tile([roomPos[0]-1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS):
-            doors.append("запад")
+            if player.isBlind:
+                if playerPos[0] == 0:
+                    doors.append("запад")
+            else:
+                doors.append("запад")
         if self.__get_tile([roomPos[0]+1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS):
-            doors.append("восток")
+            if player.isBlind:
+                if playerPos[0] == 7:
+                    doors.append("восток")
+            else:
+                doors.append("восток")
         # end of floor
         if roomPos[0] % 4 == 0 and roomPos[1] % 5 == 0:
             doors.append("вниз")
@@ -286,7 +324,7 @@ class Map:
             ladder = False
         doors = [door for door in doors if door != 'вниз']
         if len(doors) == 0:
-            resp = "В этой комнате нет дверей."
+            resp = "В этой комнате нет дверей" + ("?" if player.isBlind else ".")
         elif len(doors) == 1:
             resp = f"Единственная дверь ведёт на {doors[0]}."
         elif len(doors) == 2:

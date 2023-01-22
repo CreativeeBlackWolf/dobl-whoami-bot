@@ -115,6 +115,9 @@ async def on_message(message: discord.Message):
         data = await get_map_and_player(message)
         if data is not None:
             gameMap, player = data
+            if player.isDead:
+                await message.reply("Ты мёртв.")
+                return
             resp = f"""```ansi
 {gameMap.construct_ascii_room(player)}
 

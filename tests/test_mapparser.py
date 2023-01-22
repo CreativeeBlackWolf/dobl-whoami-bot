@@ -48,7 +48,9 @@ class TestMapParser(unittest.TestCase):
             trueHP = 100,
             trueMP = 100,
             rerolls = 2,
-            group = "группа 1"
+            group = "группа 1",
+            isBlind = False,
+            isDead = False
         )
         for attr in testPlayerGot.__dict__:
             self.assertEqual(getattr(testPlayerGot, attr), getattr(testPlayerActual, attr))
@@ -110,6 +112,23 @@ S: something
 {Back.WHITE}{Fore.BLACK}D{Style.RESET_ALL}: dead_body, test_player5"""
         self.assertEqual(asciiGot, asciiActual)
 
+    def test_construct_ascii_room_blinded(self):
+        testPlayer = self.map.get_player("test_player13", 13)
+        asciiGot = self.map.construct_ascii_room(testPlayer)
+        asciiActual = f"""\
+????????
+????????
+????????
+????????
+????????
+????????
+..??????
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}.??????
+
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player13\
+"""
+        self.assertEqual(asciiGot, asciiActual)
+
     def test_list_doors_string(self):
         testPlayer = self.map.get_player("test_player1", 1)
         self.assertEqual(self.map.list_doors_string(testPlayer), "В этой комнате нет дверей.")
@@ -123,6 +142,8 @@ S: something
         self.assertEqual(self.map.list_doors_string(testPlayer), "Двери ведут на север, запад и восток.")
         testPlayer = self.map.get_player("test_player10", 10)
         self.assertEqual(self.map.list_doors_string(testPlayer), "Единственная дверь ведёт на юг.")
+        testPlayer = self.map.get_player("test_player14", 14)
+        self.assertEqual(self.map.list_doors_string(testPlayer), "В этой комнате нет дверей?")
 
     def test_construct_ascii_map(self):
         testPlayer = self.map.get_player("test_player8", 8)

@@ -40,6 +40,9 @@ class WhoamiCommandView(View):
     async def whereami_button_callback(self, interaction: discord.Interaction, button: Button):
         for childButton in self.children:
             childButton.style = ButtonStyle.green if childButton != button else ButtonStyle.blurple
+        if self.player.isDead:
+            await interaction.response.edit_message(view=self, content="```Ты мёртв```")
+            return
         await interaction.response.edit_message(view=self, content=
             f"""```ansi
 {self.map.construct_ascii_room(self.player)}
