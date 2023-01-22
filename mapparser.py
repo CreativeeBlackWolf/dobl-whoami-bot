@@ -324,7 +324,7 @@ class Map:
             ladder = False
         doors = [door for door in doors if door != 'вниз']
         if len(doors) == 0:
-            resp = "В этой комнате нет дверей?"
+            resp = "В этой комнате нет дверей" + "?" if player.isBlind else "."
         elif len(doors) == 1:
             resp = f"Единственная дверь ведёт на {doors[0]}."
         elif len(doors) == 2:
