@@ -277,7 +277,6 @@ class Map:
                     int(player.position[1]) // 32]
         playerPos = [ int(player.position[0]) % 32 // 4,
                       int(player.position[1]) % 32 // 4]
-        print(playerPos)
         doors = []
         if self.__get_tile([roomPos[0], roomPos[1]-1]) not in (TileIDs.NULL, TileIDs.ABYSS) and \
             not (roomPos[1] % 5 == 1):
