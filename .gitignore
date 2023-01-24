@@ -5,6 +5,7 @@
 # Exclude files
 **/*.cfg
 **/*.tmx
+*.json
 
 # Exceptions
 !config_example.cfg

@@ -1,7 +1,8 @@
 from __future__ import annotations
 import configparser
-import discord
-
+import json
+import os
+from typing import Tuple, Union
 
 class Config:
 
@@ -9,53 +10,99 @@ class Config:
         self.filename = filename
         self.config = configparser.ConfigParser()
         self.config.read(self.filename)
-
+        
         self.Bot = self.Bot(
             token=self.config.get('bot', 'token'),
             prefix=self.config.get('bot', 'prefix', fallback="."),
             admins=self.config.get('bot', 'admins', fallback=[]),
-            reaction_emoji_id=self.config.getint('bot', 'reaction_emoji_id', fallback=None),
-            reaction_message_id=self.config.getint('bot', 'reaction_message_id', fallback=None),
-            reaction_role_id=self.config.getint('bot', 'reaction_role_id', fallback=None),
+            reaction_data_filename=self.config.get('bot', 'reaction_data', fallback="reaction_data.json")
         )
 
         self.Map = self.Map(
             path=self.config.get('map', 'path')
         )
 
-    def set_bot_reaction_emoji_id(self, emoji: discord.Emoji):
-        self.config.set("bot", "reaction_emoji_id", str(emoji.id))
-        self.Bot.reaction_emoji_id = emoji.id
+    def set_bot_reaction_data(
+        self,
+        reaction_emoji_id: int,
+        reaction_role_id: int,
+        reaction_message_id: int,
+        message_on_reaction: str):
+        # [{"message_id": [{"emoji_id": "role_id", "message": message_on_reaction}]}, {"message_id_2": [...]}]
+        search_result = self.search_reaction_data_message(reaction_message_id)
+        if search_result is None:
+            data = {
+                str(reaction_message_id): [
+                    {
+                        str(reaction_emoji_id): reaction_role_id,
+                        "message": message_on_reaction
+                    }
+                ]
+            }
+            self.Bot.reaction_data.append(data)
+        else:
+            search_result[list(search_result.keys())[0]].append(
+                {
+                    str(reaction_emoji_id): reaction_role_id,
+                    "message": message_on_reaction
+                }
+            )
+        self.config.set("bot", "reaction_data", str(self.Bot.reaction_data))
 
-    def set_bot_reaction_message_id(self, message: discord.Message):
-        self.config.set("bot", "reaction_message_id", str(message.id))
-        self.Bot.reaction_message_id = message.id
+    def search_reaction_data_message(self, message_id: int) -> Union[dict, None]:
+        """
+        Search for reaction data for a given message
+        :param message_id: discord message id
+        :return: reaction_data message or `None` if not found
+        """
+        for val in self.Bot.reaction_data:
+            if str(message_id) in val:
+                return val
+        return None
 
-    def set_bot_reaction_role_id(self, role: discord.Role):
-        self.config.set("bot", "reaction_role_id", str(role.id))
-        self.Bot.reaction_role_id = role.id
+    def search_reaction_data_message_emoji(
+        self, 
+        message_dict: dict,
+        emoji_id: int) -> Union[dict, None]:
+        """
+        Search emoji_id in reaction_data message
+        :param message_dict: reaction_data message
+        :param emoji_id: emoji id
+        :return: emoji dict or `None` if not found
+        """
+        for _, val in message_dict.items():
+            for emoji_value in val:
+                if str(emoji_id) in emoji_value:
+                    return emoji_value
+        return None
 
     def write_config(self):
         with open(self.filename, "w") as f:
             self.config.write(f)
 
+    def write_reaction_data_file(self):
+        with open(self.Bot.reaction_data_filename, "w", encoding="utf-8") as f:
+            json.dump(self.Bot.reaction_data, f, indent=2, ensure_ascii=False)
+
     class Bot:
-        def __init__(self, 
-                     token: str, 
-                     prefix: str, 
+        def __init__(self,
+                     token: str,
+                     prefix: str,
                      admins: list[str],
-                     reaction_emoji_id: int,
-                     reaction_message_id: int,
-                     reaction_role_id: int):
+                     reaction_data_filename: str):
             self.token: str = token
             self.prefix: str = prefix
             self.admins: list[str] = admins
-            self.reaction_emoji_id: int = reaction_emoji_id
-            self.reaction_message_id: int = reaction_message_id
-            self.reaction_role_id: int = reaction_role_id
-
+            self.reaction_data_filename: str = reaction_data_filename
             if not self.token:
                 raise ValueError("Token must be specified in configuration file.")
+
+            if not os.path.exists(self.reaction_data_filename):
+                with open(self.reaction_data_filename, "w", encoding="utf-8") as f:
+                    f.write("[]")
+
+            with open(self.reaction_data_filename, "r", encoding="utf-8") as f:
+                self.reaction_data = json.load(f)
 
     class Map:
         def __init__(self, path: str):

@@ -42,6 +42,83 @@ async def get_map_and_player(message: discord.Message) -> (
         await message.channel.send("Ты меня обмануть пытаешься?")
         return None
 
+async def get_reaction_role_data(payload: discord.RawReactionActionEvent) -> (
+        Union[Tuple[discord.Role, discord.Member, str], None]
+    ):
+    message_search_result = config.search_reaction_data_message(payload.message_id)
+    if message_search_result is not None:
+        emoji_search_result = config.search_reaction_data_message_emoji(message_search_result, payload.emoji.id or payload.emoji.name)
+        if emoji_search_result is not None:
+            emoji_keys = list(emoji_search_result.keys())
+            reaction_role: int = emoji_search_result[emoji_keys[0]]
+            reaction_message: str = emoji_search_result["message"]
+
+            guild = client.get_guild(payload.guild_id)
+            role = guild.get_role(reaction_role)
+            member = guild.get_member(payload.user_id)
+            return (role, member, reaction_message)
+    return None
+
+async def add_reaction_message(
+    message: Union[discord.Message, discord.MessageReference], 
+    append: bool = False) -> bool:
+
+    await message.delete()
+
+
+    args = message.content.split()
+    if append and not message.reference:
+        await message.channel.send("Ты должен ответить на сообщение, к которому хочешь привязать уведомления")
+        return False
+    
+    reaction_role = message.role_mentions[0] if message.role_mentions else None
+    if reaction_role is None:
+        await message.channel.send("Упомяни роль, которую хочешь присваивать.")
+        return False
+
+    reaction_emoji = re.findall(r"<:\w*:(\d*)>", message.content)
+    if not reaction_emoji:
+        unicode_emoji: list[str] = re.findall(r"[\U00010000-\U0010ffff]", message.content)
+        if not unicode_emoji:
+            await message.channel.send("Напиши эмоцию, на которую будут люди реагировать.")
+            return False
+        unicode_emoji = unicode_emoji[0]
+
+    if len(args) <= 4:
+        await message.channel.send("Напиши сообщение, которое нужно отправлять при подписке и отписке через `/`.")
+        return False
+
+    if not append and len(message.content.split("\n")) == 1:
+        await message.channel.send("Напиши, что ты хочешь увидеть в сообщении (с новой строки).")
+        return False
+    
+    message_on_reaction = " ".join(message.content.split("\n")[0].split()[4::])
+    
+    if len(message_on_reaction.split("/")) == 1:
+        await message.channel.send("Ты должен написать сообщение об отписке через `/`")
+        return False
+
+    if not append:
+        msg = "\n".join(message.content.split("\n")[1:])
+        reaction_message = await message.channel.send(msg)
+
+    if reaction_emoji:
+        reaction_emoji: discord.Emoji = await message.guild.fetch_emoji(int(reaction_emoji[0]))
+
+    if not append:
+        await reaction_message.add_reaction(reaction_emoji or unicode_emoji)
+    else:
+        reference_message = await message.channel.fetch_message(message.reference.message_id)
+        await reference_message.add_reaction(reaction_emoji or unicode_emoji)
+
+    config.set_bot_reaction_data(
+        reaction_message_id=message.reference.message_id if append else reaction_message.id,
+        reaction_emoji_id=reaction_emoji.id if reaction_emoji else unicode_emoji,
+        reaction_role_id=reaction_role.id,
+        message_on_reaction=message_on_reaction
+    )
+    config.write_reaction_data_file()
+
 @client.event
 async def on_ready():
     if os.path.exists(".rst"):
@@ -55,21 +132,21 @@ async def on_ready():
 
 @client.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
-    if payload.emoji.id == config.Bot.reaction_emoji_id and \
-       payload.message_id == config.Bot.reaction_message_id:
-        role = client.get_guild(payload.guild_id).get_role(config.Bot.reaction_role_id)
-        await payload.member.add_roles(role, reason="Подписка на уведомления.")
-        await payload.member.send("Ты подписался на уведомления об играх и новостях.")
+    search_result = await get_reaction_role_data(payload)
+    if search_result is None:
+        return
+    role, member, reaction_message = search_result
+    await member.add_roles(role)
+    await member.send(reaction_message.split("/")[0])
 
 @client.event
 async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
-    if payload.emoji.id == config.Bot.reaction_emoji_id and \
-       payload.message_id == config.Bot.reaction_message_id:
-        guild = client.get_guild(payload.guild_id)
-        role = guild.get_role(config.Bot.reaction_role_id)
-        member = guild.get_member(payload.user_id)
-        await member.remove_roles(role)
-        await member.send("Ты отписался от уведомлений.")
+    search_result = await get_reaction_role_data(payload)
+    if search_result is None:
+        return
+    role, member, reaction_message = search_result
+    await member.remove_roles(role)
+    await member.send(reaction_message.split("/")[1])
 
 @client.event
 async def on_message(message: discord.Message):
@@ -246,6 +323,8 @@ async def on_message(message: discord.Message):
             elif args[1] == "карту":
                 card = blackjack.draw_card()
                 await message.channel.send(f"Ты вытянул {card}")
+            elif args[1] == "уведомление":
+                await add_reaction_message(message, True)
             else:
                 await message.channel.send("Выбрать что?")
         else:
@@ -294,28 +373,7 @@ async def on_message(message: discord.Message):
 
                 await message.channel.send(f"Группа <@&{appendRole.id}> сформирована.")
             elif args[1] == "уведомление":
-                await message.delete()
-                if len(message.content.split("\n")) == 1:
-                    await message.channel.send(f"Напиши, что ты хочешь увидеть в сообщении (с новой строки).")
-                    return
-
-                reactionRole = message.role_mentions[0] if message.role_mentions else None
-                if reactionRole is None:
-                    await message.channel.send("Упомяни роль, которую хочешь присваивать.")
-
-                reactionEmoji = re.findall(r"<:\w*:(\d*)>", message.content)
-                if not reactionEmoji:
-                    await message.channel.send("Напиши эмоцию, на которую будут люди реагировать.")
-                    return
-
-                reactionEmoji = await message.guild.fetch_emoji(int(reactionEmoji[0]))
-                msg = "\n".join(message.content.split("\n")[1:])
-                reactionMessage = await message.channel.send(msg)
-                await reactionMessage.add_reaction(reactionEmoji)
-                config.set_bot_reaction_emoji_id(reactionEmoji)
-                config.set_bot_reaction_message_id(reactionMessage)
-                config.set_bot_reaction_role_id(reactionRole)
-                config.write_config()
+                await add_reaction_message(message, False)
             else:
                 await message.channel.send("Создать что?")
         else:
