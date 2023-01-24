@@ -60,7 +60,7 @@ async def get_reaction_role_data(payload: discord.RawReactionActionEvent) -> (
     return None
 
 async def add_reaction_message(
-    message: Union[discord.Message, discord.MessageReference], 
+    message: Union[discord.Message, discord.MessageReference],
     append: bool = False) -> bool:
 
     await message.delete()
@@ -70,7 +70,7 @@ async def add_reaction_message(
     if append and not message.reference:
         await message.channel.send("Ты должен ответить на сообщение, к которому хочешь привязать уведомления")
         return False
-    
+
     reaction_role = message.role_mentions[0] if message.role_mentions else None
     if reaction_role is None:
         await message.channel.send("Упомяни роль, которую хочешь присваивать.")
@@ -91,9 +91,9 @@ async def add_reaction_message(
     if not append and len(message.content.split("\n")) == 1:
         await message.channel.send("Напиши, что ты хочешь увидеть в сообщении (с новой строки).")
         return False
-    
+
     message_on_reaction = " ".join(message.content.split("\n")[0].split()[4::])
-    
+
     if len(message_on_reaction.split("/")) == 1:
         await message.channel.send("Ты должен написать сообщение об отписке через `/`")
         return False
@@ -186,7 +186,7 @@ async def on_message(message: discord.Message):
             _, player = data
             args = message.content.lower().split()
             if len(args) == 2:
-                if args[1] in ["скиллы", "способности", "особенности", 
+                if args[1] in ["скиллы", "способности", "особенности",
                                "навыки", "спеллы", "абилки"]:
                     await send_abilities(message, player)
                 elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:

@@ -10,7 +10,7 @@ class Config:
         self.filename = filename
         self.config = configparser.ConfigParser()
         self.config.read(self.filename)
-        
+
         self.Bot = self.Bot(
             token=self.config.get('bot', 'token'),
             prefix=self.config.get('bot', 'prefix', fallback="."),
@@ -60,8 +60,8 @@ class Config:
                 return val
         return None
 
+    @staticmethod
     def search_reaction_data_message_emoji(
-        self, 
         message_dict: dict,
         emoji_id: int) -> Union[dict, None]:
         """
