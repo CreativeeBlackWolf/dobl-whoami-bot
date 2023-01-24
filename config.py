@@ -2,7 +2,7 @@ from __future__ import annotations
 import configparser
 import json
 import os
-from typing import Tuple, Union
+from typing import Union
 
 class Config:
 
