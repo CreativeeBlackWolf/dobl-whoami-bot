@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="7" nextobjectid="371">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="7" nextobjectid="373">
  <tileset firstgid="1" name="rooms" tilewidth="32" tileheight="32" tilecount="5" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
@@ -166,7 +166,7 @@
 </chunk>
   </data>
  </layer>
- <objectgroup id="6" name="этажи">
+ <objectgroup id="6" name="этажи" locked="1">
   <object id="330" name="Этаж 1-1" x="-32" y="-128" width="96" height="160"/>
   <object id="331" name="Этаж 1-2" x="-32" y="32" width="96" height="160"/>
   <object id="332" name="Этаж 1-3" x="-32" y="192" width="96" height="160"/>
@@ -306,6 +306,16 @@
    <properties>
     <property name="ID игрока" value="14"/>
     <property name="Ослеплён" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="371" name="test_player15" class="Игрок" x="-32" y="-128" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="15"/>
+   </properties>
+  </object>
+  <object id="372" name="test_player16" class="Игрок" x="96" y="32" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="16"/>
    </properties>
   </object>
  </objectgroup>
