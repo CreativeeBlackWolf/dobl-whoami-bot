@@ -111,6 +111,22 @@ S: something
 
 {Back.WHITE}{Fore.BLACK}D{Style.RESET_ALL}: dead_body, test_player5"""
         self.assertEqual(asciiGot, asciiActual)
+        testPlayer = self.map.get_player("test_player8", 8)
+        asciiGot = self.map.construct_ascii_room(testPlayer)
+        asciiActual = f"""\
+........
+........
+........
+...{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}....
+........
+........
+......{Fore.WHITE}T{Style.RESET_ALL}.
+...{Fore.YELLOW}Л{Style.RESET_ALL}....
+
+{Fore.WHITE}T{Style.RESET_ALL}: test_player12
+{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}: test_player8
+{Fore.YELLOW}Л{Style.RESET_ALL}: Лестница вниз"""
+        self.assertEqual(asciiGot, asciiActual)
 
     def test_construct_ascii_room_blinded(self):
         testPlayer = self.map.get_player("test_player13", 13)
@@ -137,7 +153,7 @@ S: something
         testPlayer = self.map.get_player("test_player7", 7)
         self.assertEqual(self.map.list_doors_string(testPlayer), "Двери ведут на 4 стороны света.")
         testPlayer = self.map.get_player("test_player8", 8)
-        self.assertEqual(self.map.list_doors_string(testPlayer), "Единственная дверь ведёт на север. Здесь также находится лестница вниз.")
+        self.assertEqual(self.map.list_doors_string(testPlayer), "Единственная дверь ведёт на север.")
         testPlayer = self.map.get_player("test_player9", 9)
         self.assertEqual(self.map.list_doors_string(testPlayer), "Двери ведут на север, запад и восток.")
         testPlayer = self.map.get_player("test_player10", 10)
@@ -193,6 +209,10 @@ S: something
         self.assertEqual(asciiGot, asciiActual)
 
     def test_get_player_floor_coords(self):
+        testPlayer = self.map.get_player("test_player5", 5)
+        coordsGot = self.map.get_player_floor_coords(testPlayer)
+        coordsActual = (4, 0)
+        self.assertEqual(coordsGot, coordsActual)
         testPlayer = self.map.get_player("test_player6", 6)
         coordsGot = self.map.get_player_floor_coords(testPlayer)
         coordsActual = (1, 0)
@@ -213,6 +233,28 @@ S: something
         coordsGot = self.map.get_player_floor_coords(testPlayer)
         coordsActual = (1, 0)
         self.assertEqual(coordsGot, coordsActual)
+
+    def test_get_floor_string(self):
+        testPlayer = self.map.get_player("test_player5", 5)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Ты находишься в локации "testarea".'
+        self.assertEqual(floorStringGot, floorStringActual)
+        testPlayer = self.map.get_player("test_player15", 15)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Ты находишься на 1 этаже 1 инстанса.'
+        self.assertEqual(floorStringGot, floorStringActual)
+        testPlayer = self.map.get_player("test_player17", 17)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Неясно, где ты находишься.'
+        self.assertEqual(floorStringGot, floorStringActual)
+        testPlayer = self.map.get_player("test_player18", 18)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Неясно, где ты находишься.'
+        self.assertEqual(floorStringGot, floorStringActual)
+        testPlayer = self.map.get_player("test_player9", 9)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Ты находишься на 1 этаже 4 инстанса.'
+        self.assertEqual(floorStringGot, floorStringActual)
 
 if __name__ == '__main__':
     unittest.main()

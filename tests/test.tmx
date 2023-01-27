@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="6" nextobjectid="210">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="7" nextobjectid="378">
  <tileset firstgid="1" name="rooms" tilewidth="32" tileheight="32" tilecount="5" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
@@ -166,6 +166,50 @@
 </chunk>
   </data>
  </layer>
+ <objectgroup id="6" name="этажи" locked="1">
+  <object id="330" name="Этаж 1-1" x="-32" y="-128" width="96" height="160"/>
+  <object id="331" name="Этаж 1-2" x="-32" y="32" width="96" height="160"/>
+  <object id="332" name="Этаж 1-3" x="-32" y="192" width="96" height="160"/>
+  <object id="333" name="Этаж 1-4" x="-32" y="352" width="96" height="160"/>
+  <object id="334" name="Этаж 2-1" x="96" y="-128" width="96" height="160"/>
+  <object id="335" name="Этаж 2-2" x="96" y="32" width="96" height="160"/>
+  <object id="336" name="Этаж 2-3" x="96" y="192" width="96" height="160"/>
+  <object id="337" name="Этаж 2-4" x="96" y="352" width="96" height="160"/>
+  <object id="338" name="Этаж 3-1" x="224" y="-128" width="96" height="160"/>
+  <object id="339" name="Этаж 3-2" x="224" y="32" width="96" height="160"/>
+  <object id="340" name="Этаж 3-3" x="224" y="192" width="96" height="160"/>
+  <object id="341" name="Этаж 3-4" x="224" y="352" width="96" height="160"/>
+  <object id="342" name="Этаж 4-1" x="352" y="-128" width="96" height="160"/>
+  <object id="343" name="Этаж 4-2" x="352" y="32" width="96" height="160"/>
+  <object id="344" name="Этаж 4-3" x="352" y="192" width="96" height="160"/>
+  <object id="345" name="Этаж 4-4" x="352" y="352" width="96" height="160"/>
+  <object id="346" name="Этаж 5-1" x="480" y="-128" width="96" height="160"/>
+  <object id="347" name="Этаж 5-2" x="480" y="32" width="96" height="160"/>
+  <object id="348" name="Этаж 5-3" x="480" y="192" width="96" height="160"/>
+  <object id="349" name="Этаж 5-4" x="480" y="352" width="96" height="160"/>
+  <object id="350" name="Этаж 6-1" x="608" y="-128" width="96" height="160"/>
+  <object id="351" name="Этаж 6-2" x="608" y="32" width="96" height="160"/>
+  <object id="352" name="Этаж 6-3" x="608" y="192" width="96" height="160"/>
+  <object id="353" name="Этаж 6-4" x="608" y="352" width="96" height="160"/>
+  <object id="354" name="Этаж 7-1" x="736" y="-128" width="96" height="160"/>
+  <object id="355" name="Этаж 7-2" x="736" y="32" width="96" height="160"/>
+  <object id="356" name="Этаж 7-3" x="736" y="192" width="96" height="160"/>
+  <object id="357" name="Этаж 7-4" x="736" y="352" width="96" height="160"/>
+  <object id="358" name="Этаж 8-1" x="864" y="-128" width="96" height="160"/>
+  <object id="359" name="Этаж 8-2" x="864" y="32" width="96" height="160"/>
+  <object id="360" name="Этаж 8-3" x="864" y="192" width="96" height="160"/>
+  <object id="361" name="Этаж 8-4" x="864" y="352" width="96" height="160"/>
+  <object id="362" name="Этаж 9-1" x="992" y="-128" width="96" height="160"/>
+  <object id="363" name="Этаж 9-2" x="992" y="32" width="96" height="160"/>
+  <object id="364" name="Этаж 9-3" x="992" y="192" width="96" height="160"/>
+  <object id="365" name="Этаж 9-4" x="992" y="352" width="96" height="160"/>
+  <object id="366" name="Этаж 10-1" x="1120" y="-128" width="96" height="160"/>
+  <object id="367" name="Этаж 10-2" x="1120" y="32" width="96" height="160"/>
+  <object id="368" name="Этаж 10-3" x="1120" y="192" width="96" height="160"/>
+  <object id="369" name="Этаж 10-4" x="1120" y="352" width="96" height="160"/>
+  <object id="370" name="testarea" x="-64" y="-224" width="192" height="32"/>
+  <object id="377" x="256" y="-288" width="64" height="64"/>
+ </objectgroup>
  <objectgroup id="2" name="нижний" offsetx="1" offsety="1">
   <object id="191" name="token_pile" class="Предмет(-ы)" x="-28" y="-216" width="4" height="4">
    <properties>
@@ -263,6 +307,31 @@
    <properties>
     <property name="ID игрока" value="14"/>
     <property name="Ослеплён" type="bool" value="true"/>
+   </properties>
+  </object>
+  <object id="371" name="test_player15" class="Игрок" x="-32" y="-128" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="15"/>
+   </properties>
+  </object>
+  <object id="372" name="test_player16" class="Игрок" x="96" y="32" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="16"/>
+   </properties>
+  </object>
+  <object id="374" name="Лестница вниз" class="Структура" x="12" y="28" width="4" height="4">
+   <properties>
+    <property name="Прочность" value=""/>
+   </properties>
+  </object>
+  <object id="375" name="test_player17" class="Игрок" x="200" y="-220" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="17"/>
+   </properties>
+  </object>
+  <object id="376" name="test_player18" class="Игрок" x="268" y="-248" width="4" height="4">
+   <properties>
+    <property name="ID игрока" value="18"/>
    </properties>
   </object>
  </objectgroup>

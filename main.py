@@ -119,6 +119,8 @@ async def on_message(message: discord.Message):
                 await message.reply("Ты мёртв.")
                 return
             resp = f"""```ansi
+{gameMap.get_floor_string(player)}
+
 {gameMap.construct_ascii_room(player)}
 
 {gameMap.list_doors_string(player)}
@@ -315,7 +317,9 @@ async def on_message(message: discord.Message):
             if 'карта' not in invItems:
                 await message.channel.send("У тебя нет карты.")
                 return
-            resp = '```ansi\n'+gameMap.construct_ascii_map(player, invItems['карта'])+'```'
+            floorString = gameMap.get_floor_string(player)
+            asciiMap = gameMap.construct_ascii_map(player, invItems['карта'])
+            resp = f'```ansi\n{floorString}\n\n{asciiMap}```'
             await message.reply(resp)
 
     #endregion
