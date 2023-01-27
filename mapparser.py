@@ -403,7 +403,6 @@ class Map:
                     legend[f"{Back.WHITE} {Style.RESET_ALL}"] = player.name
 
             representation += '\n'
-        tile = self.__get_tile([floorStart[0]+1, floorStart[1]+4])
         legend = "\n".join([f"{char}: {''.join(objs)}" for char, objs in legend.items()])
         return f"{representation}\n\n{legend if level > 0 else ''}"
 
