@@ -7,6 +7,7 @@ import os
 import datetime
 from colorama import Fore, Back, Style
 import player
+import floor
 
 
 class MapObjectException(Exception): pass
@@ -420,3 +421,22 @@ class Map:
         floorStart = [  roomPos[0] - (roomPos[0]+1) % 4,
                         roomPos[1] - (roomPos[1]+4) % 5]
         return (roomPos[0]-floorStart[0], roomPos[1]-floorStart[1])
+
+    def get_floor_px(self, objPos) -> floor.Floor:
+        """
+        Get the floor at given coordinates (in px)
+
+        :param objPos: object's position (in px)
+        :return: the floor or None if not on a floor
+        """
+        for objectgroup in self.root.findall("objectgroup"):
+            if objectgroup.attrib["name"] == "этажи":
+                for obj in objectgroup.findall("object"):
+                    startX, startY = int(obj.attrib["x"]), int(obj.attrib["y"])
+                    sizeX, sizeY = int(obj.attrib["width"]), int(obj.attrib["height"])
+                    if  startX <= objPos[0] and \
+                        startY <= objPos[1] and \
+                        startX + sizeX > objPos[0] and \
+                        startY + sizeY > objPos[1]:
+                        name = obj.attrib.get("name", "???")
+                        return floor.Floor((startX, startY), (sizeX, sizeY), name)
