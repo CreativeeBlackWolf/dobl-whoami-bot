@@ -456,3 +456,23 @@ class Map:
         :return: the floor
         """
         return self.__get_floor_px((int(player.position[0]), int(player.position[1])))
+
+    def get_floor_string(self, player: player.Player) -> str:
+        """
+        Get the name of the floor the player is on, pretty-printed
+
+        :param player: the player in question
+        :return: the name
+        """
+        floor = self.__get_floor_player(player)
+        if floor is None:
+            return "Неясно, где ты находишься."
+        if not floor.instance is None:
+            if not floor.number is None:
+                return f"Ты находишься на {floor.number} этаже {floor.instance} инстанса."
+            return f"Ты находишься где-то в {floor.instance} инстансе."
+        if not floor.number is None:
+            return f"Ты находишься на {floor.number} этаже в неизвестном инстансе."
+        if floor.name != "???":
+            return f'Ты находишься в локации "{floor.name}".'
+        return "Неясно, где ты находишься."

@@ -234,5 +234,22 @@ S: something
         coordsActual = (1, 0)
         self.assertEqual(coordsGot, coordsActual)
 
+    def test_get_floor_string(self):
+        testPlayer = self.map.get_player("test_player5", 5)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Ты находишься в локации "testarea".'
+        self.assertEqual(floorStringGot, floorStringActual)
+        testPlayer = self.map.get_player("test_player15", 15)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Ты находишься на 1 этаже 1 инстанса.'
+        self.assertEqual(floorStringGot, floorStringActual)
+        testPlayer = self.map.get_player("test_player17", 17)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Неясно, где ты находишься.'
+        self.assertEqual(floorStringGot, floorStringActual)
+        testPlayer = self.map.get_player("test_player18", 18)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Неясно, где ты находишься.'
+
 if __name__ == '__main__':
     unittest.main()
