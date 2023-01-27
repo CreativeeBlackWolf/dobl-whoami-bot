@@ -422,7 +422,7 @@ class Map:
                         roomPos[1] - (roomPos[1]+4) % 5]
         return (roomPos[0]-floorStart[0], roomPos[1]-floorStart[1])
 
-    def get_floor_px(self, objPos) -> floor.Floor:
+    def __get_floor_px(self, objPos) -> floor.Floor:
         """
         Get the floor at given coordinates (in px)
 
@@ -440,3 +440,21 @@ class Map:
                         startY + sizeY > objPos[1]:
                         name = obj.attrib.get("name", "???")
                         return floor.Floor((startX, startY), (sizeX, sizeY), name)
+
+    def __get_floor_tile(self, tilePos) -> floor.Floor:
+        """
+        Get the floor at given coordinates (in tiles)
+
+        :param tilePos: object's position (in tiles)
+        :return: the floor or None if not on a floor
+        """
+        return self.__get_floor_px([tilePos[0]*32, tilePos[1]*32])
+
+    def __get_floor_player(self, player: player.Player) -> floor.Floor:
+        """
+        Get the floor the player is on
+
+        :param player: the player in question
+        :return: the floor
+        """
+        return self.__get_floor_px((int(player.position[0]), int(player.position[1])))
