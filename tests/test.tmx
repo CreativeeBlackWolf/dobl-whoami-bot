@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="7" nextobjectid="373">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="7" nextobjectid="375">
  <tileset firstgid="1" name="rooms" tilewidth="32" tileheight="32" tilecount="5" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
@@ -316,6 +316,11 @@
   <object id="372" name="test_player16" class="Игрок" x="96" y="32" width="4" height="4">
    <properties>
     <property name="ID игрока" value="16"/>
+   </properties>
+  </object>
+  <object id="374" name="Лестница вниз" class="Структура" x="12" y="28" width="4" height="4">
+   <properties>
+    <property name="Прочность" value=""/>
    </properties>
   </object>
  </objectgroup>

@@ -258,6 +258,8 @@ class Map:
                 coloredChar = Fore.WHITE + firstChar + Style.RESET_ALL
             elif obj[3] == "Труп":
                 coloredChar = Fore.BLACK + firstChar + Style.RESET_ALL
+            elif obj[3] == "Структура":
+                coloredChar = Fore.YELLOW + firstChar + Style.RESET_ALL
             else:
                 coloredChar = firstChar
             representation[obj[2]][obj[1]] = coloredChar
