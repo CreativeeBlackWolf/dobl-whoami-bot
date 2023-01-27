@@ -362,8 +362,6 @@ class Map:
         :param player: the player in question
         :return: the map
         """
-        roomPos = [ int(player.position[0]) // 32,
-                    int(player.position[1]) // 32]
         floor = self.__get_floor_player(player)
         if floor is None:
             return "Карта пуста."
