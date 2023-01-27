@@ -153,7 +153,7 @@ S: something
         testPlayer = self.map.get_player("test_player7", 7)
         self.assertEqual(self.map.list_doors_string(testPlayer), "Двери ведут на 4 стороны света.")
         testPlayer = self.map.get_player("test_player8", 8)
-        self.assertEqual(self.map.list_doors_string(testPlayer), "Единственная дверь ведёт на север. Здесь также находится лестница вниз.")
+        self.assertEqual(self.map.list_doors_string(testPlayer), "Единственная дверь ведёт на север.")
         testPlayer = self.map.get_player("test_player9", 9)
         self.assertEqual(self.map.list_doors_string(testPlayer), "Двери ведут на север, запад и восток.")
         testPlayer = self.map.get_player("test_player10", 10)
@@ -209,6 +209,10 @@ S: something
         self.assertEqual(asciiGot, asciiActual)
 
     def test_get_player_floor_coords(self):
+        testPlayer = self.map.get_player("test_player5", 5)
+        coordsGot = self.map.get_player_floor_coords(testPlayer)
+        coordsActual = (4, 0)
+        self.assertEqual(coordsGot, coordsActual)
         testPlayer = self.map.get_player("test_player6", 6)
         coordsGot = self.map.get_player_floor_coords(testPlayer)
         coordsActual = (1, 0)

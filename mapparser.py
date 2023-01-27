@@ -280,36 +280,38 @@ class Map:
                     int(player.position[1]) // 32]
         playerPos = [ int(player.position[0]) % 32 // 4,
                       int(player.position[1]) % 32 // 4]
+        floor = self.__get_floor_player(player)
+        if floor is None:
+            return []
         doors = []
         if self.__get_tile([roomPos[0], roomPos[1]-1]) not in (TileIDs.NULL, TileIDs.ABYSS) and \
-            not (roomPos[1] % 5 == 1):
+            getattr(self.__get_floor_tile((roomPos[0], roomPos[1]-1)), "name", None) == floor.name:
             if player.isBlind:
                 if playerPos[1] == 0:
                     doors.append("север")
             else:
                 doors.append("север")
         if self.__get_tile([roomPos[0], roomPos[1]+1]) not in (TileIDs.NULL, TileIDs.ABYSS) and \
-            not (roomPos[1] % 5 == 0):
+            getattr(self.__get_floor_tile((roomPos[0], roomPos[1]+1)), "name", None) == floor.name:
             if player.isBlind:
                 if playerPos[1] == 7:
                     doors.append("юг")
             else:
                 doors.append("юг")
-        if self.__get_tile([roomPos[0]-1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS):
+        if self.__get_tile([roomPos[0]-1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS) and \
+            getattr(self.__get_floor_tile((roomPos[0]-1, roomPos[1])), "name", None) == floor.name:
             if player.isBlind:
                 if playerPos[0] == 0:
                     doors.append("запад")
             else:
                 doors.append("запад")
-        if self.__get_tile([roomPos[0]+1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS):
+        if self.__get_tile([roomPos[0]+1, roomPos[1]]) not in (TileIDs.NULL, TileIDs.ABYSS) and \
+            getattr(self.__get_floor_tile((roomPos[0]+1, roomPos[1])), "name", None) == floor.name:
             if player.isBlind:
                 if playerPos[0] == 7:
                     doors.append("восток")
             else:
                 doors.append("восток")
-        # end of floor
-        if roomPos[0] % 4 == 0 and roomPos[1] % 5 == 0:
-            doors.append("вниз")
         return doors
 
     def list_doors_string(self, player: player.Player) -> str:
@@ -320,11 +322,6 @@ class Map:
         :return: friendly string describing available doors
         """
         doors = self.__list_doors(player)
-        if 'вниз' in doors:
-            ladder = True
-        else:
-            ladder = False
-        doors = [door for door in doors if door != 'вниз']
         if len(doors) == 0:
             resp = "В этой комнате нет дверей" + ("?" if player.isBlind else ".")
         elif len(doors) == 1:
@@ -335,7 +332,6 @@ class Map:
             resp = f"Двери ведут на {doors[0]}, {doors[1]} и {doors[2]}."
         elif len(doors) == 4:
             resp = "Двери ведут на 4 стороны света."
-        resp = resp if not ladder else resp + " Здесь также находится лестница вниз."
         return resp
 
     def __get_tile(self, pos: list) -> TileIDs:
@@ -368,12 +364,13 @@ class Map:
         """
         roomPos = [ int(player.position[0]) // 32,
                     int(player.position[1]) // 32]
-        floorStart = [  roomPos[0] - (roomPos[0]+1) % 4,
-                        roomPos[1] - (roomPos[1]+4) % 5]
+        floor = self.__get_floor_player(player)
+        floorStart = [floor.start[0] // 32, floor.start[1] // 32]
+        floorSize = [floor.size[0] // 32, floor.size[1] // 32]
         representation = ''
         legend = {}
-        for y in range(5):
-            for x in range(3):
+        for y in range(floorSize[1]):
+            for x in range(floorSize[0]):
                 tile = self.__get_tile([floorStart[0]+x, floorStart[1]+y])
                 character = Back.WHITE if level >= 2 and self.get_player_floor_coords(player) == (x, y) else ""
                 if tile in (TileIDs.NULL, TileIDs.ABYSS):
@@ -410,8 +407,7 @@ class Map:
         legend = "\n".join([f"{char}: {''.join(objs)}" for char, objs in legend.items()])
         return f"{representation}\n\n{legend if level > 0 else ''}"
 
-    @staticmethod
-    def get_player_floor_coords(player: player.Player) -> tuple[int, int]:
+    def get_player_floor_coords(self, player: player.Player) -> tuple[int, int]:
         """
         Get the coordinates of the player relative to the floor
 
@@ -420,8 +416,8 @@ class Map:
         """
         roomPos = [ int(player.position[0]) // 32,
                     int(player.position[1]) // 32]
-        floorStart = [  roomPos[0] - (roomPos[0]+1) % 4,
-                        roomPos[1] - (roomPos[1]+4) % 5]
+        floor = self.__get_floor_player(player)
+        floorStart = [floor.start[0] // 32, floor.start[1] // 32]
         return (roomPos[0]-floorStart[0], roomPos[1]-floorStart[1])
 
     def __get_floor_px(self, objPos) -> floor.Floor:
