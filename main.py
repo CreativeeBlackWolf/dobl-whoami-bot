@@ -317,8 +317,9 @@ async def on_message(message: discord.Message):
             if 'карта' not in invItems:
                 await message.channel.send("У тебя нет карты.")
                 return
-            resp = '```ansi\n'+gameMap.get_floor_string(player)+'\n\n'+\
-                gameMap.construct_ascii_map(player, invItems['карта'])+'```'
+            floorString = gameMap.get_floor_string(player)
+            asciiMap = gameMap.construct_ascii_map(player, invItems['карта'])
+            resp = f'```ansi\n{floorString}\n\n{asciiMap}```'
             await message.reply(resp)
 
     #endregion
