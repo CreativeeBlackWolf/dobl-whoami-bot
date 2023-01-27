@@ -365,6 +365,8 @@ class Map:
         roomPos = [ int(player.position[0]) // 32,
                     int(player.position[1]) // 32]
         floor = self.__get_floor_player(player)
+        if floor is None:
+            return "Карта пуста."
         floorStart = [floor.start[0] // 32, floor.start[1] // 32]
         floorSize = [floor.size[0] // 32, floor.size[1] // 32]
         representation = ''

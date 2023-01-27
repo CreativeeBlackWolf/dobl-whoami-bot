@@ -48,6 +48,8 @@ class WhoamiCommandView(View):
             return
         await interaction.response.edit_message(view=self, content=
             f"""```ansi
+{self.map.get_floor_string(player)}
+
 {self.map.construct_ascii_room(self.player)}
 
 {self.map.list_doors_string(self.player)}
