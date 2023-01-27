@@ -11,8 +11,8 @@ class Floor:
         self.end = (start[0] + size[0], start[1] + size[1]) # non-inclusive
         parsed = re.findall(r"Этаж (\d+)-(\d+)", name)
         if parsed:
-            self.number = int(parsed[0][0])
-            self.instance = int(parsed[0][1])
+            self.instance = int(parsed[0][0])
+            self.number = int(parsed[0][1])
         else:
-            self.number = None
             self.instance = None
+            self.number = None
