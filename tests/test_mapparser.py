@@ -250,6 +250,11 @@ S: something
         testPlayer = self.map.get_player("test_player18", 18)
         floorStringGot = self.map.get_floor_string(testPlayer)
         floorStringActual = 'Неясно, где ты находишься.'
+        self.assertEqual(floorStringGot, floorStringActual)
+        testPlayer = self.map.get_player("test_player9", 9)
+        floorStringGot = self.map.get_floor_string(testPlayer)
+        floorStringActual = 'Ты находишься на 1 этаже 4 инстанса.'
+        self.assertEqual(floorStringGot, floorStringActual)
 
 if __name__ == '__main__':
     unittest.main()
