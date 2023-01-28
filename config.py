@@ -24,51 +24,10 @@ class Config:
             path=self.config.get('map', 'path')
         )
 
-    def set_bot_reaction_trigger(
-        self,
-        reaction_emoji_id: int,
-        reaction_role_id: int,
-        reaction_message_id: int,
-        message_on_reaction: str):
-        # [{"message_id": [{"emoji_id": "role_id", "message": message_on_reaction}]}, {"message_id_2": [...]}]
-        search_result = self.search_reaction_data_message(reaction_message_id)
-        if search_result is None:
-            data = {
-                str(reaction_message_id): [
-                    {
-                        str(reaction_emoji_id): reaction_role_id,
-                        "message": message_on_reaction
-                    }
-                ]
-            }
-            self.Bot.reaction_data.append(data)
-        else:
-            search_result[list(search_result.keys())[0]].append(
-                {
-                    str(reaction_emoji_id): reaction_role_id,
-                    "message": message_on_reaction
-                }
-            )
-        self.config.set("bot", "reaction_data", str(self.Bot.reaction_data))
-
-    def search_reaction_trigger(self, message_id: int) -> Union[ReactionTrigger, None]:
-        """
-        Search for reaction data for a given message
-        :param message_id: discord message id
-        :return: reaction_data message or `None` if not found
-        """
-        for val in self.Bot.reaction_data:
-            if str(message_id) in val:
-                return val
-        return None
-
+    
     def write_config(self):
         with open(self.filename, "w") as f:
             self.config.write(f)
-
-    def write_reaction_data_file(self):
-        with open(self.Bot.reaction_data_filename, "w", encoding="utf-8") as f:
-            json.dump(self.Bot.reaction_data, f, indent=2, ensure_ascii=False)
 
     class Bot:
         def __init__(self,
@@ -80,6 +39,8 @@ class Config:
             self.prefix: str = prefix
             self.admins: list[str] = admins
             self.reaction_data_filename: str = reaction_data_filename
+            self.__reaction_triggers: list[ReactionTrigger] = []
+
             if not self.token:
                 raise ValueError("Token must be specified in configuration file.")
 
@@ -88,7 +49,82 @@ class Config:
                     f.write("[]")
 
             with open(self.reaction_data_filename, "r", encoding="utf-8") as f:
-                self.reaction_data = json.load(f)
+                raw_triggers: list[dict[str, list[dict]]] = json.load(f)
+
+            # serialize reaction triggers
+            for trigger in raw_triggers:
+                message_id, raw_emoji_list = list(trigger.items())[0]
+                emoji_list: list[str] = []
+                role_ids:   list[int] = []
+                messages:   list[str] = []
+                for emoji in raw_emoji_list:
+                    emoji_data = list(emoji.items())
+                    emoji_str, role_id = emoji_data[0]
+                    _, message = emoji_data[1]
+                    emoji_list.append(emoji_str)
+                    role_ids.append(role_id)
+                    messages.append(message)
+                self.__reaction_triggers.append(ReactionTrigger(
+                    message_id=int(message_id),
+                    emojis=emoji_list,
+                    role_ids=role_ids,
+                    messages=messages
+                ))
+
+        @property
+        def reaction_triggers(self) -> list[ReactionTrigger]:
+            """
+            List of reaction triggers
+            """
+            return self.__reaction_triggers
+
+        def set_reaction_trigger(
+            self,
+            reaction_message_id: int,
+            reaction_emoji: str,
+            reaction_role_id: int,
+            message_on_reaction: str):
+            """
+            Creates new reaction trigger or updates existing
+            :param reaction_message_id: discord message id
+            :param reaction_emoji: Unicode or custom emoji
+            :param reaction_role_id: discord role id
+            :param message_on_reaction: message on subscription and unsubscribtion 
+            separated with `/`
+            """
+            search_trigger = self.search_reaction_trigger(reaction_message_id)
+            if search_trigger is not None:
+                search_trigger.set_reaction_emoji(
+                    emoji=reaction_emoji,
+                    role_id=reaction_role_id,
+                    message=message_on_reaction
+                )
+            else:
+                self.__reaction_triggers.append(ReactionTrigger(
+                    message_id=reaction_message_id,
+                    emojis=[reaction_emoji],
+                    role_ids=[reaction_role_id],
+                    messages=[message_on_reaction]
+                ))
+
+
+        def search_reaction_trigger(self, message_id: int) -> Union[ReactionTrigger, None]:
+            """
+            Search for reaction data for a given message
+            :param message_id: discord message id
+            :return: `ReactionTrigger` object or `None` if not found
+            """
+            for trigger in self.__reaction_triggers:
+                if trigger.message_id == message_id:
+                    return trigger
+            return None 
+
+        def write_reaction_triggers_file(self):
+            data_to_write = []
+            for trigger in self.__reaction_triggers:
+                data_to_write.append(trigger.dump_trigger_data())
+            with open(self.reaction_data_filename, "w", encoding="utf-8") as f:
+                json.dump(data_to_write, f, indent=2, ensure_ascii=False)
 
     class Map:
         def __init__(self, path: str):
@@ -100,8 +136,8 @@ class Config:
 
 class ReactionTrigger:
     def __init__(
-        self, 
-        message_id: int, 
+        self,
+        message_id: int,
         emojis: list[str],
         role_ids: list[int],
         messages: list[str]):
@@ -110,19 +146,35 @@ class ReactionTrigger:
         self.__role_ids = role_ids
         self.__messages = messages
 
+    def __repr__(self):
+        return str(self.__message_id)
+
     @property
-    def message_id(self):
+    def message_id(self) -> int:
         """
         Message ID associated with this reaction trigger
         """
         return self.__message_id
 
     @property
-    def emojis(self):
+    def emojis(self) -> list[str]:
         """
         List of emojis and custom emoji ids.
         """
         return self.__emojis
+
+    def set_reaction_emoji(self, emoji: str, role_id: int, message: str):
+        """
+        Set or update the emoji, role and message
+        """
+        if emoji in self.__emojis:
+            index = self.__emojis.index(emoji)
+            self.__role_ids[index] = role_id
+            self._messages[index] = message
+        else:
+            self.__emojis.append(emoji)
+            self.__role_ids.append(role_id)
+            self.__messages.append(message)
 
     def get_data_by_emoji(self, emoji: str) -> Union[tuple[int, str], None]:
         """
@@ -138,7 +190,7 @@ class ReactionTrigger:
     def dump_trigger_data(self) -> dict:
         """
         Dumps the trigger data to a dictionary like:
-        `{"message_id": [{"emoji_id_1": role_id, "message": "msg"}, ...]}`
+        `{"message_id": [{"emoji_id_1": role_id, "message": "sub/unsub"}, ...]}`
         """
         dump = {str(self.__message_id): []}
         for index, value in enumerate(self.__emojis):
@@ -149,3 +201,8 @@ class ReactionTrigger:
                 }
             )
         return dump
+
+
+if __name__ == '__main__':
+    config = Config("botconfig.cfg")
+    print(config.Bot.reaction_triggers)

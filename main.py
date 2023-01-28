@@ -13,7 +13,7 @@ from dialog_manager import (send_abilities,
                             get_inventory_string,
                             get_abilities_string)
 from buttons import WhoamiCommandView
-from config import Config
+from config import Config, ReactionTrigger
 import mapparser
 import command_help
 from player import Player
@@ -45,13 +45,12 @@ async def get_map_and_player(message: discord.Message) -> (
 async def get_reaction_trigger_data(payload: discord.RawReactionActionEvent) -> (
         Union[Tuple[discord.Role, discord.Member, str], None]
     ):
-    message_search_result = config.search_reaction_data_message(payload.message_id)
-    if message_search_result is not None:
-        emoji_search_result = config.search_reaction_data_message_emoji(message_search_result, payload.emoji.id or payload.emoji.name)
-        if emoji_search_result is not None:
-            emoji_keys = list(emoji_search_result.keys())
-            reaction_role: int = emoji_search_result[emoji_keys[0]]
-            reaction_message: str = emoji_search_result["message"]
+    trigger: Union[ReactionTrigger, None] = \
+        config.Bot.search_reaction_trigger(message_id=payload.message_id)
+    if trigger is not None:
+        emoji = payload.emoji.id or payload.emoji.name
+        if emoji in trigger.emojis:
+            reaction_role, reaction_message = trigger.get_data_by_emoji(emoji)
 
             guild = client.get_guild(payload.guild_id)
             role = guild.get_role(reaction_role)
@@ -111,13 +110,13 @@ async def add_reaction_message(
         reference_message = await message.channel.fetch_message(message.reference.message_id)
         await reference_message.add_reaction(reaction_emoji or unicode_emoji)
 
-    config.set_bot_reaction_data(
+    config.Bot.set_reaction_trigger(
         reaction_message_id=message.reference.message_id if append else reaction_message.id,
-        reaction_emoji_id=reaction_emoji.id if reaction_emoji else unicode_emoji,
+        reaction_emoji=reaction_emoji.id if reaction_emoji else unicode_emoji,
         reaction_role_id=reaction_role.id,
         message_on_reaction=message_on_reaction
     )
-    config.write_reaction_data_file()
+    config.Bot.write_reaction_triggers_file()
 
 @client.event
 async def on_ready():
