@@ -341,12 +341,12 @@ async def on_message(message: discord.Message):
         except mapparser.MapObjectNotFoundException:
             await message.channel.send("Такой игрок не найден.")
             return
-    
+
     elif message.content.lower().startswith(config.BotConfig.prefix + "удали"):
         if str(message.author.id) not in config.BotConfig.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
-        
+
         args = message.content.split()
         if len(args) >= 2:
             if args[1] == "уведомление":

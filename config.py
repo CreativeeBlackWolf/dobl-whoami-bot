@@ -88,7 +88,7 @@ class Config:
             :param reaction_message_id: discord message id
             :param reaction_emoji: Unicode or custom emoji
             :param reaction_role_id: discord role id
-            :param message_on_reaction: message on subscription and unsubscribtion 
+            :param message_on_reaction: message on subscription and unsubscribtion
             separated with `/`
             """
             search_trigger = self.search_reaction_trigger(reaction_message_id)
@@ -116,7 +116,7 @@ class Config:
             for trigger in self.__reaction_triggers:
                 if trigger.message_id == message_id:
                     return trigger
-            return None 
+            return None
 
         def remove_reaction_trigger(self, trigger: ReactionTrigger):
             """
@@ -124,7 +124,7 @@ class Config:
             :param trigger: ReactionTrigger
             :return: `True` if trigger was removed else `False`
             """
-            try:    
+            try:
                 self.__reaction_triggers.remove(trigger)
                 return True
             except ValueError:
