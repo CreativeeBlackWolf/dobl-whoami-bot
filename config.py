@@ -15,14 +15,16 @@ class Config:
             token=self.config.get('bot', 'token'),
             prefix=self.config.get('bot', 'prefix', fallback="."),
             admins=self.config.get('bot', 'admins', fallback=[]),
-            reaction_data_filename=self.config.get('bot', 'reaction_data', fallback="reaction_data.json")
+            reaction_data_filename=self.config.get(
+                'bot', 'reaction_data', fallback="reaction_triggers.json"
+            )
         )
 
         self.Map = self.Map(
             path=self.config.get('map', 'path')
         )
 
-    def set_bot_reaction_data(
+    def set_bot_reaction_trigger(
         self,
         reaction_emoji_id: int,
         reaction_role_id: int,
@@ -49,7 +51,7 @@ class Config:
             )
         self.config.set("bot", "reaction_data", str(self.Bot.reaction_data))
 
-    def search_reaction_data_message(self, message_id: int) -> Union[dict, None]:
+    def search_reaction_trigger(self, message_id: int) -> Union[ReactionTrigger, None]:
         """
         Search for reaction data for a given message
         :param message_id: discord message id
@@ -58,22 +60,6 @@ class Config:
         for val in self.Bot.reaction_data:
             if str(message_id) in val:
                 return val
-        return None
-
-    @staticmethod
-    def search_reaction_data_message_emoji(
-        message_dict: dict,
-        emoji_id: int) -> Union[dict, None]:
-        """
-        Search emoji_id in reaction_data message
-        :param message_dict: reaction_data message
-        :param emoji_id: emoji id
-        :return: emoji dict or `None` if not found
-        """
-        for _, val in message_dict.items():
-            for emoji_value in val:
-                if str(emoji_id) in emoji_value:
-                    return emoji_value
         return None
 
     def write_config(self):
@@ -110,3 +96,56 @@ class Config:
 
             if not self.path:
                 raise ValueError("Path must be specified in configuration file.")
+
+
+class ReactionTrigger:
+    def __init__(
+        self, 
+        message_id: int, 
+        emojis: list[str],
+        role_ids: list[int],
+        messages: list[str]):
+        self.__message_id = message_id
+        self.__emojis = emojis
+        self.__role_ids = role_ids
+        self.__messages = messages
+
+    @property
+    def message_id(self):
+        """
+        Message ID associated with this reaction trigger
+        """
+        return self.__message_id
+
+    @property
+    def emojis(self):
+        """
+        List of emojis and custom emoji ids.
+        """
+        return self.__emojis
+
+    def get_data_by_emoji(self, emoji: str) -> Union[tuple[int, str], None]:
+        """
+        Get role assignment data for a given emoji
+
+        :returns: role id and assign/deassign message
+        """
+        if emoji not in self.__emojis:
+            return None
+        index = self.__emojis.index(emoji)
+        return (self.__role_ids[index], self.__messages[index])
+
+    def dump_trigger_data(self) -> dict:
+        """
+        Dumps the trigger data to a dictionary like:
+        `{"message_id": [{"emoji_id_1": role_id, "message": "msg"}, ...]}`
+        """
+        dump = {str(self.__message_id): []}
+        for index, value in enumerate(self.__emojis):
+            dump[str(self.__message_id)].append(
+                {
+                    value: self.__role_ids[index],
+                    "message": self.__messages[index]
+                }
+            )
+        return dump

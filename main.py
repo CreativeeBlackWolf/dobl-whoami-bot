@@ -42,7 +42,7 @@ async def get_map_and_player(message: discord.Message) -> (
         await message.channel.send("Ты меня обмануть пытаешься?")
         return None
 
-async def get_reaction_role_data(payload: discord.RawReactionActionEvent) -> (
+async def get_reaction_trigger_data(payload: discord.RawReactionActionEvent) -> (
         Union[Tuple[discord.Role, discord.Member, str], None]
     ):
     message_search_result = config.search_reaction_data_message(payload.message_id)
@@ -132,7 +132,7 @@ async def on_ready():
 
 @client.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
-    search_result = await get_reaction_role_data(payload)
+    search_result = await get_reaction_trigger_data(payload)
     if search_result is None:
         return
     role, member, reaction_message = search_result
@@ -141,7 +141,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
 @client.event
 async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
-    search_result = await get_reaction_role_data(payload)
+    search_result = await get_reaction_trigger_data(payload)
     if search_result is None:
         return
     role, member, reaction_message = search_result
