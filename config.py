@@ -170,7 +170,7 @@ class ReactionTrigger:
         if emoji in self.__emojis:
             index = self.__emojis.index(emoji)
             self.__role_ids[index] = role_id
-            self._messages[index] = message
+            self.__messages[index] = message
         else:
             self.__emojis.append(emoji)
             self.__role_ids.append(role_id)
