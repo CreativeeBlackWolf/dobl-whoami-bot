@@ -3,7 +3,7 @@ import re
 import player as pl
 from main import config
 
-prefix = config.Bot.prefix
+prefix = config.BotConfig.prefix
 
 commands = {
     "кто я": f"Вывести своего персонажа // `{prefix}кто я`",
@@ -28,6 +28,7 @@ adminCommands = {
 <"сообщение о подписке/сообщение об отписке"> <"текст с новой строки">`',
     "сбрось": f"Сбросить колоду // `{prefix}сбрось колоду`",
     "покажи": f"Показать колоду // `{prefix}покажи колоду`",
+    "удали": f"Удалить триггер для сообщения // `{prefix}удали уведомление"
 }
 
 aliases = {

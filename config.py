@@ -11,7 +11,7 @@ class Config:
         self.config = configparser.ConfigParser()
         self.config.read(self.filename)
 
-        self.Bot = self.Bot(
+        self.BotConfig = self.Bot(
             token=self.config.get('bot', 'token'),
             prefix=self.config.get('bot', 'prefix', fallback="."),
             admins=self.config.get('bot', 'admins', fallback=[]),
@@ -20,11 +20,10 @@ class Config:
             )
         )
 
-        self.Map = self.Map(
+        self.MapConfig = self.Map(
             path=self.config.get('map', 'path')
         )
 
-    
     def write_config(self):
         with open(self.filename, "w") as f:
             self.config.write(f)
@@ -119,6 +118,18 @@ class Config:
                     return trigger
             return None 
 
+        def remove_reaction_trigger(self, trigger: ReactionTrigger):
+            """
+            Removes ReactionTrigger from list of triggers
+            :param trigger: ReactionTrigger
+            :return: `True` if trigger was removed else `False`
+            """
+            try:    
+                self.__reaction_triggers.remove(trigger)
+                return True
+            except ValueError:
+                return False
+
         def write_reaction_triggers_file(self):
             data_to_write = []
             for trigger in self.__reaction_triggers:
@@ -205,4 +216,4 @@ class ReactionTrigger:
 
 if __name__ == '__main__':
     config = Config("botconfig.cfg")
-    print(config.Bot.reaction_triggers)
+    print(config.BotConfig.reaction_triggers)
