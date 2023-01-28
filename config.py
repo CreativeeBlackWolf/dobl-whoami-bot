@@ -167,8 +167,8 @@ class ReactionTrigger:
         """
         Set or update the emoji, role and message
         """
-        if emoji in self.__emojis:
-            index = self.__emojis.index(emoji)
+        if str(emoji) in self.__emojis:
+            index = self.__emojis.index(str(emoji))
             self.__role_ids[index] = role_id
             self.__messages[index] = message
         else:
