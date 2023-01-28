@@ -75,7 +75,6 @@ async def add_reaction_message(
 
     await message.delete()
 
-
     args = message.content.split()
     if append and not message.reference:
         await message.channel.send("Ты должен ответить на сообщение, к которому хочешь привязать уведомления")
@@ -88,7 +87,7 @@ async def add_reaction_message(
 
     reaction_emoji = re.findall(r"<:\w*:(\d*)>", message.content)
     if not reaction_emoji:
-        unicode_emoji: list[str] = re.findall(r"[\U00010000-\U0010ffff]", message.content)
+        unicode_emoji: list[str] = re.findall(r"[\u263a-\U0001ffff]", message.content)
         if not unicode_emoji:
             await message.channel.send("Напиши эмоцию, на которую будут люди реагировать.")
             return False
