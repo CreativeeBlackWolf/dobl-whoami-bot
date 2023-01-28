@@ -216,10 +216,12 @@ async def on_message(message: discord.Message):
                     for user in message.guild.members:
                         if user.status == discord.Status.online and \
                         excludeRole not in user.roles:
-                            if not isinstance(player := gameMap.get_player(user.display_name, user.id),
-                                            mapparser.MapObjectError):
+                            try:
+                                player = gameMap.get_player(user.display_name, user.id)
                                 if (levelNeeded == 0) or (levelNeeded == player.level):
                                     candidates.append(player)
+                            except mapparser.MapObjectNotFoundException:
+                                continue    
                 except ValueError:
                     ...
                 if candidates:
