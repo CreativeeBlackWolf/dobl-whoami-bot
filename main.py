@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os
-import re
 import sys
 import random
 import platform
@@ -11,7 +10,8 @@ from dialog_manager import (send_abilities,
                             send_formatted_inventory,
                             get_player_info_string,
                             get_inventory_string,
-                            get_abilities_string)
+                            get_abilities_string,
+                            add_reaction_message)
 from buttons import WhoamiCommandView
 from config import Config, ReactionTrigger
 import mapparser
@@ -57,66 +57,6 @@ async def get_reaction_trigger_data(payload: discord.RawReactionActionEvent) -> 
             member = guild.get_member(payload.user_id)
             return (role, member, reaction_message)
     return None
-
-async def add_reaction_message(
-    message: Union[discord.Message, discord.MessageReference],
-    append: bool = False) -> bool:
-
-    await message.delete()
-
-
-    args = message.content.split()
-    if append and not message.reference:
-        await message.channel.send("Ты должен ответить на сообщение, к которому хочешь привязать уведомления")
-        return False
-
-    reaction_role = message.role_mentions[0] if message.role_mentions else None
-    if reaction_role is None:
-        await message.channel.send("Упомяни роль, которую хочешь присваивать.")
-        return False
-
-    reaction_emoji = re.findall(r"<:\w*:(\d*)>", message.content)
-    if not reaction_emoji:
-        unicode_emoji: list[str] = re.findall(r"[\U00010000-\U0010ffff]", message.content)
-        if not unicode_emoji:
-            await message.channel.send("Напиши эмоцию, на которую будут люди реагировать.")
-            return False
-        unicode_emoji = unicode_emoji[0]
-
-    if len(args) <= 4:
-        await message.channel.send("Напиши сообщение, которое нужно отправлять при подписке и отписке через `/`.")
-        return False
-
-    if not append and len(message.content.split("\n")) == 1:
-        await message.channel.send("Напиши, что ты хочешь увидеть в сообщении (с новой строки).")
-        return False
-
-    message_on_reaction = " ".join(message.content.split("\n")[0].split()[4::])
-
-    if len(message_on_reaction.split("/")) == 1:
-        await message.channel.send("Ты должен написать сообщение об отписке через `/`")
-        return False
-
-    if not append:
-        msg = "\n".join(message.content.split("\n")[1:])
-        reaction_message = await message.channel.send(msg)
-
-    if reaction_emoji:
-        reaction_emoji: discord.Emoji = await message.guild.fetch_emoji(int(reaction_emoji[0]))
-
-    if not append:
-        await reaction_message.add_reaction(reaction_emoji or unicode_emoji)
-    else:
-        reference_message = await message.channel.fetch_message(message.reference.message_id)
-        await reference_message.add_reaction(reaction_emoji or unicode_emoji)
-
-    config.Bot.set_reaction_trigger(
-        reaction_message_id=message.reference.message_id if append else reaction_message.id,
-        reaction_emoji=reaction_emoji.id if reaction_emoji else unicode_emoji,
-        reaction_role_id=reaction_role.id,
-        message_on_reaction=message_on_reaction
-    )
-    config.Bot.write_reaction_triggers_file()
 
 @client.event
 async def on_ready():
@@ -323,7 +263,7 @@ async def on_message(message: discord.Message):
                 card = blackjack.draw_card()
                 await message.channel.send(f"Ты вытянул {card}")
             elif args[1] == "уведомление":
-                await add_reaction_message(message, True)
+                await add_reaction_message(message, config, True)
             else:
                 await message.channel.send("Выбрать что?")
         else:
@@ -372,7 +312,7 @@ async def on_message(message: discord.Message):
 
                 await message.channel.send(f"Группа <@&{appendRole.id}> сформирована.")
             elif args[1] == "уведомление":
-                await add_reaction_message(message, False)
+                await add_reaction_message(message, config, False)
             else:
                 await message.channel.send("Создать что?")
         else:
