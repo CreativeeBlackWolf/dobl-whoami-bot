@@ -386,7 +386,7 @@ class Map:
                 elif level >= 2 and tile == TileIDs.MERCHANT:
                     character += Fore.YELLOW + "Т" + Style.RESET_ALL
                     representation += character
-                    legend[Fore.YELLOW + "Т" + Style.RESET_ALL] = "Торговец/Казино"
+                    legend[Fore.YELLOW + "Т" + Style.RESET_ALL] = "Торговец"
                 elif level >= 2 and tile == TileIDs.EMPTY:
                     character += "П" + Style.RESET_ALL
                     representation += character

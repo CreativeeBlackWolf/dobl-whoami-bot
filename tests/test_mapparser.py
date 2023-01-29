@@ -187,7 +187,7 @@ S: something
 
 П{Style.RESET_ALL}: Пусто
 {Fore.RED}Н{Style.RESET_ALL}: НПЦ
-{Fore.YELLOW}Т{Style.RESET_ALL}: Торговец/Казино
+{Fore.YELLOW}Т{Style.RESET_ALL}: Торговец
 {Fore.GREEN}С{Style.RESET_ALL}: Событие
 {Back.WHITE} {Style.RESET_ALL}: test_player12\
 """
