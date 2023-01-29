@@ -10,9 +10,10 @@ from dialog_manager import (send_abilities,
                             send_formatted_inventory,
                             get_player_info_string,
                             get_inventory_string,
-                            get_abilities_string)
+                            get_abilities_string,
+                            add_reaction_message)
 from buttons import WhoamiCommandView
-from config import Config
+from config import Config, ReactionTrigger
 import mapparser
 import command_help
 from player import Player
@@ -30,7 +31,7 @@ async def get_map_and_player(message: discord.Message) -> (
         Union[Tuple[mapparser.Map, Player], None]
     ):
     try:
-        gameMap = mapparser.Map(config.Map.path)
+        gameMap = mapparser.Map(config.MapConfig.path)
         player = gameMap.get_player(message.author.display_name, message.author.id)
 
         return (gameMap, player)
@@ -40,6 +41,22 @@ async def get_map_and_player(message: discord.Message) -> (
     except mapparser.MapObjectWrongIDException:
         await message.channel.send("Ты меня обмануть пытаешься?")
         return None
+
+async def get_reaction_trigger_data(payload: discord.RawReactionActionEvent) -> (
+        Union[Tuple[discord.Role, discord.Member, str], None]
+    ):
+    trigger: Union[ReactionTrigger, None] = \
+        config.BotConfig.search_reaction_trigger(message_id=payload.message_id)
+    if trigger is not None:
+        emoji = payload.emoji.id or payload.emoji.name
+        if emoji in trigger.emojis:
+            reaction_role, reaction_message = trigger.get_data_by_emoji(emoji)
+
+            guild = client.get_guild(payload.guild_id)
+            role = guild.get_role(reaction_role)
+            member = guild.get_member(payload.user_id)
+            return (role, member, reaction_message)
+    return None
 
 @client.event
 async def on_ready():
@@ -53,14 +70,32 @@ async def on_ready():
 
 
 @client.event
+async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+    search_result = await get_reaction_trigger_data(payload)
+    if search_result is None:
+        return
+    role, member, reaction_message = search_result
+    await member.add_roles(role)
+    await member.send(reaction_message.split("/")[0])
+
+@client.event
+async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
+    search_result = await get_reaction_trigger_data(payload)
+    if search_result is None:
+        return
+    role, member, reaction_message = search_result
+    await member.remove_roles(role)
+    await member.send(reaction_message.split("/")[1])
+
+@client.event
 async def on_message(message: discord.Message):
     if message.author == client.user:
         return
 
     #region [user commands]
 
-    if message.content.lower().startswith(config.Bot.prefix + "помоги"):
-        gameMap = mapparser.Map(config.Map.path)
+    if message.content.lower().startswith(config.BotConfig.prefix + "помоги"):
+        gameMap = mapparser.Map(config.MapConfig.path)
         player = gameMap.get_player(message.author.display_name, message.author.id)
 
         splittedMessage = message.content.split()
@@ -70,33 +105,33 @@ async def on_message(message: discord.Message):
             if splittedMessage[1] == "мне":
                 await message.channel.send("Сам справишься.")
             elif splittedMessage[1] == "админу":
-                if str(message.author.id) in config.Bot.admins:
+                if str(message.author.id) in config.BotConfig.admins:
                     await message.channel.send(command_help.get_admin_command())
                 else:
                     await message.channel.send("Ты кто вообще такой?")
             else:
                 await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::]), player))
 
-    elif message.content.lower().startswith((config.Bot.prefix + 'кто я', config.Bot.prefix + 'я кто')):
+    elif message.content.lower().startswith((config.BotConfig.prefix + 'кто я', config.BotConfig.prefix + 'я кто')):
         data = await get_map_and_player(message)
         if data is not None:
             gameMap, player = data
             view = WhoamiCommandView(gameMap, player, message.author)
             view.message = await message.reply(get_player_info_string(gameMap, player), view=view)
 
-    elif message.content.lower().startswith(config.Bot.prefix + 'покажи'):
+    elif message.content.lower().startswith(config.BotConfig.prefix + 'покажи'):
         data = await get_map_and_player(message)
         if data is not None:
             _, player = data
             args = message.content.lower().split()
             if len(args) == 2:
-                if args[1] in ["скиллы", "способности", "особенности", 
+                if args[1] in ["скиллы", "способности", "особенности",
                                "навыки", "спеллы", "абилки"]:
                     await send_abilities(message, player)
                 elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:
                     await send_player_inventory(message, player)
                 elif args[1] in ["колоду"]:
-                    if str(message.author.id) not in config.Bot.admins:
+                    if str(message.author.id) not in config.BotConfig.admins:
                         await message.channel.send("Размечтался.")
                         return
                     await message.author.send(
@@ -111,7 +146,7 @@ async def on_message(message: discord.Message):
                     f'Неправильное использование команды:\n{command_help.get_commands("покажи")}'
                 )
 
-    elif message.content.lower().startswith(config.Bot.prefix + 'где я'):
+    elif message.content.lower().startswith(config.BotConfig.prefix + 'где я'):
         data = await get_map_and_player(message)
         if data is not None:
             gameMap, player = data
@@ -127,7 +162,7 @@ async def on_message(message: discord.Message):
 ```"""
             await message.reply(resp)
 
-    elif message.content.lower().startswith(config.Bot.prefix + "группа"):
+    elif message.content.lower().startswith(config.BotConfig.prefix + "группа"):
         ingame: bool = False
         groupRole: discord.Role = None
         for role in message.author.roles:
@@ -141,7 +176,7 @@ async def on_message(message: discord.Message):
             await message.channel.send("Ты не в игре.")
             return
 
-        gameMap = mapparser.Map(config.Map.path)
+        gameMap = mapparser.Map(config.MapConfig.path)
         groupMembers = list(groupRole.members) if groupRole is not None else [message.author]
         msg = "```ansi\n"
 
@@ -159,14 +194,14 @@ async def on_message(message: discord.Message):
 
     #region [admin commands]
 
-    elif message.content.lower().startswith(config.Bot.prefix + 'инвентарь'):
-        if str(message.author.id) not in config.Bot.admins:
+    elif message.content.lower().startswith(config.BotConfig.prefix + 'инвентарь'):
+        if str(message.author.id) not in config.BotConfig.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
 
         if len(message.content.split("\n")) < 2:
             if len(message.content.split()) >= 2:
-                gameMap = mapparser.Map(config.Map.path)
+                gameMap = mapparser.Map(config.MapConfig.path)
                 try:
                     inv = gameMap.get_objects_inventory(" ".join(message.content.split()[1::]))
 
@@ -182,8 +217,8 @@ async def on_message(message: discord.Message):
 
         await send_formatted_inventory(message, message.content.split("\n")[1::])
 
-    elif message.content.lower().startswith(config.Bot.prefix + "перезапусти"):
-        if str(message.author.id) not in config.Bot.admins:
+    elif message.content.lower().startswith(config.BotConfig.prefix + "перезапусти"):
+        if str(message.author.id) not in config.BotConfig.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
 
@@ -197,14 +232,14 @@ async def on_message(message: discord.Message):
         elif platform.system() == "Windows":
             os.execv(sys.executable, ["python"] + sys.argv)
 
-    elif message.content.lower().startswith(config.Bot.prefix + "выбери"):
-        if str(message.author.id) not in config.Bot.admins:
+    elif message.content.lower().startswith(config.BotConfig.prefix + "выбери"):
+        if str(message.author.id) not in config.BotConfig.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
 
         args = message.content.split()
         if len(args) >= 2:
-            gameMap = mapparser.Map(config.Map.path)
+            gameMap = mapparser.Map(config.MapConfig.path)
             if args[1] == "игрока":
                 await message.delete()
 
@@ -231,13 +266,15 @@ async def on_message(message: discord.Message):
             elif args[1] == "карту":
                 card = blackjack.draw_card()
                 await message.channel.send(f"Ты вытянул {card}")
+            elif args[1] == "уведомление":
+                await add_reaction_message(message, config, True)
             else:
                 await message.channel.send("Выбрать что?")
         else:
             await message.channel.send("Выбрать что?")
 
-    elif message.content.lower().startswith(config.Bot.prefix + "сбрось"):
-        if str(message.author.id) not in config.Bot.admins:
+    elif message.content.lower().startswith(config.BotConfig.prefix + "сбрось"):
+        if str(message.author.id) not in config.BotConfig.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
 
@@ -251,8 +288,8 @@ async def on_message(message: discord.Message):
         else:
             await message.channel.send("Сбросить что?")
 
-    elif message.content.lower().startswith(config.Bot.prefix + "создай"):
-        if str(message.author.id) not in config.Bot.admins:
+    elif message.content.lower().startswith(config.BotConfig.prefix + "создай"):
+        if str(message.author.id) not in config.BotConfig.admins:
             await message.channel.send("Ты как сюда попал, шизанутый?")
             return
 
@@ -278,15 +315,17 @@ async def on_message(message: discord.Message):
                     await user.add_roles(appendRole, inGameRole)
 
                 await message.channel.send(f"Группа <@&{appendRole.id}> сформирована.")
+            elif args[1] == "уведомление":
+                await add_reaction_message(message, config, False)
             else:
                 await message.channel.send("Создать что?")
         else:
             await message.channel.send("Создать что?")
 
-    elif message.content.lower().startswith(config.Bot.prefix + "кто"):
-        if str(message.author.id) not in config.Bot.admins:
+    elif message.content.lower().startswith(config.BotConfig.prefix + "кто"):
+        if str(message.author.id) not in config.BotConfig.admins:
             await message.channel.send(
-                f"Ты можешь осматривать только себя (`{config.Bot.prefix}кто я`)."
+                f"Ты можешь осматривать только себя (`{config.BotConfig.prefix}кто я`)."
             )
             return
 
@@ -296,7 +335,7 @@ async def on_message(message: discord.Message):
                 "Необходимо упомянуть игрока, которого ты хочешь осмотреть."
             )
             return
-        gameMap = mapparser.Map(config.Map.path)
+        gameMap = mapparser.Map(config.MapConfig.path)
         user = mentions[0]
         try:
             player = gameMap.get_player(user.display_name, user.id)
@@ -307,11 +346,38 @@ async def on_message(message: discord.Message):
             await message.channel.send("Такой игрок не найден.")
             return
 
+    elif message.content.lower().startswith(config.BotConfig.prefix + "удали"):
+        if str(message.author.id) not in config.BotConfig.admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+
+        args = message.content.split()
+        if len(args) >= 2:
+            if args[1] == "уведомление":
+                await message.delete()
+                if not message.reference:
+                    await message.channel.send("Ты должен ответить на сообщение, к которому привязаны уведомления.")
+                    return
+
+                trigger: ReactionTrigger = config.BotConfig.search_reaction_trigger(message_id=message.reference.message_id)
+                if trigger is None:
+                    await message.channel.send("К этому сообщению не привязаны уведомления.")
+                    return
+
+                config.BotConfig.remove_reaction_trigger(trigger=trigger)
+                config.BotConfig.write_reaction_triggers_file()
+                msg = await message.channel.fetch_message(message.reference.message_id)
+                await msg.clear_reactions()
+            else:
+                await message.channel.send("Удалить что?")
+        else:
+            await message.channel.send("Удалить что?")
+
     #endregion
 
     #region [item-related commands]
 
-    elif message.content.lower().startswith(config.Bot.prefix + 'карта'):
+    elif message.content.lower().startswith(config.BotConfig.prefix + 'карта'):
         data = await get_map_and_player(message)
         if data is not None:
             gameMap, player = data
@@ -327,4 +393,4 @@ async def on_message(message: discord.Message):
     #endregion
 
 if __name__ == '__main__':
-    client.run(config.Bot.token)
+    client.run(config.BotConfig.token)
