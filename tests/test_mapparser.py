@@ -59,21 +59,21 @@ class TestMapParser(unittest.TestCase):
         testPlayer = self.map.get_player("test_player1", 1)
         objectsGot = self.map.get_same_room_objects(testPlayer)
         objectsActual = [
-            ('???', 3, 5, 'НПЦ', 1, 1),
-            ('item_pile', 1, 6, 'Предмет(-ы)', 1, 1),
-            ('something', 6, 4, '', 1, 1),
-            ('test_player1', 1, 2, 'Игрок', 1, 1),
-            ('test_player2', 4, 2, 'Игрок', 1, 1),
-            ('test_player3', 5, 7, 'Труп', 1, 1)
+            ('???', 3, 5, 'НПЦ', 1, 1, 1),
+            ('item_pile', 1, 6, 'Предмет(-ы)', 1, 1, 0),
+            ('something', 6, 4, '', 1, 1, 1),
+            ('test_player1', 1, 2, 'Игрок', 1, 1, 1),
+            ('test_player2', 4, 2, 'Игрок', 1, 1, 1),
+            ('test_player3', 5, 7, 'Труп', 1, 1, 0)
         ]
         self.assertEqual(objectsGot, objectsActual)
         testPlayer = self.map.get_player("test_player2", 2)
         objectsGot = self.map.get_same_room_objects(testPlayer)
         objectsActual = [
-            ('something', 6, 4, '', 1, 1),
-            ('test_player1', 1, 2, 'Игрок', 1, 1),
-            ('test_player2', 4, 2, 'Игрок', 1, 1),
-            ('test_player3', 5, 7, 'Труп', 1, 1)
+            ('something', 6, 4, '', 1, 1, 1),
+            ('test_player1', 1, 2, 'Игрок', 1, 1, 1),
+            ('test_player2', 4, 2, 'Игрок', 1, 1, 1),
+            ('test_player3', 5, 7, 'Труп', 1, 1, 0)
         ]
         self.assertEqual(objectsGot, objectsActual)
 
@@ -102,14 +102,14 @@ S: something
         asciiActual = f"""\
 ........
 ........
-..{Back.WHITE}{Fore.BLACK}D{Style.RESET_ALL}.....
+..{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}.....
 ........
 ........
 ........
 ........
 ........
 
-{Back.WHITE}{Fore.BLACK}D{Style.RESET_ALL}: dead_body, test_player5"""
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: dead_body, test_player5"""
         self.assertEqual(asciiGot, asciiActual)
         testPlayer = self.map.get_player("test_player8", 8)
         asciiGot = self.map.construct_ascii_room(testPlayer)
@@ -117,14 +117,14 @@ S: something
 ........
 ........
 ........
-...{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}....
+...{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}....
 ........
 ........
-......{Fore.WHITE}T{Style.RESET_ALL}.
+......{Fore.WHITE}t{Style.RESET_ALL}.
 ...{Fore.YELLOW}Л{Style.RESET_ALL}....
 
-{Fore.WHITE}T{Style.RESET_ALL}: test_player12
-{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}: test_player8
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player8
+{Fore.WHITE}t{Style.RESET_ALL}: test_player12
 {Fore.YELLOW}Л{Style.RESET_ALL}: Лестница вниз"""
         self.assertEqual(asciiGot, asciiActual)
 
