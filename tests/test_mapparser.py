@@ -90,11 +90,11 @@ class TestMapParser(unittest.TestCase):
 .{Fore.BLUE}I{Style.RESET_ALL}......
 .....{Fore.BLACK}!{Style.RESET_ALL}..
 
-{Fore.RED}?{Style.RESET_ALL}: ???
-{Fore.BLUE}I{Style.RESET_ALL}: item_pile
-S: something
 {Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player1
 {Fore.WHITE}t{Style.RESET_ALL}: test_player2
+S: something
+{Fore.RED}?{Style.RESET_ALL}: ???
+{Fore.BLUE}I{Style.RESET_ALL}: item_pile
 {Fore.BLACK}!{Style.RESET_ALL}: test_player3"""
         self.assertEqual(asciiGot, asciiActual)
         testPlayer = self.map.get_player("test_player5", 5)
