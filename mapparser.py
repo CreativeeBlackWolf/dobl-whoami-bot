@@ -237,8 +237,12 @@ class Map:
                 firstCharObj = tileContents[y][x][0]
                 for obj in tileContents[y][x]:
                     if obj[0] == player.name:
+                        # prioritize the player
                         firstCharObj = obj
                         break
+                    if obj[6] > firstCharObj[6]:
+                        # prioritize objects on higher layers
+                        firstCharObj = obj
                 firstChar = firstCharObj[0][0].upper()
                 if self.__loose_char_in(firstChar, usedChars):
                     firstChar = firstChar.lower()
