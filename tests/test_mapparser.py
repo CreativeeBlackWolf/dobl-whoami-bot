@@ -59,21 +59,21 @@ class TestMapParser(unittest.TestCase):
         testPlayer = self.map.get_player("test_player1", 1)
         objectsGot = self.map.get_same_room_objects(testPlayer)
         objectsActual = [
-            ('???', 3, 5, 'НПЦ'),
-            ('item_pile', 1, 6, 'Предмет(-ы)'),
-            ('something', 6, 4, ''),
-            ('test_player1', 1, 2, 'Игрок'),
-            ('test_player2', 4, 2, 'Игрок'),
-            ('test_player3', 5, 7, 'Труп')
+            ('???', 3, 5, 'НПЦ', 1, 1),
+            ('item_pile', 1, 6, 'Предмет(-ы)', 1, 1),
+            ('something', 6, 4, '', 1, 1),
+            ('test_player1', 1, 2, 'Игрок', 1, 1),
+            ('test_player2', 4, 2, 'Игрок', 1, 1),
+            ('test_player3', 5, 7, 'Труп', 1, 1)
         ]
         self.assertEqual(objectsGot, objectsActual)
         testPlayer = self.map.get_player("test_player2", 2)
         objectsGot = self.map.get_same_room_objects(testPlayer)
         objectsActual = [
-            ('something', 6, 4, ''),
-            ('test_player1', 1, 2, 'Игрок'),
-            ('test_player2', 4, 2, 'Игрок'),
-            ('test_player3', 5, 7, 'Труп')
+            ('something', 6, 4, '', 1, 1),
+            ('test_player1', 1, 2, 'Игрок', 1, 1),
+            ('test_player2', 4, 2, 'Игрок', 1, 1),
+            ('test_player3', 5, 7, 'Труп', 1, 1)
         ]
         self.assertEqual(objectsGot, objectsActual)
 
