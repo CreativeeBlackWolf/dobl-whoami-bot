@@ -66,7 +66,8 @@ class TestMapParser(unittest.TestCase):
             ('something', 6, 4, '', 1, 1, 1),
             ('test_player1', 1, 2, 'Игрок', 1, 1, 1),
             ('test_player2', 4, 2, 'Игрок', 1, 1, 1),
-            ('test_player3', 5, 7, 'Труп', 1, 1, 0)
+            ('test_player3', 5, 7, 'Труп', 1, 1, 0),
+            ('Турель', 2, 1, 'Структура', 2, 2, 1)
         ]
         self.assertEqual(objectsGot, objectsActual)
         testPlayer = self.map.get_player("test_player2", 2)
@@ -75,7 +76,8 @@ class TestMapParser(unittest.TestCase):
             ('something', 6, 4, '', 1, 1, 1),
             ('test_player1', 1, 2, 'Игрок', 1, 1, 1),
             ('test_player2', 4, 2, 'Игрок', 1, 1, 1),
-            ('test_player3', 5, 7, 'Труп', 1, 1, 0)
+            ('test_player3', 5, 7, 'Труп', 1, 1, 0),
+            ('Турель', 2, 1, 'Структура', 2, 2, 1)
         ]
         self.assertEqual(objectsGot, objectsActual)
 
