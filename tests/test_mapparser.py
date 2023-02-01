@@ -12,6 +12,8 @@ import unittest
 import player
 
 class TestMapParser(unittest.TestCase):
+    maxDiff = None
+
     map = mapparser.Map(os.path.join(current, "test.tmx"))
 
     def test_get_objects_inventory(self):
@@ -82,20 +84,21 @@ class TestMapParser(unittest.TestCase):
         asciiGot = self.map.construct_ascii_room(testPlayer)
         asciiActual = f"""\
 ........
-........
-.{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}..{Fore.WHITE}t{Style.RESET_ALL}...
+..{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}....
+.{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.WHITE}!{Style.RESET_ALL}...
 ........
 ......S.
 ...{Fore.RED}?{Style.RESET_ALL}....
 .{Fore.BLUE}I{Style.RESET_ALL}......
-.....{Fore.BLACK}!{Style.RESET_ALL}..
+.....{Fore.BLACK}\"{Style.RESET_ALL}..
 
-{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player1
-{Fore.WHITE}t{Style.RESET_ALL}: test_player2
+{Fore.YELLOW}Т{Style.RESET_ALL}: Турель
+{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}: test_player1
+{Fore.WHITE}!{Style.RESET_ALL}: test_player2
 S: something
 {Fore.RED}?{Style.RESET_ALL}: ???
 {Fore.BLUE}I{Style.RESET_ALL}: item_pile
-{Fore.BLACK}!{Style.RESET_ALL}: test_player3"""
+{Fore.BLACK}\"{Style.RESET_ALL}: test_player3"""
         self.assertEqual(asciiGot, asciiActual)
         testPlayer = self.map.get_player("test_player5", 5)
         asciiGot = self.map.construct_ascii_room(testPlayer)
@@ -138,9 +141,10 @@ S: something
 ????????
 ????????
 ????????
-..??????
-{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}.??????
+.{Fore.RED}Г{Style.RESET_ALL}??????
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}{Fore.RED}Г{Style.RESET_ALL}??????
 
+{Fore.RED}Г{Style.RESET_ALL}: Гигант
 {Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player13\
 """
         self.assertEqual(asciiGot, asciiActual)
