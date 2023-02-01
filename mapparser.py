@@ -198,7 +198,9 @@ class Map:
                             objX, objY = objX % 32 // 4, objY % 32 // 4
                             width = int(obj.attrib.get("width", 0)) // 4
                             height = int(obj.attrib.get("height", 0)) // 4
-                            objects.append((obj.attrib.get("name", "???"), objX, objY, obj.attrib.get("class", ""), width, height))
+                            layer = objectgroup.attrib["name"]
+                            layer = 0 if layer == "нижний" else 1 if layer == "средний" else 2
+                            objects.append((obj.attrib.get("name", "???"), objX, objY, obj.attrib.get("class", ""), width, height, layer))
 
         return sorted(objects, key=lambda x: x[0]+str(x[1])+str(x[2]))
 
