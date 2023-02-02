@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import os
 import sys
+import shlex
 import random
 import platform
 from typing import Tuple, Union
 import discord
+from discord.ui import Button
 from dialog_manager import (send_abilities,
                             send_player_inventory,
                             send_formatted_inventory,
@@ -12,7 +14,7 @@ from dialog_manager import (send_abilities,
                             get_inventory_string,
                             get_abilities_string,
                             add_reaction_message)
-from buttons import WhoamiCommandView
+from buttons import WhoamiCommandView, VoteCommandView
 from config import Config, ReactionTrigger
 import mapparser
 import command_help
@@ -372,6 +374,62 @@ async def on_message(message: discord.Message):
                 await message.channel.send("Удалить что?")
         else:
             await message.channel.send("Удалить что?")
+
+    elif message.content.lower().startswith(config.BotConfig.prefix + "спроси"):
+        if str(message.author.id) not in config.BotConfig.admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+
+        args = message.content.split()
+
+        if len(args) >= 2:
+            if args[1] == "всех":
+                await message.delete()
+                command_line = message.content.split("\n")[0]
+                command_args = shlex.split(command_line)
+                timeout = 300
+                anonymous = False
+                can_revote = False
+                force_stop = False
+
+                if any(i for i in command_args if i == "-время"):
+                    try:
+                        timeout = int(command_args[command_args.index("-время")+1])
+                    except Exception:
+                        await message.channel.send("Опция `-время` введена неверно.")
+                if any(i for i in command_args if i == "-анон"):
+                    anonymous = True
+                if any(i for i in command_args if i == "-переголосование"):
+                    can_revote = True
+                if any(i for i in command_args if i == "-админ"):
+                    force_stop = True
+                
+                if not '"' in message.content.split("\n")[0]:
+                    await message.channel.send("Ты должен ввести название голосования.")
+                    return
+
+                title = message.content.split('"')[1]
+
+                view = VoteCommandView(
+                    title=title,
+                    timeout=timeout,
+                    can_revote=can_revote,
+                    anonymous=anonymous,
+                    force_stop=force_stop,
+                    admin_id=message.author.id
+                )
+
+                if len(message.content.split("\n")[1::]) > 1:
+                    for label in message.content.split("\n")[1::]:
+                        view.add_item(Button(label=label, style=discord.ButtonStyle.green))
+                else:
+                    view.add_item(Button(label="За", style=discord.ButtonStyle.green))
+                    view.add_item(Button(label="Против", style=discord.ButtonStyle.red))
+
+                view.message = await message.channel.send(content=view.get_voting_message_str(), view=view)
+                await view.message.pin()
+        else:
+            await message.channel.send("Спросить кого?")
 
     #endregion
 
