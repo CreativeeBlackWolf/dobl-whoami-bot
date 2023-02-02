@@ -262,7 +262,7 @@ async def on_message(message: discord.Message):
                                 if (levelNeeded == 0) or (levelNeeded == player.level):
                                     candidates.append(player)
                             except mapparser.MapObjectNotFoundException:
-                                continue    
+                                continue
                 except ValueError:
                     ...
                 if candidates:
@@ -442,8 +442,8 @@ async def on_message(message: discord.Message):
                     view.add_item(Button(label="За", style=discord.ButtonStyle.primary))
                     view.add_item(
                         Button(
-                            label="Против", 
-                            style=discord.ButtonStyle.red if force_stop_by_variant else discord.ButtonStyle.primary), 
+                            label="Против",
+                            style=discord.ButtonStyle.red if force_stop_by_variant else discord.ButtonStyle.primary),
                         force_stop_by_variant)
 
                 view.message = await message.channel.send(content=view.get_voting_message_str(), view=view)

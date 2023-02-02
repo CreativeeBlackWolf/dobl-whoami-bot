@@ -1,7 +1,6 @@
 from typing import Union
 from discord.ui import Button, View, button
 from discord import ButtonStyle
-import colorama
 import discord
 import random
 
@@ -20,13 +19,13 @@ class WhoamiCommandView(View):
 
     def change_active_button_color(self, button: Button):
         for child_button in self.children:
-            if child_button.custom_id != "close":    
+            if child_button.custom_id != "close":
                 child_button.style = ButtonStyle.green if child_button != button \
                                 else ButtonStyle.blurple
 
-    @button(label="Персонаж", 
-            custom_id="player", 
-            style=ButtonStyle.blurple, 
+    @button(label="Персонаж",
+            custom_id="player",
+            style=ButtonStyle.blurple,
             emoji=random.choice(["🤔", "😐", "🤡"]))
     async def player_button_callback(self, interaction: discord.Interaction, button: Button):
         self.change_active_button_color(button)
@@ -85,7 +84,7 @@ class VoteCommandView(View):
         admin_id: int = None,
         anonymous: bool = False,
         force_stop: bool = False,
-        voting_users: list[discord.Member] = [],):
+        voting_users: list[discord.Member] = []):
         super().__init__(timeout=timeout)
         self.message: discord.Message = None
         self.__title = title
@@ -105,7 +104,7 @@ class VoteCommandView(View):
         {
             "variant": {
                 "votes": int,
-                "voted": list[str], # voted users 
+                "voted": list[str], # voted users
             }
         }
         ```
@@ -138,7 +137,7 @@ class VoteCommandView(View):
 
     def __find_user(self, username: str) -> Union[dict, None]:
         """
-        Finds the user that voted 
+        Finds the user that voted
         :param username: `discord.User.display_username` str
         :return: variant data
         """
