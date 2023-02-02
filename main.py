@@ -22,7 +22,10 @@ from player import Player
 import casino
 
 
-config = Config("botconfig.cfg" if os.path.exists("botconfig.cfg") else "config_example.cfg")
+scriptDir = os.path.dirname(os.path.realpath(__file__))
+configPath = os.path.join(scriptDir, "botconfig.cfg")
+fallbackConfigPath = os.path.join(scriptDir, "config_example.cfg")
+config = Config(configPath if os.path.exists(configPath) else fallbackConfigPath)
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
