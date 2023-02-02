@@ -10,8 +10,11 @@ sys.path.append(parent)
 import mapparser
 import unittest
 import player
+import roomobject
 
 class TestMapParser(unittest.TestCase):
+    maxDiff = None
+
     map = mapparser.Map(os.path.join(current, "test.tmx"))
 
     def test_get_objects_inventory(self):
@@ -59,21 +62,24 @@ class TestMapParser(unittest.TestCase):
         testPlayer = self.map.get_player("test_player1", 1)
         objectsGot = self.map.get_same_room_objects(testPlayer)
         objectsActual = [
-            ('???', 3, 5, 'НПЦ'),
-            ('item_pile', 1, 6, 'Предмет(-ы)'),
-            ('something', 6, 4, ''),
-            ('test_player1', 1, 2, 'Игрок'),
-            ('test_player2', 4, 2, 'Игрок'),
-            ('test_player3', 5, 7, 'Труп')
+            roomobject.RoomObject('???', (3, 5), (1, 1), 'НПЦ', 1),
+            roomobject.RoomObject('item_pile', (1, 6), (1, 1), 'Предмет(-ы)', 0),
+            roomobject.RoomObject('something', (6, 4), (1, 1), '', 1),
+            roomobject.RoomObject('test_player1', (1, 2), (1, 1), 'Игрок', 1),
+            roomobject.RoomObject('test_player2', (4, 2), (1, 1), 'Игрок', 1),
+            roomobject.RoomObject('test_player3', (5, 7), (1, 1), 'Труп', 0),
+            roomobject.RoomObject('Турель', (2, 1), (2, 2), 'Структура', 1)
         ]
         self.assertEqual(objectsGot, objectsActual)
+
         testPlayer = self.map.get_player("test_player2", 2)
         objectsGot = self.map.get_same_room_objects(testPlayer)
         objectsActual = [
-            ('something', 6, 4, ''),
-            ('test_player1', 1, 2, 'Игрок'),
-            ('test_player2', 4, 2, 'Игрок'),
-            ('test_player3', 5, 7, 'Труп')
+            roomobject.RoomObject('something', (6, 4), (1, 1),  '', 1),
+            roomobject.RoomObject('test_player1', (1, 2), (1, 1),  'Игрок', 1),
+            roomobject.RoomObject('test_player2', (4, 2), (1, 1),  'Игрок', 1),
+            roomobject.RoomObject('test_player3', (5, 7), (1, 1),  'Труп', 0),
+            roomobject.RoomObject('Турель', (2, 1), (2, 2), 'Структура', 1)
         ]
         self.assertEqual(objectsGot, objectsActual)
 
@@ -82,34 +88,35 @@ class TestMapParser(unittest.TestCase):
         asciiGot = self.map.construct_ascii_room(testPlayer)
         asciiActual = f"""\
 ........
-........
-.{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}..{Fore.WHITE}t{Style.RESET_ALL}...
+..{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}....
+.{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.WHITE}!{Style.RESET_ALL}...
 ........
 ......S.
 ...{Fore.RED}?{Style.RESET_ALL}....
 .{Fore.BLUE}I{Style.RESET_ALL}......
-.....{Fore.BLACK}!{Style.RESET_ALL}..
+.....{Fore.BLACK}\"{Style.RESET_ALL}..
 
+{Fore.YELLOW}Т{Style.RESET_ALL}: Турель
+{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}: test_player1
+{Fore.WHITE}!{Style.RESET_ALL}: test_player2
+S: something
 {Fore.RED}?{Style.RESET_ALL}: ???
 {Fore.BLUE}I{Style.RESET_ALL}: item_pile
-S: something
-{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player1
-{Fore.WHITE}t{Style.RESET_ALL}: test_player2
-{Fore.BLACK}!{Style.RESET_ALL}: test_player3"""
+{Fore.BLACK}\"{Style.RESET_ALL}: test_player3"""
         self.assertEqual(asciiGot, asciiActual)
         testPlayer = self.map.get_player("test_player5", 5)
         asciiGot = self.map.construct_ascii_room(testPlayer)
         asciiActual = f"""\
 ........
 ........
-..{Back.WHITE}{Fore.BLACK}D{Style.RESET_ALL}.....
+..{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}.....
 ........
 ........
 ........
 ........
 ........
 
-{Back.WHITE}{Fore.BLACK}D{Style.RESET_ALL}: dead_body, test_player5"""
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: dead_body, test_player5"""
         self.assertEqual(asciiGot, asciiActual)
         testPlayer = self.map.get_player("test_player8", 8)
         asciiGot = self.map.construct_ascii_room(testPlayer)
@@ -117,14 +124,14 @@ S: something
 ........
 ........
 ........
-...{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}....
+...{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}....
 ........
 ........
-......{Fore.WHITE}T{Style.RESET_ALL}.
+......{Fore.WHITE}t{Style.RESET_ALL}.
 ...{Fore.YELLOW}Л{Style.RESET_ALL}....
 
-{Fore.WHITE}T{Style.RESET_ALL}: test_player12
-{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}: test_player8
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player8
+{Fore.WHITE}t{Style.RESET_ALL}: test_player12
 {Fore.YELLOW}Л{Style.RESET_ALL}: Лестница вниз"""
         self.assertEqual(asciiGot, asciiActual)
 
@@ -138,9 +145,10 @@ S: something
 ????????
 ????????
 ????????
-..??????
-{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}.??????
+.{Fore.RED}Г{Style.RESET_ALL}??????
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}{Fore.RED}Г{Style.RESET_ALL}??????
 
+{Fore.RED}Г{Style.RESET_ALL}: Гигант
 {Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player13\
 """
         self.assertEqual(asciiGot, asciiActual)

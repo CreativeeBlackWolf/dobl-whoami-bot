@@ -8,6 +8,7 @@ import datetime
 from colorama import Fore, Back, Style
 import player
 import floor
+import roomobject
 
 
 class MapObjectException(Exception): pass
@@ -56,7 +57,13 @@ class Map:
     def __loose_char_equals(self, char1: str, char2: str) -> bool:
         """
         Compare two characters across Cyrillic and Latin alphabets.
+        Can also seek for a character in a container, useful for removing ANSI escape sequences.
         """
+        assert(len(char1) == 1 or len(char2) == 1)
+        if len(char1) > 1:
+            return self.__loose_char_in(char2, char1)
+        if len(char2) > 1:
+            return self.__loose_char_in(char1, char2)
         if ord(char1) > ord(char2):
             char1, char2 = char2, char1
         if (char1, char2) in self.LAT_CYR_LOOKALIKES:
@@ -190,9 +197,17 @@ class Map:
                             (group != "" and group == player.group) or \
                             (name != "???" and name == player.name):
                             objX, objY = objX % 32 // 4, objY % 32 // 4
-                            objects.append((obj.attrib.get("name", "???"), objX, objY, obj.attrib.get("class", "")))
+                            width = int(obj.attrib.get("width", 0)) // 4
+                            height = int(obj.attrib.get("height", 0)) // 4
+                            layer = objectgroup.attrib["name"]
+                            obj = roomobject.RoomObject(obj.attrib.get("name", "???"),
+                                                        (objX, objY),
+                                                        (width, height),
+                                                        obj.attrib.get("class", ""),
+                                                        layer)
+                            objects.append(obj)
 
-        return sorted(objects, key=lambda x: x[0]+str(x[1])+str(x[2]))
+        return sorted(objects, key=lambda x: x.name+str(x.position[0])+str(x.position[1]))
 
     def construct_ascii_room(self, player: player.Player) -> str:
         """
@@ -204,6 +219,58 @@ class Map:
         objlist = self.get_same_room_objects(player)
         playerPos = [ int(player.position[0]) % 32 // 4,
                       int(player.position[1]) % 32 // 4]
+        tileContents = [ [ [] for x in range(8) ] for y in range(8) ]
+        for obj in objlist:
+            for x in range(obj.size[0]):
+                for y in range(obj.size[1]):
+                    if player.isBlind:
+                        if obj.position[0]+x - playerPos[0] in range(-1, 2) and \
+                           obj.position[1]+y - playerPos[1] in range(-1, 2):
+                            pass
+                        else:
+                            continue
+                    tileContents[obj.position[1]+y][obj.position[0]+x].append(obj)
+        usedChars = {}
+        legend = {}
+        nextDefaultIndex = 0
+        for y in range(8):
+            for x in range(8):
+                if len(tileContents[y][x]) == 0 or tileContents[y][x] in usedChars.values():
+                    # either nothing here or we've already defined a char for this combo
+                    continue
+                # find a new char, first candidate is the first letter of an object name
+                firstCharObj = tileContents[y][x][0]
+                for obj in tileContents[y][x]:
+                    if obj.name == player.name:
+                        # prioritize the player
+                        firstCharObj = obj
+                        break
+                    if obj.layer > firstCharObj.layer:
+                        # prioritize objects on higher layers
+                        firstCharObj = obj
+                firstChar = firstCharObj.name[0].upper()
+                if self.__loose_char_in(firstChar, usedChars):
+                    firstChar = firstChar.lower()
+                while self.__loose_char_in(firstChar, usedChars):
+                    firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
+                    nextDefaultIndex += 1
+                # colorize the char
+                if firstCharObj.name == player.name:
+                    coloredChar = f'{Back.WHITE}{Fore.BLACK}' + firstChar + Style.RESET_ALL
+                elif firstCharObj.obj_class == "НПЦ":
+                    coloredChar = Fore.RED + firstChar + Style.RESET_ALL
+                elif firstCharObj.obj_class == "Предмет(-ы)":
+                    coloredChar = Fore.BLUE + firstChar + Style.RESET_ALL
+                elif firstCharObj.obj_class == "Игрок":
+                    coloredChar = Fore.WHITE + firstChar + Style.RESET_ALL
+                elif firstCharObj.obj_class == "Труп":
+                    coloredChar = Fore.BLACK + firstChar + Style.RESET_ALL
+                elif firstCharObj.obj_class == "Структура":
+                    coloredChar = Fore.YELLOW + firstChar + Style.RESET_ALL
+                else:
+                    coloredChar = firstChar
+                usedChars[coloredChar] = tileContents[y][x]
+                legend[coloredChar] = [obj.name for obj in tileContents[y][x]]
         representation = [
             [
                 "."
@@ -214,57 +281,14 @@ class Map:
             ]
             for y in range(8)
         ]
-        legend = {}
-        usedChars = []
-        nextDefaultIndex = 0
-        for obj in objlist:
-            if player.isBlind:
-                if obj[1] - playerPos[0] in range(-1, 2) and \
-                   obj[2] - playerPos[1] in range(-1, 2):
-                    ...
-                else:
+        for y in range(8):
+            for x in range(8):
+                if len(tileContents[y][x]) == 0:
                     continue
-            # check if another object is at same position
-            existingChar: str = representation[obj[2]][obj[1]]
-            if existingChar != ".":
-                # if so, use the same char
-                # if this is the player, colorize the char
-                if obj[0] == player.name:
-                    if Style.RESET_ALL in existingChar:
-                        actualChar = existingChar[-5]
-                    else:
-                        actualChar = existingChar
-                    coloredChar = f'{Back.WHITE}{Fore.BLACK}' + actualChar + Style.RESET_ALL
-                    representation[obj[2]][obj[1]] = coloredChar
-                    legend[coloredChar] = legend[existingChar]+[obj[0]]
-                    del legend[existingChar]
-                else:
-                    legend[existingChar].append(obj[0])
-                continue
-            # find a new char, first candidate is the first letter of the object name
-            firstChar = obj[0][0].upper()
-            if self.__loose_char_in(firstChar, usedChars):
-                firstChar = firstChar.lower()
-            while self.__loose_char_in(firstChar, usedChars):
-                firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
-                nextDefaultIndex += 1
-            if obj[0] == player.name:
-                coloredChar = f'{Back.WHITE}{Fore.BLACK}' + firstChar + Style.RESET_ALL
-            elif obj[3] == "НПЦ":
-                coloredChar = Fore.RED + firstChar + Style.RESET_ALL
-            elif obj[3] == "Предмет(-ы)":
-                coloredChar = Fore.BLUE + firstChar + Style.RESET_ALL
-            elif obj[3] == "Игрок":
-                coloredChar = Fore.WHITE + firstChar + Style.RESET_ALL
-            elif obj[3] == "Труп":
-                coloredChar = Fore.BLACK + firstChar + Style.RESET_ALL
-            elif obj[3] == "Структура":
-                coloredChar = Fore.YELLOW + firstChar + Style.RESET_ALL
-            else:
-                coloredChar = firstChar
-            representation[obj[2]][obj[1]] = coloredChar
-            usedChars.append(firstChar)
-            legend[coloredChar] = [obj[0]]
+                for char, objs in usedChars.items():
+                    if tileContents[y][x] == objs:
+                        representation[y][x] = char
+                        break
         representation = "\n".join(["".join(row) for row in representation])
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
         return f"{representation}\n\n{legend}"
