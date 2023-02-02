@@ -49,6 +49,7 @@ async def get_reaction_trigger_data(payload: discord.RawReactionActionEvent) -> 
         config.BotConfig.search_reaction_trigger(message_id=payload.message_id)
     if trigger is not None:
         emoji = payload.emoji.id or payload.emoji.name
+        emoji = str(emoji)
         if emoji in trigger.emojis:
             reaction_role, reaction_message = trigger.get_data_by_emoji(emoji)
 
