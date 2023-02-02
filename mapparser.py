@@ -252,7 +252,7 @@ class Map:
                     isReset = False
                 if effectPresent:
                     # underline the char, looks like colorama doesn't support underlined text?
-                    coloredChar = '[4;2m' + coloredChar
+                    coloredChar = stringworks.UNDERLINE_CODE + coloredChar
                     if not isReset:
                         coloredChar += Style.RESET_ALL
                 usedChars[coloredChar] = tileContents[y][x]

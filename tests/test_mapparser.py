@@ -1,6 +1,7 @@
 import sys
 import os
 from colorama import Fore, Back, Style
+import stringworks
 
 # prepare sys.path for importing modules from parent directory
 current = os.path.dirname(os.path.realpath(__file__))
@@ -90,19 +91,19 @@ class TestMapParser(unittest.TestCase):
         asciiGot = self.map.construct_ascii_room(testPlayer)
         asciiActual = f"""\
 ........
-..[4;2m{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}т{Style.RESET_ALL}....
-.{Back.WHITE}{Fore.BLACK}!{Style.RESET_ALL}[4;2m{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}т{Style.RESET_ALL}{Fore.WHITE}\"{Style.RESET_ALL}...
-..[4;2mР{Style.RESET_ALL}.....
+..{stringworks.UNDERLINE_CODE}{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}т{Style.RESET_ALL}....
+.{Back.WHITE}{Fore.BLACK}!{Style.RESET_ALL}{stringworks.UNDERLINE_CODE}{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}т{Style.RESET_ALL}{Fore.WHITE}\"{Style.RESET_ALL}...
+..{stringworks.UNDERLINE_CODE}Р{Style.RESET_ALL}.....
 ......S.
 ...{Fore.RED}?{Style.RESET_ALL}....
 .{Fore.BLUE}I{Style.RESET_ALL}......
 .....{Fore.BLACK}#{Style.RESET_ALL}..
 
-[4;2m{Fore.YELLOW}Т{Style.RESET_ALL}: Турель, Режущая завеса
+{stringworks.UNDERLINE_CODE}{Fore.YELLOW}Т{Style.RESET_ALL}: Турель, Режущая завеса
 {Fore.YELLOW}т{Style.RESET_ALL}: Турель
 {Back.WHITE}{Fore.BLACK}!{Style.RESET_ALL}: test_player1
 {Fore.WHITE}\"{Style.RESET_ALL}: test_player2
-[4;2mР{Style.RESET_ALL}: Режущая завеса
+{stringworks.UNDERLINE_CODE}Р{Style.RESET_ALL}: Режущая завеса
 S: something
 {Fore.RED}?{Style.RESET_ALL}: ???
 {Fore.BLUE}I{Style.RESET_ALL}: item_pile
