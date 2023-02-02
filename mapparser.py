@@ -209,8 +209,15 @@ class Map:
         nextDefaultIndex = 0
         for y in range(8):
             for x in range(8):
-                if len(tileContents[y][x]) == 0 or tileContents[y][x] in usedChars.values():
-                    # either nothing here or we've already defined a char for this combo
+                if len(tileContents[y][x]) == 0:
+                    continue
+                # check if there is a char already used for this combo
+                skip = False
+                for _, combo in usedChars.values():
+                    if combo == tileContents[y][x]:
+                        skip = True
+                        break
+                if skip:
                     continue
                 # find a new char, first candidate is the first letter of an object name
                 firstCharObj = tileContents[y][x][0]
@@ -255,7 +262,7 @@ class Map:
                     coloredChar = stringworks.UNDERLINE_CODE + coloredChar
                     if not isReset:
                         coloredChar += Style.RESET_ALL
-                usedChars[coloredChar] = tileContents[y][x]
+                usedChars[firstChar] = (coloredChar, tileContents[y][x])
                 legend[coloredChar] = [obj.name for obj in tileContents[y][x]]
         representation = [
             [
@@ -271,9 +278,9 @@ class Map:
             for x in range(8):
                 if len(tileContents[y][x]) == 0:
                     continue
-                for char, objs in usedChars.items():
-                    if tileContents[y][x] == objs:
-                        representation[y][x] = char
+                for char, charObjTuple in usedChars.items():
+                    if tileContents[y][x] == charObjTuple[1]:
+                        representation[y][x] = charObjTuple[0]
                         break
         representation = "\n".join(["".join(row) for row in representation])
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
