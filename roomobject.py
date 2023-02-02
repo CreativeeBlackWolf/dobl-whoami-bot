@@ -19,5 +19,5 @@ class RoomObject:
                 self.layer = 2
             else:
                 raise ValueError("Unknown layer: "+self.layer)
-        else:
-            self.layer = self.layer
+        elif self.layer not in range(0, 3):
+            raise ValueError("Unknown layer: "+str(self.layer))
