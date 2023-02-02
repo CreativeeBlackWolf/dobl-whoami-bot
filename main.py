@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 import os
 import sys
+import shlex
 import random
 import platform
 from typing import Tuple, Union
 import discord
+from discord.ui import Button
 from dialog_manager import (send_abilities,
                             send_player_inventory,
                             send_formatted_inventory,
@@ -12,7 +14,7 @@ from dialog_manager import (send_abilities,
                             get_inventory_string,
                             get_abilities_string,
                             add_reaction_message)
-from buttons import WhoamiCommandView
+from buttons import WhoamiCommandView, VoteCommandView
 from config import Config, ReactionTrigger
 import mapparser
 import command_help
@@ -99,19 +101,23 @@ async def on_message(message: discord.Message):
         gameMap = mapparser.Map(config.MapConfig.path)
         player = gameMap.get_player(message.author.display_name, message.author.id)
 
-        splittedMessage = message.content.split()
-        if len(splittedMessage) == 1:
+        splitted_message = message.content.split()
+        if len(splitted_message) == 1:
             await message.channel.send(command_help.get_commands(player=player))
-        elif len(splittedMessage) >= 2:
-            if splittedMessage[1] == "мне":
+        elif len(splitted_message) >= 2:
+            if splitted_message[1] == "мне":
                 await message.channel.send("Сам справишься.")
-            elif splittedMessage[1] == "админу":
+            elif splitted_message[1] == "админу":
                 if str(message.author.id) in config.BotConfig.admins:
-                    await message.channel.send(command_help.get_admin_command())
+                    await message.channel.send(
+                        command_help.get_admin_command(
+                            splitted_message[2] if len(splitted_message) >= 3 else None
+                        )
+                    )
                 else:
                     await message.channel.send("Ты кто вообще такой?")
             else:
-                await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::]), player))
+                await message.channel.send(command_help.get_commands(" ".join(splitted_message[1::]), player))
 
     elif message.content.lower().startswith((config.BotConfig.prefix + 'кто я', config.BotConfig.prefix + 'я кто')):
         data = await get_map_and_player(message)
@@ -257,7 +263,7 @@ async def on_message(message: discord.Message):
                                 if (levelNeeded == 0) or (levelNeeded == player.level):
                                     candidates.append(player)
                             except mapparser.MapObjectNotFoundException:
-                                continue    
+                                continue
                 except ValueError:
                     ...
                 if candidates:
@@ -373,6 +379,78 @@ async def on_message(message: discord.Message):
                 await message.channel.send("Удалить что?")
         else:
             await message.channel.send("Удалить что?")
+
+    elif message.content.lower().startswith(config.BotConfig.prefix + "спроси"):
+        if str(message.author.id) not in config.BotConfig.admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+
+        args = message.content.split()
+
+        if len(args) >= 2:
+            if args[1] == "всех" or message.role_mentions:
+                await message.delete()
+
+                voting_users = []
+                if message.role_mentions:
+                    voting_users = message.role_mentions[0].members
+
+                command_line = message.content.split("\n")[0]
+                command_args = shlex.split(command_line)
+                timeout = 300
+                anonymous = False
+                can_revote = False
+                force_stop_by_admin = True
+                force_stop_by_variant = True
+
+                if any(i for i in command_args if i == "-время"):
+                    try:
+                        timeout = int(command_args[command_args.index("-время")+1])
+                    except Exception:
+                        await message.channel.send("Опция `-время` введена неверно.")
+                if any(i for i in command_args if i == "-анон"):
+                    anonymous = True
+                if any(i for i in command_args if i == "-переголосование"):
+                    can_revote = True
+                if any(i for i in command_args if i == "-админ"):
+                    force_stop_by_admin = False
+                if any(i for i in command_args if i == "-вето"):
+                    force_stop_by_variant = False
+
+                if not '"' in message.content.split("\n")[0]:
+                    await message.channel.send("Ты должен ввести название голосования.")
+                    return
+
+                title = message.content.split('"')[1]
+
+                view = VoteCommandView(
+                    title=title,
+                    timeout=timeout,
+                    can_revote=can_revote,
+                    anonymous=anonymous,
+                    force_stop=force_stop_by_admin,
+                    admin_id=message.author.id,
+                    voting_users=voting_users
+                )
+
+                if len(message.content.split("\n")[1::]) > 1:
+                    for label in message.content.split("\n")[1::]:
+                        if label.startswith("!") and force_stop_by_variant:
+                            view.add_item(Button(label=label[1:], style=discord.ButtonStyle.red), True)
+                        else:
+                            view.add_item(Button(label=label, style=discord.ButtonStyle.primary))
+                else:
+                    view.add_item(Button(label="За", style=discord.ButtonStyle.primary))
+                    view.add_item(
+                        Button(
+                            label="Против",
+                            style=discord.ButtonStyle.red if force_stop_by_variant else discord.ButtonStyle.primary),
+                        force_stop_by_variant)
+
+                view.message = await message.channel.send(content=view.get_voting_message_str(), view=view)
+                await view.message.pin()
+        else:
+            await message.channel.send("Спросить кого?")
 
     #endregion
 

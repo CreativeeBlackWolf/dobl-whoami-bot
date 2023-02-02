@@ -12,7 +12,7 @@ commands = {
     "группа": f"Показать состояние группы // `{prefix}группа`"
 }
 
-adminCommands = {
+admin_commands = {
     "выбери": f"Выбрать случайного игрока онлайн или карту из колоды // `{prefix}выбери игрока|карту \
 [роль|уровень] [роль]`",
     "выбери уведомление": f'Выбрать сообщение, реакция на которое будет давать роль // `{prefix}выбери \
@@ -28,7 +28,8 @@ adminCommands = {
 <сообщение о подписке/сообщение об отписке> <текст с новой строки>`',
     "сбрось": f"Сбросить колоду // `{prefix}сбрось колоду`",
     "покажи": f"Показать колоду // `{prefix}покажи колоду`",
-    "удали": f"Удалить триггер для сообщения // `{prefix}удали уведомление`"
+    "удали": f"Удалить триггер для сообщения // `{prefix}удали уведомление`",
+    "спроси": f"Создать опрос для всех/группы // `{prefix}спроси <всех/@группу> [-опции] <сообщение> [варианты с новой строки]`"
 }
 
 aliases = {
@@ -38,7 +39,18 @@ aliases = {
 """
 }
 
-inventoryCommands = {
+admin_advanced = {
+    "спроси": f"""Опции:
+`-время <секунды>`: установить время на голосование (по умолчанию: 300)
+`-переголосование`: установить возможность переголосовать
+`-анон`: анонимное голосование
+`-админ`: отключить возможность досрочно прекращать голосование админу
+`-вето`: отключить возможность досрочно прекращать голосование по нажатию на определённый вариант.
+Каждый вариант с "правом вето" должен начинаться с `!`.      
+"""
+}
+
+inventory_commands = {
     "карта": f"Показать карту // `{prefix}карта`",
 }
 
@@ -56,16 +68,17 @@ def get_commands(command: str = None, player: pl.Player = None) -> str:
     invCmds = list_inventory_commands(player).keys()
     if len(invCmds) > 0:
         for i in invCmds:
-            s += inventoryCommands.get(i) + "\n"
+            s += inventory_commands.get(i) + "\n"
     return s
 
 def get_admin_command(command: str = None):
     if command is not None:
-        com = adminCommands.get(command)
+        com = admin_commands.get(command)
         if com is None:
             return "Такой команды нет."
+        return com + "\n" + admin_advanced.get(command, "")
     s = ""
-    for _, v in adminCommands.items():
+    for _, v in admin_commands.items():
         s += v + "\n"
     return s
 
