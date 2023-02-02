@@ -249,12 +249,18 @@ class Map:
                     if obj.layer > firstCharObj.layer:
                         # prioritize objects on higher layers
                         firstCharObj = obj
+                effectPresent = False
+                for obj in tileContents[y][x]:
+                    if obj.layer < 0:
+                        effectPresent = True
+                        break
                 firstChar = firstCharObj.name[0].upper()
                 if self.__loose_char_in(firstChar, usedChars):
                     firstChar = firstChar.lower()
                 while self.__loose_char_in(firstChar, usedChars):
                     firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
                     nextDefaultIndex += 1
+                isReset = True
                 # colorize the char
                 if firstCharObj.name == player.name:
                     coloredChar = f'{Back.WHITE}{Fore.BLACK}' + firstChar + Style.RESET_ALL
@@ -270,6 +276,12 @@ class Map:
                     coloredChar = Fore.YELLOW + firstChar + Style.RESET_ALL
                 else:
                     coloredChar = firstChar
+                    isReset = False
+                if effectPresent:
+                    # underline the char, looks like colorama doesn't support underlined text?
+                    coloredChar = '[4;2m' + coloredChar
+                    if not isReset:
+                        coloredChar += Style.RESET_ALL
                 usedChars[coloredChar] = tileContents[y][x]
                 legend[coloredChar] = [obj.name for obj in tileContents[y][x]]
         representation = [
