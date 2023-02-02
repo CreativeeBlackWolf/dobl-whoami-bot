@@ -3,19 +3,19 @@
  <tileset firstgid="1" name="rooms" tilewidth="32" tileheight="32" tilecount="5" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
-   <image width="32" height="32" source="../../rooms/base.png"/>
+   <image width="32" height="32" source="../../dobl-main/rooms/base.png"/>
   </tile>
   <tile id="1">
-   <image width="32" height="32" source="../../rooms/abyss.png"/>
+   <image width="32" height="32" source="../../dobl-main/rooms/abyss.png"/>
   </tile>
   <tile id="2">
-   <image width="32" height="32" source="../../rooms/enemy.png"/>
+   <image width="32" height="32" source="../../dobl-main/rooms/enemy.png"/>
   </tile>
   <tile id="3" probability="0.5">
-   <image width="32" height="32" source="../../rooms/merchant.png"/>
+   <image width="32" height="32" source="../../dobl-main/rooms/merchant.png"/>
   </tile>
   <tile id="4" probability="0.05">
-   <image width="32" height="32" source="../../rooms/event.png"/>
+   <image width="32" height="32" source="../../dobl-main/rooms/event.png"/>
   </tile>
  </tileset>
  <layer id="1" name="пол" width="100" height="100">
