@@ -203,6 +203,7 @@ class VoteCommandView(View):
     def add_item(self, vote_button: Button, force_stop_variant: bool = False):
         async def voting_button_callback(interaction: discord.Interaction):
             if self.__force_stop_by_admin and interaction.user.id == self.__admin_id:
+                await interaction.response.defer()
                 await self.__disable_all_buttons()
                 await self.message.channel.send(
                     f"Админ принудительно завершил голосование `{self.__title}` с результатом `{vote_button.label}`."
