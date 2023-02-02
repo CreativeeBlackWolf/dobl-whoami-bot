@@ -17,7 +17,9 @@ class RoomObject:
                 self.layer = 1
             elif self.layer == "верхний":
                 self.layer = 2
+            elif self.layer.startswith("эффекты"):
+                self.layer = -int(self.layer[7:])
             else:
                 raise ValueError("Unknown layer: "+self.layer)
-        elif self.layer not in range(0, 3):
+        elif self.layer > 2:
             raise ValueError("Unknown layer: "+str(self.layer))

@@ -9,6 +9,7 @@ from colorama import Fore, Back, Style
 import player
 import floor
 import roomobject
+import stringworks
 
 
 class MapObjectException(Exception): pass
@@ -27,9 +28,6 @@ class TileIDs(Enum):
 class Map:
     # name's actually misleading since it's not strictly ASCII
     ASCII_DEFAULT_CHARS = '!"#$%&\'()*+,-./:;<=>?[\\]^_`{|}~0123456789ABCDEFGHIJKLMNOPQRSTUVW'
-    LAT_CYR_LOOKALIKES = (('A', 'А'), ('B', 'В'), ('E', 'Е'), ('K', 'К'), ('M', 'М'), ('H', 'Н'), ('O', 'О'), ('P', 'Р'),
-                          ('C', 'С'), ('T', 'Т'), ('X', 'Х'), ('Y', 'У'), ('a', 'а'), ('b', 'в'), ('e', 'е'), ('k', 'к'),
-                          ('m', 'м'), ('h', 'н'), ('o', 'о'), ('p', 'р'), ('c', 'с'), ('t', 'т'), ('x', 'х'), ('y', 'у'))
 
     def __init__(self, filepath: str):
         # read the file
@@ -53,31 +51,6 @@ class Map:
                             return obj
                     except KeyError:
                         pass
-
-    def __loose_char_equals(self, char1: str, char2: str) -> bool:
-        """
-        Compare two characters across Cyrillic and Latin alphabets.
-        Can also seek for a character in a container, useful for removing ANSI escape sequences.
-        """
-        assert(len(char1) == 1 or len(char2) == 1)
-        if len(char1) > 1:
-            return self.__loose_char_in(char2, char1)
-        if len(char2) > 1:
-            return self.__loose_char_in(char1, char2)
-        if ord(char1) > ord(char2):
-            char1, char2 = char2, char1
-        if (char1, char2) in self.LAT_CYR_LOOKALIKES:
-            return True
-        return char1 == char2
-
-    def __loose_char_in(self, char: str, container) -> bool:
-        """
-        Check if a character is in a container across Cyrillic and Latin alphabets.
-        """
-        for c in container:
-            if self.__loose_char_equals(char, c):
-                return True
-        return False
 
     def get_objects_inventory(self, objectname: str) -> list:
         """
@@ -179,7 +152,8 @@ class Map:
                     int(player.position[1])-int(player.position[1]) % 32]
         objects = []
         for objectgroup in self.root.findall("objectgroup"):
-            if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
+            if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"] or \
+               objectgroup.attrib["name"].startswith("эффекты"):
                 for obj in objectgroup.findall("object"):
                     objX, objY = int(obj.attrib["x"]), int(obj.attrib["y"])
                     if objX-objX % 32 == roomPos[0] and objY-objY % 32 == roomPos[1]:
@@ -207,7 +181,7 @@ class Map:
                                                         layer)
                             objects.append(obj)
 
-        return sorted(objects, key=lambda x: x.name+str(x.position[0])+str(x.position[1]))
+        return sorted(objects, key=lambda x: [-x.layer, x.position[0], x.position[1]])
 
     def construct_ascii_room(self, player: player.Player) -> str:
         """
@@ -235,8 +209,15 @@ class Map:
         nextDefaultIndex = 0
         for y in range(8):
             for x in range(8):
-                if len(tileContents[y][x]) == 0 or tileContents[y][x] in usedChars.values():
-                    # either nothing here or we've already defined a char for this combo
+                if len(tileContents[y][x]) == 0:
+                    continue
+                # check if there is a char already used for this combo
+                skip = False
+                for _, combo in usedChars.values():
+                    if combo == tileContents[y][x]:
+                        skip = True
+                        break
+                if skip:
                     continue
                 # find a new char, first candidate is the first letter of an object name
                 firstCharObj = tileContents[y][x][0]
@@ -248,12 +229,18 @@ class Map:
                     if obj.layer > firstCharObj.layer:
                         # prioritize objects on higher layers
                         firstCharObj = obj
+                effectPresent = False
+                for obj in tileContents[y][x]:
+                    if obj.layer < 0:
+                        effectPresent = True
+                        break
                 firstChar = firstCharObj.name[0].upper()
-                if self.__loose_char_in(firstChar, usedChars):
+                if stringworks.loose_char_in(firstChar, usedChars):
                     firstChar = firstChar.lower()
-                while self.__loose_char_in(firstChar, usedChars):
+                while stringworks.loose_char_in(firstChar, usedChars):
                     firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
                     nextDefaultIndex += 1
+                isReset = True
                 # colorize the char
                 if firstCharObj.name == player.name:
                     coloredChar = f'{Back.WHITE}{Fore.BLACK}' + firstChar + Style.RESET_ALL
@@ -269,7 +256,13 @@ class Map:
                     coloredChar = Fore.YELLOW + firstChar + Style.RESET_ALL
                 else:
                     coloredChar = firstChar
-                usedChars[coloredChar] = tileContents[y][x]
+                    isReset = False
+                if effectPresent:
+                    # underline the char, looks like colorama doesn't support underlined text?
+                    coloredChar = stringworks.UNDERLINE_CODE + coloredChar
+                    if not isReset:
+                        coloredChar += Style.RESET_ALL
+                usedChars[firstChar] = (coloredChar, tileContents[y][x])
                 legend[coloredChar] = [obj.name for obj in tileContents[y][x]]
         representation = [
             [
@@ -285,9 +278,9 @@ class Map:
             for x in range(8):
                 if len(tileContents[y][x]) == 0:
                     continue
-                for char, objs in usedChars.items():
-                    if tileContents[y][x] == objs:
-                        representation[y][x] = char
+                for char, charObjTuple in usedChars.items():
+                    if tileContents[y][x] == charObjTuple[1]:
+                        representation[y][x] = charObjTuple[0]
                         break
         representation = "\n".join(["".join(row) for row in representation])
         legend = "\n".join([f"{char}: {', '.join(objs)}" for char, objs in legend.items()])
