@@ -68,7 +68,8 @@ class TestMapParser(unittest.TestCase):
             roomobject.RoomObject('test_player2', (4, 2), (1, 1), 'Игрок', 1),
             roomobject.RoomObject('something', (6, 4), (1, 1), '', 1),
             roomobject.RoomObject('item_pile', (1, 6), (1, 1), 'Предмет(-ы)', 0),
-            roomobject.RoomObject('test_player3', (5, 7), (1, 1), 'Труп', 0)
+            roomobject.RoomObject('test_player3', (5, 7), (1, 1), 'Труп', 0),
+            roomobject.RoomObject('Режущая завеса', (2, 1), (1, 3), '', -1)
         ]
         self.assertEqual(objectsGot, objectsActual)
 
@@ -79,7 +80,8 @@ class TestMapParser(unittest.TestCase):
             roomobject.RoomObject('Турель', (2, 1), (2, 2), 'Структура', 1),
             roomobject.RoomObject('test_player2', (4, 2), (1, 1),  'Игрок', 1),
             roomobject.RoomObject('something', (6, 4), (1, 1),  '', 1),
-            roomobject.RoomObject('test_player3', (5, 7), (1, 1),  'Труп', 0)
+            roomobject.RoomObject('test_player3', (5, 7), (1, 1),  'Труп', 0),
+            roomobject.RoomObject('Режущая завеса', (2, 1), (1, 3), '', -1)
         ]
         self.assertEqual(objectsGot, objectsActual)
 
@@ -88,21 +90,23 @@ class TestMapParser(unittest.TestCase):
         asciiGot = self.map.construct_ascii_room(testPlayer)
         asciiActual = f"""\
 ........
-..{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}....
-.{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.WHITE}!{Style.RESET_ALL}...
-........
+..[4;2m{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}т{Style.RESET_ALL}....
+.{Back.WHITE}{Fore.BLACK}!{Style.RESET_ALL}[4;2m{Fore.YELLOW}Т{Style.RESET_ALL}{Fore.YELLOW}т{Style.RESET_ALL}{Fore.WHITE}\"{Style.RESET_ALL}...
+..[4;2mР{Style.RESET_ALL}.....
 ......S.
 ...{Fore.RED}?{Style.RESET_ALL}....
 .{Fore.BLUE}I{Style.RESET_ALL}......
-.....{Fore.BLACK}\"{Style.RESET_ALL}..
+.....{Fore.BLACK}#{Style.RESET_ALL}..
 
-{Fore.YELLOW}Т{Style.RESET_ALL}: Турель
-{Back.WHITE}{Fore.BLACK}t{Style.RESET_ALL}: test_player1
-{Fore.WHITE}!{Style.RESET_ALL}: test_player2
+[4;2m{Fore.YELLOW}Т{Style.RESET_ALL}: Турель, Режущая завеса
+{Fore.YELLOW}т{Style.RESET_ALL}: Турель
+{Back.WHITE}{Fore.BLACK}!{Style.RESET_ALL}: test_player1
+{Fore.WHITE}\"{Style.RESET_ALL}: test_player2
+[4;2mР{Style.RESET_ALL}: Режущая завеса
 S: something
 {Fore.RED}?{Style.RESET_ALL}: ???
 {Fore.BLUE}I{Style.RESET_ALL}: item_pile
-{Fore.BLACK}\"{Style.RESET_ALL}: test_player3"""
+{Fore.BLACK}#{Style.RESET_ALL}: test_player3"""
         self.assertEqual(asciiGot, asciiActual)
         testPlayer = self.map.get_player("test_player5", 5)
         asciiGot = self.map.construct_ascii_room(testPlayer)

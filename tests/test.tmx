@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="7" nextobjectid="380">
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="1" backgroundcolor="#4b4b4b" nextlayerid="8" nextobjectid="381">
  <tileset firstgid="1" name="rooms" tilewidth="32" tileheight="32" tilecount="5" columns="0">
   <grid orientation="orthogonal" width="1" height="1"/>
   <tile id="0">
@@ -209,6 +209,9 @@
   <object id="369" name="Этаж 10-4" x="1120" y="352" width="96" height="160"/>
   <object id="370" name="testarea" x="-64" y="-224" width="192" height="32"/>
   <object id="377" x="256" y="-288" width="64" height="64"/>
+ </objectgroup>
+ <objectgroup id="7" name="эффекты1" offsetx="-0.5" offsety="-0.5">
+  <object id="380" name="Режущая завеса" x="40" y="-220" width="4" height="12"/>
  </objectgroup>
  <objectgroup id="2" name="нижний" offsetx="1" offsety="1">
   <object id="191" name="token_pile" class="Предмет(-ы)" x="-28" y="-216" width="4" height="4">
