@@ -93,7 +93,7 @@ class VoteCommandView(View):
         self.__variants: dict[str, dict] = {}
         self.__can_revote = can_revote
         self.__anonymous = anonymous
-        self.__force_stop = force_stop
+        self.__force_stop_by_admin = force_stop
         self.__voting_users = voting_users
         self.__voting_users_names = [i.display_name for i in self.__voting_users]
 
@@ -172,7 +172,7 @@ class VoteCommandView(View):
         voting_params_str = "Переголосовать можно" if self.__can_revote else "Переголосовать нельзя"
         voting_params_str += ", анонимное голосование" if self.__anonymous else ", публичное голосование"
         voting_params_str += f", {self.timeout} секунд"
-        voting_params_str += f", админ может досрочно закончить голосование" if self.__force_stop else ""
+        voting_params_str += f", админ может досрочно закончить голосование" if self.__force_stop_by_admin else ""
 
         return f"""{self.__title}
 ```ansi
@@ -188,7 +188,7 @@ class VoteCommandView(View):
         await interaction.response.edit_message(content=self.get_voting_message_str())
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
-        if interaction.user.id == self.__admin_id:
+        if interaction.user.id == self.__admin_id and self.__force_stop_by_admin:
             return True
         if self.__voting_users and interaction.user not in self.__voting_users:
             return False
@@ -203,7 +203,7 @@ class VoteCommandView(View):
 
     def add_item(self, vote_button: Button, force_stop_variant: bool = False):
         async def voting_button_callback(interaction: discord.Interaction):
-            if self.__force_stop and interaction.user.id == self.__admin_id:
+            if self.__force_stop_by_admin and interaction.user.id == self.__admin_id:
                 await self.__disable_all_buttons()
                 await self.message.channel.send(
                     f"Админ принудительно завершил голосование `{self.__title}` с результатом `{vote_button.label}`."

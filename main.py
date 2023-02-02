@@ -100,19 +100,23 @@ async def on_message(message: discord.Message):
         gameMap = mapparser.Map(config.MapConfig.path)
         player = gameMap.get_player(message.author.display_name, message.author.id)
 
-        splittedMessage = message.content.split()
-        if len(splittedMessage) == 1:
+        splitted_message = message.content.split()
+        if len(splitted_message) == 1:
             await message.channel.send(command_help.get_commands(player=player))
-        elif len(splittedMessage) >= 2:
-            if splittedMessage[1] == "мне":
+        elif len(splitted_message) >= 2:
+            if splitted_message[1] == "мне":
                 await message.channel.send("Сам справишься.")
-            elif splittedMessage[1] == "админу":
+            elif splitted_message[1] == "админу":
                 if str(message.author.id) in config.BotConfig.admins:
-                    await message.channel.send(command_help.get_admin_command())
+                    await message.channel.send(
+                        command_help.get_admin_command(
+                            splitted_message[2] if len(splitted_message) >= 3 else None
+                        )
+                    )
                 else:
                     await message.channel.send("Ты кто вообще такой?")
             else:
-                await message.channel.send(command_help.get_commands(" ".join(splittedMessage[1::]), player))
+                await message.channel.send(command_help.get_commands(" ".join(splitted_message[1::]), player))
 
     elif message.content.lower().startswith((config.BotConfig.prefix + 'кто я', config.BotConfig.prefix + 'я кто')):
         data = await get_map_and_player(message)
@@ -429,14 +433,9 @@ async def on_message(message: discord.Message):
                 )
 
                 if len(message.content.split("\n")[1::]) > 1:
-                    if not any(i.startswith("!") for i in message.content.split("\n")[1::]) \
-                       and force_stop_by_variant:
-                        await message.channel.send(
-                            "Ты ввёл `-вето`, но не указал вариант, который будет закрывать голосование."
-                        )
                     for label in message.content.split("\n")[1::]:
                         if label.startswith("!") and force_stop_by_variant:
-                            view.add_item(Button(label=label, style=discord.ButtonStyle.red), True)
+                            view.add_item(Button(label=label[1:], style=discord.ButtonStyle.red), True)
                         else:
                             view.add_item(Button(label=label, style=discord.ButtonStyle.primary))
                 else:
