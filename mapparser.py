@@ -208,7 +208,7 @@ class Map:
                                                         layer)
                             objects.append(obj)
 
-        return sorted(objects, key=lambda x: x.name+str(x.position[0])+str(x.position[1]))
+        return sorted(objects, key=lambda x: [x.layer+x.position[0]+x.position[1]])
 
     def construct_ascii_room(self, player: player.Player) -> str:
         """
