@@ -1,0 +1,41 @@
+site_name: DoBL guideline
+repo_url: https://github.com/CreativeeBlackWolf/dobl-whoami-bot
+repo_name: dobl-whoami-bot
+
+
+theme:
+  name: material
+
+  palette:
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  
+
+  icon:
+    repo: fontawesome/brands/git-alt
+
+  features:
+    - navigation.tabs
+    - navigation.top
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+nav:
+  - FAQ.md
+  - TODO.md
