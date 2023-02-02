@@ -10,9 +10,9 @@ import player
 
 
 class WhoamiCommandView(View):
-    def __init__(self, map: mapparser.Map, player: player.Player, author: discord.User):
+    def __init__(self, game_map: mapparser.Map, player: player.Player, author: discord.User):
         super().__init__(timeout=30.0)
-        self.map = map
+        self.map = game_map
         self.player = player
         self.author = author
         self.message: discord.Message = None
