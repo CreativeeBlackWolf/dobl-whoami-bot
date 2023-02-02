@@ -1,7 +1,6 @@
 import sys
 import os
 from colorama import Fore, Back, Style
-import stringworks
 
 # prepare sys.path for importing modules from parent directory
 current = os.path.dirname(os.path.realpath(__file__))
@@ -12,6 +11,7 @@ import mapparser
 import unittest
 import player
 import roomobject
+import stringworks
 
 class TestMapParser(unittest.TestCase):
     maxDiff = None
