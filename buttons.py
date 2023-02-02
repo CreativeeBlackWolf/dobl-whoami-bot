@@ -84,7 +84,8 @@ class VoteCommandView(View):
         can_revote: bool = False,
         admin_id: int = None,
         anonymous: bool = False,
-        force_stop: bool = False):
+        force_stop: bool = False,
+        voting_users: list[discord.Member] = [],):
         super().__init__(timeout=timeout)
         self.message: discord.Message = None
         self.__title = title
@@ -93,6 +94,8 @@ class VoteCommandView(View):
         self.__can_revote = can_revote
         self.__anonymous = anonymous
         self.__force_stop = force_stop
+        self.__voting_users = voting_users
+        self.__voting_users_names = [i.display_name for i in self.__voting_users]
 
     @property
     def variants(self):
@@ -117,6 +120,11 @@ class VoteCommandView(View):
              any((amount % 100 < 10, amount % 100 >= 20)))):
             return "голоса"
         return "голосов"
+
+    async def __disable_all_buttons(self):
+        for but in self.children:
+            but.disabled = True
+        await self.message.edit(view=self)
 
     def __construct_voting_variants_str(self):
         votes_count = self.count_votes()
@@ -169,6 +177,8 @@ class VoteCommandView(View):
         return f"""{self.__title}
 ```ansi
 {voting_params_str}
+{'Пользователи, которые не голосовали: ' + ", ".join(self.__voting_users_names)
+ if self.__voting_users_names else ""}
 
 {self.__construct_voting_variants_str()}
 Всего проголосовало: {votes_count}
@@ -178,6 +188,10 @@ class VoteCommandView(View):
         await interaction.response.edit_message(content=self.get_voting_message_str())
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id == self.__admin_id:
+            return True
+        if self.__voting_users and interaction.user not in self.__voting_users:
+            return False
         search_result = self.__find_user(interaction.user.display_name)
         if not self.__can_revote and search_result is not None:
             await interaction.user.send("Ты уже отдал свой голос в этом голосовании.")
@@ -187,33 +201,57 @@ class VoteCommandView(View):
             search_result["voted"].remove(interaction.user.display_name)
         return True
 
-    def add_item(self, vote_button: Button):
+    def add_item(self, vote_button: Button, force_stop_variant: bool = False):
         async def voting_button_callback(interaction: discord.Interaction):
             if self.__force_stop and interaction.user.id == self.__admin_id:
-                for but in self.children:
-                    but.disabled = True
-                await interaction.response.edit_message(view=self)
+                await self.__disable_all_buttons()
                 await self.message.channel.send(
                     f"Админ принудительно завершил голосование `{self.__title}` с результатом `{vote_button.label}`."
                 )
+                await self.message.unpin()
                 self.stop()
                 return
 
             self.__variants[vote_button.label]["votes"] += 1
             self.__variants[vote_button.label]["voted"].append(interaction.user.display_name)
+
+            if interaction.user.display_name in self.__voting_users_names:
+                self.__voting_users_names.remove(interaction.user.display_name)
+
             await self.edit_voting_message(interaction)
+
+            if force_stop_variant:
+                await self.__disable_all_buttons()
+                await self.message.channel.send(
+                    f"Голосование `{self.__title}` завершено досрочно.\n" +
+                    f"{interaction.user.display_name} проголосовал `{vote_button.label}`"
+                )
+                await self.message.unpin()
+                self.stop()
+                return
+
+            if self.__voting_users and not self.__voting_users_names and \
+               not self.__can_revote:
+                await self.__disable_all_buttons()
+                votes_count = self.count_votes()
+                most_voted = self.get_most_voted_variant()
+                await self.message.channel.send(
+                    f"Голосование `{self.__title}` завершено досрочно (все проголосовали).\n" +
+                    f"Победил вариант `{most_voted[0]}` ({most_voted[1]['votes'] / (votes_count or 1) * 100}%)"
+                )
+                await self.message.unpin()
+                self.stop()
+                return
 
         self.__variants[vote_button.label] = {"votes": 0, "voted": []}
         vote_button.callback = voting_button_callback
         return super().add_item(vote_button)
 
     async def on_timeout(self) -> None:
-        for button in self.children:
-            button.disabled = True
+        await self.__disable_all_buttons()
 
         votes_count = self.count_votes()
         most_voted = self.get_most_voted_variant()
-        await self.message.edit(view=self)
         await self.message.channel.send(f"""Голосование `{self.__title}` завершено по времени.
 Победил вариант `{most_voted[0]}` ({most_voted[1]['votes'] / (votes_count or 1) * 100}%)
 """)

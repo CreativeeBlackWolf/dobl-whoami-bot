@@ -383,14 +383,20 @@ async def on_message(message: discord.Message):
         args = message.content.split()
 
         if len(args) >= 2:
-            if args[1] == "всех":
+            if args[1] == "всех" or message.role_mentions:
                 await message.delete()
+
+                voting_users = []
+                if message.role_mentions:
+                    voting_users = message.role_mentions[0].members
+
                 command_line = message.content.split("\n")[0]
                 command_args = shlex.split(command_line)
                 timeout = 300
                 anonymous = False
                 can_revote = False
-                force_stop = False
+                force_stop_by_admin = True
+                force_stop_by_variant = True
 
                 if any(i for i in command_args if i == "-время"):
                     try:
@@ -402,8 +408,10 @@ async def on_message(message: discord.Message):
                 if any(i for i in command_args if i == "-переголосование"):
                     can_revote = True
                 if any(i for i in command_args if i == "-админ"):
-                    force_stop = True
-                
+                    force_stop_by_admin = False
+                if any(i for i in command_args if i == "-вето"):
+                    force_stop_by_variant = False
+
                 if not '"' in message.content.split("\n")[0]:
                     await message.channel.send("Ты должен ввести название голосования.")
                     return
@@ -415,16 +423,29 @@ async def on_message(message: discord.Message):
                     timeout=timeout,
                     can_revote=can_revote,
                     anonymous=anonymous,
-                    force_stop=force_stop,
-                    admin_id=message.author.id
+                    force_stop=force_stop_by_admin,
+                    admin_id=message.author.id,
+                    voting_users=voting_users
                 )
 
                 if len(message.content.split("\n")[1::]) > 1:
+                    if not any(i.startswith("!") for i in message.content.split("\n")[1::]) \
+                       and force_stop_by_variant:
+                        await message.channel.send(
+                            "Ты ввёл `-вето`, но не указал вариант, который будет закрывать голосование."
+                        )
                     for label in message.content.split("\n")[1::]:
-                        view.add_item(Button(label=label, style=discord.ButtonStyle.green))
+                        if label.startswith("!") and force_stop_by_variant:
+                            view.add_item(Button(label=label, style=discord.ButtonStyle.red), True)
+                        else:
+                            view.add_item(Button(label=label, style=discord.ButtonStyle.primary))
                 else:
-                    view.add_item(Button(label="За", style=discord.ButtonStyle.green))
-                    view.add_item(Button(label="Против", style=discord.ButtonStyle.red))
+                    view.add_item(Button(label="За", style=discord.ButtonStyle.primary))
+                    view.add_item(
+                        Button(
+                            label="Против", 
+                            style=discord.ButtonStyle.red if force_stop_by_variant else discord.ButtonStyle.primary), 
+                        force_stop_by_variant)
 
                 view.message = await message.channel.send(content=view.get_voting_message_str(), view=view)
                 await view.message.pin()
