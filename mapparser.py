@@ -8,6 +8,7 @@ import datetime
 from colorama import Fore, Back, Style
 import player
 import floor
+import roomobject
 
 
 class MapObjectException(Exception): pass
@@ -199,10 +200,14 @@ class Map:
                             width = int(obj.attrib.get("width", 0)) // 4
                             height = int(obj.attrib.get("height", 0)) // 4
                             layer = objectgroup.attrib["name"]
-                            layer = 0 if layer == "нижний" else 1 if layer == "средний" else 2
-                            objects.append((obj.attrib.get("name", "???"), objX, objY, obj.attrib.get("class", ""), width, height, layer))
+                            obj = roomobject.RoomObject(obj.attrib.get("name", "???"),
+                                                        (objX, objY),
+                                                        (width, height),
+                                                        obj.attrib.get("class", ""),
+                                                        layer)
+                            objects.append(obj)
 
-        return sorted(objects, key=lambda x: x[0]+str(x[1])+str(x[2]))
+        return sorted(objects, key=lambda x: x.name+str(x.position[0])+str(x.position[1]))
 
     def construct_ascii_room(self, player: player.Player) -> str:
         """
@@ -216,15 +221,15 @@ class Map:
                       int(player.position[1]) % 32 // 4]
         tileContents = [ [ [] for x in range(8) ] for y in range(8) ]
         for obj in objlist:
-            for x in range(obj[4]):
-                for y in range(obj[5]):
+            for x in range(obj.size[0]):
+                for y in range(obj.size[1]):
                     if player.isBlind:
-                        if obj[1]+x - playerPos[0] in range(-1, 2) and \
-                           obj[2]+y - playerPos[1] in range(-1, 2):
+                        if obj.position[0]+x - playerPos[0] in range(-1, 2) and \
+                           obj.position[1]+y - playerPos[1] in range(-1, 2):
                             pass
                         else:
                             continue
-                    tileContents[obj[2]+y][obj[1]+x].append(obj)
+                    tileContents[obj.position[1]+y][obj.position[0]+x].append(obj)
         usedChars = {}
         legend = {}
         nextDefaultIndex = 0
@@ -236,36 +241,36 @@ class Map:
                 # find a new char, first candidate is the first letter of an object name
                 firstCharObj = tileContents[y][x][0]
                 for obj in tileContents[y][x]:
-                    if obj[0] == player.name:
+                    if obj.name == player.name:
                         # prioritize the player
                         firstCharObj = obj
                         break
-                    if obj[6] > firstCharObj[6]:
+                    if obj.layer > firstCharObj.layer:
                         # prioritize objects on higher layers
                         firstCharObj = obj
-                firstChar = firstCharObj[0][0].upper()
+                firstChar = firstCharObj.name[0].upper()
                 if self.__loose_char_in(firstChar, usedChars):
                     firstChar = firstChar.lower()
                 while self.__loose_char_in(firstChar, usedChars):
                     firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
                     nextDefaultIndex += 1
                 # colorize the char
-                if firstCharObj[0] == player.name:
+                if firstCharObj.name == player.name:
                     coloredChar = f'{Back.WHITE}{Fore.BLACK}' + firstChar + Style.RESET_ALL
-                elif firstCharObj[3] == "НПЦ":
+                elif firstCharObj.obj_class == "НПЦ":
                     coloredChar = Fore.RED + firstChar + Style.RESET_ALL
-                elif firstCharObj[3] == "Предмет(-ы)":
+                elif firstCharObj.obj_class == "Предмет(-ы)":
                     coloredChar = Fore.BLUE + firstChar + Style.RESET_ALL
-                elif firstCharObj[3] == "Игрок":
+                elif firstCharObj.obj_class == "Игрок":
                     coloredChar = Fore.WHITE + firstChar + Style.RESET_ALL
-                elif firstCharObj[3] == "Труп":
+                elif firstCharObj.obj_class == "Труп":
                     coloredChar = Fore.BLACK + firstChar + Style.RESET_ALL
-                elif firstCharObj[3] == "Структура":
+                elif firstCharObj.obj_class == "Структура":
                     coloredChar = Fore.YELLOW + firstChar + Style.RESET_ALL
                 else:
                     coloredChar = firstChar
                 usedChars[coloredChar] = tileContents[y][x]
-                legend[coloredChar] = [obj[0] for obj in tileContents[y][x]]
+                legend[coloredChar] = [obj.name for obj in tileContents[y][x]]
         representation = [
             [
                 "."

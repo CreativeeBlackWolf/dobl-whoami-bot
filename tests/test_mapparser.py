@@ -10,6 +10,7 @@ sys.path.append(parent)
 import mapparser
 import unittest
 import player
+import roomobject
 
 class TestMapParser(unittest.TestCase):
     maxDiff = None
@@ -61,23 +62,24 @@ class TestMapParser(unittest.TestCase):
         testPlayer = self.map.get_player("test_player1", 1)
         objectsGot = self.map.get_same_room_objects(testPlayer)
         objectsActual = [
-            ('???', 3, 5, 'НПЦ', 1, 1, 1),
-            ('item_pile', 1, 6, 'Предмет(-ы)', 1, 1, 0),
-            ('something', 6, 4, '', 1, 1, 1),
-            ('test_player1', 1, 2, 'Игрок', 1, 1, 1),
-            ('test_player2', 4, 2, 'Игрок', 1, 1, 1),
-            ('test_player3', 5, 7, 'Труп', 1, 1, 0),
-            ('Турель', 2, 1, 'Структура', 2, 2, 1)
+            roomobject.RoomObject('???', (3, 5), (1, 1), 'НПЦ', 1),
+            roomobject.RoomObject('item_pile', (1, 6), (1, 1), 'Предмет(-ы)', 0),
+            roomobject.RoomObject('something', (6, 4), (1, 1), '', 1),
+            roomobject.RoomObject('test_player1', (1, 2), (1, 1), 'Игрок', 1),
+            roomobject.RoomObject('test_player2', (4, 2), (1, 1), 'Игрок', 1),
+            roomobject.RoomObject('test_player3', (5, 7), (1, 1), 'Труп', 0),
+            roomobject.RoomObject('Турель', (2, 1), (2, 2), 'Структура', 1)
         ]
         self.assertEqual(objectsGot, objectsActual)
+
         testPlayer = self.map.get_player("test_player2", 2)
         objectsGot = self.map.get_same_room_objects(testPlayer)
         objectsActual = [
-            ('something', 6, 4, '', 1, 1, 1),
-            ('test_player1', 1, 2, 'Игрок', 1, 1, 1),
-            ('test_player2', 4, 2, 'Игрок', 1, 1, 1),
-            ('test_player3', 5, 7, 'Труп', 1, 1, 0),
-            ('Турель', 2, 1, 'Структура', 2, 2, 1)
+            roomobject.RoomObject('something', (6, 4), (1, 1),  '', 1),
+            roomobject.RoomObject('test_player1', (1, 2), (1, 1),  'Игрок', 1),
+            roomobject.RoomObject('test_player2', (4, 2), (1, 1),  'Игрок', 1),
+            roomobject.RoomObject('test_player3', (5, 7), (1, 1),  'Труп', 0),
+            roomobject.RoomObject('Турель', (2, 1), (2, 2), 'Структура', 1)
         ]
         self.assertEqual(objectsGot, objectsActual)
 
