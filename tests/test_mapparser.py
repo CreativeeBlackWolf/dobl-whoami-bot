@@ -64,10 +64,10 @@ class TestMapParser(unittest.TestCase):
         objectsActual = [
             roomobject.RoomObject('test_player1', (1, 2), (1, 1), 'Игрок', 1),
             roomobject.RoomObject('Турель', (2, 1), (2, 2), 'Структура', 1),
-            roomobject.RoomObject('item_pile', (1, 6), (1, 1), 'Предмет(-ы)', 0),
-            roomobject.RoomObject('test_player2', (4, 2), (1, 1), 'Игрок', 1),
             roomobject.RoomObject('???', (3, 5), (1, 1), 'НПЦ', 1),
+            roomobject.RoomObject('test_player2', (4, 2), (1, 1), 'Игрок', 1),
             roomobject.RoomObject('something', (6, 4), (1, 1), '', 1),
+            roomobject.RoomObject('item_pile', (1, 6), (1, 1), 'Предмет(-ы)', 0),
             roomobject.RoomObject('test_player3', (5, 7), (1, 1), 'Труп', 0)
         ]
         self.assertEqual(objectsGot, objectsActual)
@@ -116,7 +116,7 @@ S: something
 ........
 ........
 
-{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: dead_body, test_player5"""
+{Back.WHITE}{Fore.BLACK}T{Style.RESET_ALL}: test_player5, dead_body"""
         self.assertEqual(asciiGot, asciiActual)
         testPlayer = self.map.get_player("test_player8", 8)
         asciiGot = self.map.construct_ascii_room(testPlayer)
