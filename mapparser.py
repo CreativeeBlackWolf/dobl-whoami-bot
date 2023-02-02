@@ -179,7 +179,8 @@ class Map:
                     int(player.position[1])-int(player.position[1]) % 32]
         objects = []
         for objectgroup in self.root.findall("objectgroup"):
-            if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
+            if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"] or \
+               objectgroup.attrib["name"].startswith("эффекты"):
                 for obj in objectgroup.findall("object"):
                     objX, objY = int(obj.attrib["x"]), int(obj.attrib["y"])
                     if objX-objX % 32 == roomPos[0] and objY-objY % 32 == roomPos[1]:
