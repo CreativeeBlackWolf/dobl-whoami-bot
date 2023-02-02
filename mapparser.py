@@ -9,6 +9,7 @@ from colorama import Fore, Back, Style
 import player
 import floor
 import roomobject
+import stringworks
 
 
 class MapObjectException(Exception): pass
@@ -27,9 +28,6 @@ class TileIDs(Enum):
 class Map:
     # name's actually misleading since it's not strictly ASCII
     ASCII_DEFAULT_CHARS = '!"#$%&\'()*+,-./:;<=>?[\\]^_`{|}~0123456789ABCDEFGHIJKLMNOPQRSTUVW'
-    LAT_CYR_LOOKALIKES = (('A', 'А'), ('B', 'В'), ('E', 'Е'), ('K', 'К'), ('M', 'М'), ('H', 'Н'), ('O', 'О'), ('P', 'Р'),
-                          ('C', 'С'), ('T', 'Т'), ('X', 'Х'), ('Y', 'У'), ('a', 'а'), ('b', 'в'), ('e', 'е'), ('k', 'к'),
-                          ('m', 'м'), ('h', 'н'), ('o', 'о'), ('p', 'р'), ('c', 'с'), ('t', 'т'), ('x', 'х'), ('y', 'у'))
 
     def __init__(self, filepath: str):
         # read the file
@@ -53,31 +51,6 @@ class Map:
                             return obj
                     except KeyError:
                         pass
-
-    def __loose_char_equals(self, char1: str, char2: str) -> bool:
-        """
-        Compare two characters across Cyrillic and Latin alphabets.
-        Can also seek for a character in a container, useful for removing ANSI escape sequences.
-        """
-        assert(len(char1) == 1 or len(char2) == 1)
-        if len(char1) > 1:
-            return self.__loose_char_in(char2, char1)
-        if len(char2) > 1:
-            return self.__loose_char_in(char1, char2)
-        if ord(char1) > ord(char2):
-            char1, char2 = char2, char1
-        if (char1, char2) in self.LAT_CYR_LOOKALIKES:
-            return True
-        return char1 == char2
-
-    def __loose_char_in(self, char: str, container) -> bool:
-        """
-        Check if a character is in a container across Cyrillic and Latin alphabets.
-        """
-        for c in container:
-            if self.__loose_char_equals(char, c):
-                return True
-        return False
 
     def get_objects_inventory(self, objectname: str) -> list:
         """
@@ -255,9 +228,9 @@ class Map:
                         effectPresent = True
                         break
                 firstChar = firstCharObj.name[0].upper()
-                if self.__loose_char_in(firstChar, usedChars):
+                if stringworks.loose_char_in(firstChar, usedChars):
                     firstChar = firstChar.lower()
-                while self.__loose_char_in(firstChar, usedChars):
+                while stringworks.loose_char_in(firstChar, usedChars):
                     firstChar = Map.ASCII_DEFAULT_CHARS[nextDefaultIndex]
                     nextDefaultIndex += 1
                 isReset = True
