@@ -44,7 +44,8 @@ class Map:
         :return: the object's root element or None if no match found
         """
         for objectgroup in self.root.findall("objectgroup"):
-            if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"]:
+            if objectgroup.attrib["name"] in ["нижний", "средний", "верхний"] or \
+                objectgroup.attrib["name"].startswith("эффекты"):
                 for obj in objectgroup.findall("object"):
                     try:
                         if obj.attrib["name"] == objectname:
