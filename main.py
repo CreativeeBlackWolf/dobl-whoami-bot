@@ -1,29 +1,24 @@
 #!/usr/bin/env python3
 import os
 import sys
+from typing import Tuple, Union
 import shlex
 import random
 import platform
-from typing import Tuple, Union
 import discord
 from discord.ui import Button
-from dialog_manager import (send_abilities,
-                            send_player_inventory,
-                            send_formatted_inventory,
-                            get_player_info_string,
-                            get_inventory_string,
-                            get_abilities_string,
-                            add_reaction_message)
 from buttons import WhoamiCommandView, VoteCommandView
 from config import Config, ReactionTrigger
-import mapparser
-import command_help
 from player import Player
+import command_help
+import mapparser
 import casino
+import dialog_manager as dialog
 
 
+config_name = "botconfig.cfg"
 scriptDir = os.path.dirname(os.path.realpath(__file__))
-configPath = os.path.join(scriptDir, "botconfig.cfg")
+configPath = os.path.join(scriptDir, config_name)
 fallbackConfigPath = os.path.join(scriptDir, "config_example.cfg")
 config = Config(configPath if os.path.exists(configPath) else fallbackConfigPath)
 intents = discord.Intents.all()
@@ -101,8 +96,8 @@ async def on_message(message: discord.Message):
     #region [user commands]
 
     if message.content.lower().startswith(config.BotConfig.prefix + "помоги"):
-        gameMap = mapparser.Map(config.MapConfig.path)
-        player = gameMap.get_player(message.author.display_name, message.author.id)
+        game_map = mapparser.Map(config.MapConfig.path)
+        player = game_map.get_player(message.author.display_name, message.author.id)
 
         splitted_message = message.content.split()
         if len(splitted_message) == 1:
@@ -125,9 +120,9 @@ async def on_message(message: discord.Message):
     elif message.content.lower().startswith((config.BotConfig.prefix + 'кто я', config.BotConfig.prefix + 'я кто')):
         data = await get_map_and_player(message)
         if data is not None:
-            gameMap, player = data
-            view = WhoamiCommandView(gameMap, player, message.author)
-            view.message = await message.reply(get_player_info_string(gameMap, player), view=view)
+            game_map, player = data
+            view = WhoamiCommandView(game_map, player, message.author)
+            view.message = await message.reply(dialog.get_player_info_string(game_map, player), view=view)
 
     elif message.content.lower().startswith(config.BotConfig.prefix + 'покажи'):
         data = await get_map_and_player(message)
@@ -137,9 +132,9 @@ async def on_message(message: discord.Message):
             if len(args) == 2:
                 if args[1] in ["скиллы", "способности", "особенности",
                                "навыки", "спеллы", "абилки"]:
-                    await send_abilities(message, player)
+                    await dialog.send_abilities(message, player)
                 elif args[1] in ["инвентарь", "шмотки", "рюкзак"]:
-                    await send_player_inventory(message, player)
+                    await dialog.send_player_inventory(message, player)
                 elif args[1] in ["колоду"]:
                     if str(message.author.id) not in config.BotConfig.admins:
                         await message.channel.send("Размечтался.")
@@ -159,18 +154,11 @@ async def on_message(message: discord.Message):
     elif message.content.lower().startswith(config.BotConfig.prefix + 'где я'):
         data = await get_map_and_player(message)
         if data is not None:
-            gameMap, player = data
+            game_map, player = data
             if player.isDead:
                 await message.reply("Ты мёртв.")
                 return
-            resp = f"""```ansi
-{gameMap.get_floor_string(player)}
-
-{gameMap.construct_ascii_room(player)}
-
-{gameMap.list_doors_string(player)}
-```"""
-            await message.reply(resp)
+            await message.reply(dialog.get_player_position_string(game_map, player))
 
     elif message.content.lower().startswith(config.BotConfig.prefix + "группа"):
         ingame: bool = False
@@ -186,12 +174,12 @@ async def on_message(message: discord.Message):
             await message.channel.send("Ты не в игре.")
             return
 
-        gameMap = mapparser.Map(config.MapConfig.path)
+        game_map = mapparser.Map(config.MapConfig.path)
         groupMembers = list(groupRole.members) if groupRole is not None else [message.author]
         msg = "```ansi\n"
 
         for member in groupMembers:
-            player = gameMap.get_player(member.display_name, member.id)
+            player = game_map.get_player(member.display_name, member.id)
             msg += f"{member.display_name}: <[31m{player.HP}/{player.maxHP}[0m> "
             if player.maxMP > 0:
                 msg += f"<[34m{player.MP}/{player.maxMP}[0m>"
@@ -211,21 +199,17 @@ async def on_message(message: discord.Message):
 
         if len(message.content.split("\n")) < 2:
             if len(message.content.split()) >= 2:
-                gameMap = mapparser.Map(config.MapConfig.path)
+                game_map = mapparser.Map(config.MapConfig.path)
                 try:
-                    inv = gameMap.get_objects_inventory(" ".join(message.content.split()[1::]))
-
+                    inv = game_map.get_objects_inventory(" ".join(message.content.split()[1::]))
+                    await dialog.send_formatted_inventory(message, inv, formatInventory=False)
                 except mapparser.MapObjectNotFoundException:
                     await message.channel.send("Объекта с таким именем нет на карте.")
                     return
-
-                await send_formatted_inventory(message, inv, formatInventory=False)
-                return
-
-            await message.channel.send("А инвентарь-то где?")
-            return
-
-        await send_formatted_inventory(message, message.content.split("\n")[1::])
+            else:
+                await message.channel.send("А инвентарь-то где?")
+        else:
+            await dialog.send_formatted_inventory(message, message.content.split("\n")[1::])
 
     elif message.content.lower().startswith(config.BotConfig.prefix + "перезапусти"):
         if str(message.author.id) not in config.BotConfig.admins:
@@ -249,7 +233,7 @@ async def on_message(message: discord.Message):
 
         args = message.content.split()
         if len(args) >= 2:
-            gameMap = mapparser.Map(config.MapConfig.path)
+            game_map = mapparser.Map(config.MapConfig.path)
             if args[1] == "игрока":
                 await message.delete()
 
@@ -262,7 +246,7 @@ async def on_message(message: discord.Message):
                         if user.status == discord.Status.online and \
                         excludeRole not in user.roles:
                             try:
-                                player = gameMap.get_player(user.display_name, user.id)
+                                player = game_map.get_player(user.display_name, user.id)
                                 if (levelNeeded == 0) or (levelNeeded == player.level):
                                     candidates.append(player)
                             except mapparser.MapObjectNotFoundException:
@@ -277,7 +261,7 @@ async def on_message(message: discord.Message):
                 card = blackjack.draw_card()
                 await message.channel.send(f"Ты вытянул {card}")
             elif args[1] == "уведомление":
-                await add_reaction_message(message, config, True)
+                await dialog.add_reaction_message(message, config, True)
             else:
                 await message.channel.send("Выбрать что?")
         else:
@@ -326,7 +310,7 @@ async def on_message(message: discord.Message):
 
                 await message.channel.send(f"Группа <@&{appendRole.id}> сформирована.")
             elif args[1] == "уведомление":
-                await add_reaction_message(message, config, False)
+                await dialog.add_reaction_message(message, config, False)
             else:
                 await message.channel.send("Создать что?")
         else:
@@ -345,13 +329,13 @@ async def on_message(message: discord.Message):
                 "Необходимо упомянуть игрока, которого ты хочешь осмотреть."
             )
             return
-        gameMap = mapparser.Map(config.MapConfig.path)
+        game_map = mapparser.Map(config.MapConfig.path)
         user = mentions[0]
         try:
-            player = gameMap.get_player(user.display_name, user.id)
-            await message.channel.send(get_player_info_string(gameMap, player))
-            await message.channel.send(get_inventory_string(player))
-            await message.channel.send(get_abilities_string(player))
+            player = game_map.get_player(user.display_name, user.id)
+            await message.channel.send(dialog.get_player_info_string(game_map, player))
+            await dialog.send_player_inventory(message, player)
+            await dialog.send_abilities(message, player)
         except mapparser.MapObjectNotFoundException:
             await message.channel.send("Такой игрок не найден.")
             return
@@ -462,13 +446,13 @@ async def on_message(message: discord.Message):
     elif message.content.lower().startswith(config.BotConfig.prefix + 'карта'):
         data = await get_map_and_player(message)
         if data is not None:
-            gameMap, player = data
+            game_map, player = data
             invItems = command_help.list_inventory_commands(player)
             if 'карта' not in invItems:
                 await message.channel.send("У тебя нет карты.")
                 return
-            floorString = gameMap.get_floor_string(player)
-            asciiMap = gameMap.construct_ascii_map(player, invItems['карта'])
+            floorString = game_map.get_floor_string(player)
+            asciiMap = game_map.construct_ascii_map(player, invItems['карта'])
             resp = f'```ansi\n{floorString}\n\n{asciiMap}```'
             await message.reply(resp)
 

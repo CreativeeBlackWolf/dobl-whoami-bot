@@ -47,14 +47,10 @@ class WhoamiCommandView(View):
         if self.player.isDead:
             await interaction.response.edit_message(view=self, content="```Ты мёртв```")
             return
-        await interaction.response.edit_message(view=self, content=
-            f"""```ansi
-{self.map.get_floor_string(self.player)}
-
-{self.map.construct_ascii_room(self.player)}
-
-{self.map.list_doors_string(self.player)}
-```""")
+        await interaction.response.edit_message(
+            view=self, 
+            content=dialog.get_player_position_string(self.map, self.player)
+        )
 
     @button(label="Закрыть меню", custom_id="close", style=ButtonStyle.red, emoji="❌")
     async def close_button_callback(self, interaction: discord.Interaction, button: discord.Button):

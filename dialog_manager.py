@@ -2,49 +2,18 @@ import re
 from typing import Union
 import discord
 import mapparser
-import player
+from player import Player
 from config import Config
 
 
-async def send_player_inventory(message: discord.Message, player: player.Player) -> None:
-    """
-    Send inventory of a given player
-    """
-    inv = "\n".join(player.inventory)
-    await message.channel.send(f'''```ansi
-Инвентарь:
-{inv}
-```''')
-
-async def send_formatted_inventory(message: discord.Message, inventory: list, formatInventory = True) -> None:
-    """
-    Format inventory list
-    """
-    inv = "\n".join(player.Player.format_inventory_list(inventory) if formatInventory else inventory)
-    await message.delete()
-    await message.channel.send(f'''```ansi
-{inv}
-```''')
-
-async def send_abilities(message: discord.Message, player: player.Player) -> None:
-    active = "\n".join(player.active_abilities)
-    passive = "\n".join(player.passive_abilities)
-    await message.channel.send(f'''```
-Навыки:
-{active}
-
-Особенности:
-{passive}
-```''')
-
-def get_inventory_string(player: player.Player):
+def get_inventory_string(player: Player):
     inv = "\n".join(player.inventory)
     return f'''```ansi
 Инвентарь:
 {inv}
 ```'''
 
-def get_player_info_string(gameMap: mapparser.Map, player: player.Player):
+def get_player_info_string(gameMap: mapparser.Map, player: Player):
     return f'''```
 ОЗ: {player.format_HP()}
 ОМ: {player.format_MP()}
@@ -57,7 +26,7 @@ def get_player_info_string(gameMap: mapparser.Map, player: player.Player):
 Учитывай, что данные за время могли измениться.
 ```'''
 
-def get_abilities_string(player: player.Player):
+def get_abilities_string(player: Player):
     active = "\n".join(player.active_abilities)
     passive = "\n".join(player.passive_abilities)
     return f'''```
@@ -120,10 +89,39 @@ async def add_reaction_message(
         reference_message = await message.channel.fetch_message(message.reference.message_id)
         await reference_message.add_reaction(reaction_emoji or unicode_emoji)
 
-    config.BotConfig.set_reaction_trigger(
+    config.Bot.set_reaction_trigger(
         reaction_message_id=message.reference.message_id if append else reaction_message.id,
         reaction_emoji=reaction_emoji.id if reaction_emoji else unicode_emoji,
         reaction_role_id=reaction_role.id,
         message_on_reaction=message_on_reaction
     )
-    config.BotConfig.write_reaction_triggers_file()
+    config.Bot.write_reaction_triggers_file()
+
+
+async def send_player_inventory(message: discord.Message, player: Player) -> None:
+    """
+    Send inventory of a given player
+    """
+    await message.channel.send(get_inventory_string(player))
+
+async def send_formatted_inventory(message: discord.Message, inventory: list, formatInventory = True) -> None:
+    """
+    Format inventory list
+    """
+    inv = "\n".join(Player.format_inventory_list(inventory) if formatInventory else inventory)
+    await message.delete()
+    await message.channel.send(f'''```ansi
+{inv}
+```''')
+
+async def send_abilities(message: discord.Message, player: Player) -> None:
+    await message.channel.send(get_abilities_string(player))
+
+def get_player_position_string(game_map: mapparser.Map, player: Player) -> str:
+    return f'''```ansi
+{game_map.get_floor_string(player)}
+
+{game_map.construct_ascii_room(player)}
+
+{game_map.list_doors_string(player)}
+```'''
