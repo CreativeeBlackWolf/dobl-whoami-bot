@@ -102,7 +102,15 @@ async def send_player_inventory(message: discord.Message, player: Player) -> Non
     """
     Send inventory of a given player
     """
-    await message.channel.send(get_inventory_string(player))
+    inventory_str = get_inventory_string(player)
+
+    if len(inventory_str) >= 2000:
+        inv_first = "\n".join(player.inventory[:len(player.inventory)])
+        inv_second = "\n".join(player.inventory[len(player.inventory) + 1:])
+        await message.channel.send(f"```ansi\n{inv_first}```")
+        await message.channel.send(f"```ansi\n{inv_second}```")
+    else:
+        await message.channel.send(inventory_str)
 
 async def send_formatted_inventory(message: discord.Message, inventory: list, formatInventory = True) -> None:
     """
@@ -115,7 +123,15 @@ async def send_formatted_inventory(message: discord.Message, inventory: list, fo
 ```''')
 
 async def send_abilities(message: discord.Message, player: Player) -> None:
-    await message.channel.send(get_abilities_string(player))
+    abilities_str = get_abilities_string(player)
+
+    if len(abilities_str) >= 2000:
+        active = "\n".join(player.active_abilities)
+        passive = "\n".join(player.passive_abilities)
+        await message.channel.send(f"```Навыки:\n{active}```")
+        await message.channel.send(f"```Особенности:\n{passive}```")
+    else:
+        await message.channel.send(abilities_str)
 
 def get_player_position_string(game_map: mapparser.Map, player: Player) -> str:
     return f'''```ansi

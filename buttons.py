@@ -34,12 +34,25 @@ class WhoamiCommandView(View):
     @button(label="Инвентарь", custom_id="inventory", style=ButtonStyle.success, emoji="📦")
     async def inventory_button_callback(self, interaction: discord.Interaction, button: Button):
         self.change_active_button_color(button)
-        await interaction.response.edit_message(view=self, content=dialog.get_inventory_string(self.player))
+        inv = dialog.get_inventory_string(self.player)
+        if len(inv) >= 2000:
+            await interaction.response.edit_message(
+                view=self, 
+                content="```Твой инвентарь слишком большой для отображения в одном сообщении... Используй команду .покажи инвентарь```"
+            )
+        else:
+            await interaction.response.edit_message(view=self, content=inv)
 
     @button(label="Навыки", custom_id="abilities", style=ButtonStyle.success, emoji="🔶")
     async def abilities_button_callback(self, interaction: discord.Interaction, button: Button):
         self.change_active_button_color(button)
-        await interaction.response.edit_message(view=self, content=dialog.get_abilities_string(self.player))
+        abilities = dialog.get_abilities_string(self.player)
+        if len(abilities) >= 2000:
+            await interaction.response.edit_message(
+                view=self, 
+                content="```Твои навыки не помещаются в одно сообщение... Используй команду .покажи навыки```")
+        else:
+            await interaction.response.edit_message(view=self, content=abilities)
 
     @button(label="Где я", custom_id="whereami", style=ButtonStyle.success, emoji="🗺️")
     async def whereami_button_callback(self, interaction: discord.Interaction, button: Button):
