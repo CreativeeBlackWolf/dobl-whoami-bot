@@ -89,13 +89,13 @@ async def add_reaction_message(
         reference_message = await message.channel.fetch_message(message.reference.message_id)
         await reference_message.add_reaction(reaction_emoji or unicode_emoji)
 
-    config.Bot.set_reaction_trigger(
+    config.BotConfig.set_reaction_trigger(
         reaction_message_id=message.reference.message_id if append else reaction_message.id,
         reaction_emoji=reaction_emoji.id if reaction_emoji else unicode_emoji,
         reaction_role_id=reaction_role.id,
         message_on_reaction=message_on_reaction
     )
-    config.Bot.write_reaction_triggers_file()
+    config.BotConfig.write_reaction_triggers_file()
 
 
 async def send_player_inventory(message: discord.Message, player: Player) -> None:
