@@ -117,12 +117,16 @@ async def on_message(message: discord.Message):
             else:
                 await message.channel.send(command_help.get_commands(" ".join(splitted_message[1::]), player))
 
-    elif message.content.lower().startswith((config.BotConfig.prefix + 'кто я', config.BotConfig.prefix + 'я кто')):
+    elif message.content.lower().startswith(
+        (config.BotConfig.prefix + 'кто я', config.BotConfig.prefix + 'я кто')
+        ):
         data = await get_map_and_player(message)
         if data is not None:
             game_map, player = data
-            view = WhoamiCommandView(game_map, player, message.author)
-            view.message = await message.reply(dialog.get_player_info_string(game_map, player), view=view)
+            view = WhoamiCommandView(game_map, player, message.author, False)
+            view.message = await message.reply(
+                dialog.get_player_info_string(game_map, player), 
+                view=view)
 
     elif message.content.lower().startswith(config.BotConfig.prefix + 'покажи'):
         data = await get_map_and_player(message)
@@ -155,10 +159,10 @@ async def on_message(message: discord.Message):
         data = await get_map_and_player(message)
         if data is not None:
             game_map, player = data
-            if player.isDead:
-                await message.reply("Ты мёртв.")
-                return
-            await message.reply(dialog.get_player_position_string(game_map, player))
+            view = WhoamiCommandView(game_map, player, message.author, True)
+            view.message = await message.reply(
+                dialog.get_player_position_string(game_map, player), 
+                view=view)
 
     elif message.content.lower().startswith(config.BotConfig.prefix + "группа"):
         ingame: bool = False
