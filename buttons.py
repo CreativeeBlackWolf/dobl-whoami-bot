@@ -10,54 +10,94 @@ import player
 
 
 class WhoamiCommandView(View):
-    def __init__(self, game_map: mapparser.Map, player: player.Player, author: discord.User):
-        super().__init__(timeout=30.0)
+    def __init__(
+            self,
+            game_map: mapparser.Map,
+            player: player.Player,
+            author: discord.User,
+            is_whereami_first: bool = False
+        ):
+        super().__init__(timeout=60.0)
         self.map = game_map
         self.player = player
         self.author = author
         self.message: discord.Message = None
 
-    def change_active_button_color(self, button: Button):
+        player_button = Button(
+            label="Персонаж",
+            custom_id="player",
+            style=ButtonStyle.blurple if not is_whereami_first else ButtonStyle.green,
+            emoji=random.choice(["🤔", "😐", "🤡"]),
+        )
+        player_button.callback = self.player_button_callback
+        self.add_item(player_button)
+
+        inventory_button = Button(label="Инвентарь", custom_id="inventory",
+                                  style=ButtonStyle.success, emoji="📦")
+        inventory_button.callback = self.inventory_button_callback
+        self.add_item(inventory_button)
+
+        abilities_button = Button(label="Навыки", custom_id="abilities",
+                                  style=ButtonStyle.success, emoji="🔶")
+        abilities_button.callback = self.abilities_button_callback
+        self.add_item(abilities_button)
+
+        whereami_button = Button(
+            label="Где я",
+            custom_id="whereami",
+            style=ButtonStyle.blurple if is_whereami_first else ButtonStyle.green,
+            emoji="🗺️"
+        )
+        whereami_button.callback = self.whereami_button_callback
+        self.add_item(whereami_button)
+
+        close_button = Button(label="Закрыть меню", custom_id="close", \
+                              style=ButtonStyle.red, emoji="❌")
+        close_button.callback = self.close_button_callback
+        self.add_item(close_button)
+
+    def change_active_button_color(self, button_id: str):
         for child_button in self.children:
             if child_button.custom_id != "close":
-                child_button.style = ButtonStyle.green if child_button != button \
+                child_button.style = ButtonStyle.green if child_button.custom_id != button_id \
                                 else ButtonStyle.blurple
 
-    @button(label="Персонаж",
-            custom_id="player",
-            style=ButtonStyle.blurple,
-            emoji=random.choice(["🤔", "😐", "🤡"]))
-    async def player_button_callback(self, interaction: discord.Interaction, button: Button):
-        self.change_active_button_color(button)
+    async def player_button_callback(self, interaction: discord.Interaction):
+        self.change_active_button_color("player")
         await interaction.response.edit_message(view=self, content=dialog.get_player_info_string(self.map, self.player))
 
-    @button(label="Инвентарь", custom_id="inventory", style=ButtonStyle.success, emoji="📦")
-    async def inventory_button_callback(self, interaction: discord.Interaction, button: Button):
-        self.change_active_button_color(button)
-        await interaction.response.edit_message(view=self, content=dialog.get_inventory_string(self.player))
+    async def inventory_button_callback(self, interaction: discord.Interaction):
+        self.change_active_button_color("inventory")
+        inv = dialog.get_inventory_string(self.player)
+        if len(inv) >= 2000:
+            await interaction.response.edit_message(
+                view=self,
+                content="```Твой инвентарь слишком большой для отображения в одном сообщении... Используй команду .покажи инвентарь```"
+            )
+        else:
+            await interaction.response.edit_message(view=self, content=inv)
 
-    @button(label="Навыки", custom_id="abilities", style=ButtonStyle.success, emoji="🔶")
-    async def abilities_button_callback(self, interaction: discord.Interaction, button: Button):
-        self.change_active_button_color(button)
-        await interaction.response.edit_message(view=self, content=dialog.get_abilities_string(self.player))
+    async def abilities_button_callback(self, interaction: discord.Interaction):
+        self.change_active_button_color("abilities")
+        abilities = dialog.get_abilities_string(self.player)
+        if len(abilities) >= 2000:
+            await interaction.response.edit_message(
+                view=self,
+                content="```Твои навыки не помещаются в одно сообщение... Используй команду .покажи навыки```")
+        else:
+            await interaction.response.edit_message(view=self, content=abilities)
 
-    @button(label="Где я", custom_id="whereami", style=ButtonStyle.success, emoji="🗺️")
-    async def whereami_button_callback(self, interaction: discord.Interaction, button: Button):
-        self.change_active_button_color(button)
+    async def whereami_button_callback(self, interaction: discord.Interaction):
+        self.change_active_button_color("whereami")
         if self.player.isDead:
             await interaction.response.edit_message(view=self, content="```Ты мёртв```")
             return
-        await interaction.response.edit_message(view=self, content=
-            f"""```ansi
-{self.map.get_floor_string(self.player)}
+        await interaction.response.edit_message(
+            view=self,
+            content=dialog.get_player_position_string(self.map, self.player)
+        )
 
-{self.map.construct_ascii_room(self.player)}
-
-{self.map.list_doors_string(self.player)}
-```""")
-
-    @button(label="Закрыть меню", custom_id="close", style=ButtonStyle.red, emoji="❌")
-    async def close_button_callback(self, interaction: discord.Interaction, button: discord.Button):
+    async def close_button_callback(self, interaction: discord.Interaction):
         await self.message.delete()
 
     async def interaction_check(self, interaction: discord.Interaction, /) -> bool:

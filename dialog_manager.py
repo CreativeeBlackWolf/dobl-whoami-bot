@@ -2,49 +2,18 @@ import re
 from typing import Union
 import discord
 import mapparser
-import player
+from player import Player
 from config import Config
 
 
-async def send_player_inventory(message: discord.Message, player: player.Player) -> None:
-    """
-    Send inventory of a given player
-    """
-    inv = "\n".join(player.inventory)
-    await message.channel.send(f'''```ansi
-Инвентарь:
-{inv}
-```''')
-
-async def send_formatted_inventory(message: discord.Message, inventory: list, formatInventory = True) -> None:
-    """
-    Format inventory list
-    """
-    inv = "\n".join(player.Player.format_inventory_list(inventory) if formatInventory else inventory)
-    await message.delete()
-    await message.channel.send(f'''```ansi
-{inv}
-```''')
-
-async def send_abilities(message: discord.Message, player: player.Player) -> None:
-    active = "\n".join(player.active_abilities)
-    passive = "\n".join(player.passive_abilities)
-    await message.channel.send(f'''```
-Навыки:
-{active}
-
-Особенности:
-{passive}
-```''')
-
-def get_inventory_string(player: player.Player):
+def get_inventory_string(player: Player):
     inv = "\n".join(player.inventory)
     return f'''```ansi
 Инвентарь:
 {inv}
 ```'''
 
-def get_player_info_string(gameMap: mapparser.Map, player: player.Player):
+def get_player_info_string(gameMap: mapparser.Map, player: Player):
     return f'''```
 ОЗ: {player.format_HP()}
 ОМ: {player.format_MP()}
@@ -57,7 +26,7 @@ def get_player_info_string(gameMap: mapparser.Map, player: player.Player):
 Учитывай, что данные за время могли измениться.
 ```'''
 
-def get_abilities_string(player: player.Player):
+def get_abilities_string(player: Player):
     active = "\n".join(player.active_abilities)
     passive = "\n".join(player.passive_abilities)
     return f'''```
@@ -127,3 +96,48 @@ async def add_reaction_message(
         message_on_reaction=message_on_reaction
     )
     config.BotConfig.write_reaction_triggers_file()
+
+
+async def send_player_inventory(message: discord.Message, player: Player) -> None:
+    """
+    Send inventory of a given player
+    """
+    inventory_str = get_inventory_string(player)
+
+    if len(inventory_str) >= 2000:
+        inv_first = "\n".join(player.inventory[:len(player.inventory)])
+        inv_second = "\n".join(player.inventory[len(player.inventory) + 1:])
+        await message.channel.send(f"```ansi\n{inv_first}```")
+        await message.channel.send(f"```ansi\n{inv_second}```")
+    else:
+        await message.channel.send(inventory_str)
+
+async def send_formatted_inventory(message: discord.Message, inventory: list, formatInventory = True) -> None:
+    """
+    Format inventory list
+    """
+    inv = "\n".join(Player.format_inventory_list(inventory) if formatInventory else inventory)
+    await message.delete()
+    await message.channel.send(f'''```ansi
+{inv}
+```''')
+
+async def send_abilities(message: discord.Message, player: Player) -> None:
+    abilities_str = get_abilities_string(player)
+
+    if len(abilities_str) >= 2000:
+        active = "\n".join(player.active_abilities)
+        passive = "\n".join(player.passive_abilities)
+        await message.channel.send(f"```Навыки:\n{active}```")
+        await message.channel.send(f"```Особенности:\n{passive}```")
+    else:
+        await message.channel.send(abilities_str)
+
+def get_player_position_string(game_map: mapparser.Map, player: Player) -> str:
+    return f'''```ansi
+{game_map.get_floor_string(player)}
+
+{game_map.construct_ascii_room(player)}
+
+{game_map.list_doors_string(player)}
+```'''
