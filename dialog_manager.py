@@ -112,11 +112,20 @@ async def send_player_inventory(message: discord.Message, player: Player) -> Non
     else:
         await message.channel.send(inventory_str)
 
-async def send_formatted_inventory(message: discord.Message, inventory: list, formatInventory = True) -> None:
+async def send_formatted_inventory(
+    message: discord.Message, 
+    inventory: list, 
+    format_inventory: bool = True,
+    show_equipped_only: bool = False) -> None:
     """
-    Format inventory list
+    Format inventory list and send it to channel
+
+    :param message: discord.Message object
+    :param inventory: Player.inventory list
+    :param format_inventory: format inventory with Player.format_inventory_list method
+    :param show_equipped_only: see Player.format_inventory_list method parameters
     """
-    inv = "\n".join(Player.format_inventory_list(inventory) if formatInventory else inventory)
+    inv = "\n".join(Player.format_inventory_list(inventory, show_equipped_only) if format_inventory else inventory)
     await message.delete()
     await message.channel.send(f'''```ansi
 {inv}
