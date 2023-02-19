@@ -134,6 +134,8 @@ async def send_abilities(message: discord.Message, player: Player) -> None:
         await message.channel.send(abilities_str)
 
 def get_player_position_string(game_map: mapparser.Map, player: Player) -> str:
+    if player.isDead:
+        return "```Ты мёртв```"
     return f'''```ansi
 {game_map.get_floor_string(player)}
 
