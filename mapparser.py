@@ -283,7 +283,7 @@ class Map:
             for x in range(8):
                 if len(tileContents[y][x]) == 0:
                     continue
-                for char, charObjTuple in usedChars.items():
+                for _, charObjTuple in usedChars.items():
                     if tileContents[y][x] == charObjTuple[1]:
                         representation[y][x] = charObjTuple[0]
                         break

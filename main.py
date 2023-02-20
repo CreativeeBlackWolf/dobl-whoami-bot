@@ -125,7 +125,7 @@ async def on_message(message: discord.Message):
             game_map, player = data
             view = WhoamiCommandView(game_map, player, message.author, False)
             view.message = await message.reply(
-                dialog.get_player_info_string(game_map, player), 
+                dialog.get_player_info_string(game_map, player),
                 view=view)
 
     elif message.content.lower().startswith(config.BotConfig.prefix + 'покажи'):
@@ -161,7 +161,7 @@ async def on_message(message: discord.Message):
             game_map, player = data
             view = WhoamiCommandView(game_map, player, message.author, True)
             view.message = await message.reply(
-                dialog.get_player_position_string(game_map, player), 
+                dialog.get_player_position_string(game_map, player),
                 view=view)
 
     elif message.content.lower().startswith(config.BotConfig.prefix + "группа"):
