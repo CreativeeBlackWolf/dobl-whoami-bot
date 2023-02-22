@@ -83,7 +83,7 @@ class Player:
                 if not re.findall(equipped_item_regex, item):
                     continue
                 else:
-                    item_name = re.findall(r"э\.([\W].+?) [\(|\{|\&]", item)[0][1::]
+                    item_name = re.findall(r"э.([\W].+?)[\ |\(|\{|\n]", item)[0][1::]
                     formatted_inventory.append(item_name)
                     continue
 
