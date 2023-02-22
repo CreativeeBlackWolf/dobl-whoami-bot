@@ -453,8 +453,12 @@ async def on_message(message: discord.Message):
         if len(message.content.split()) >= 2:
             game_map = mapparser.Map(config.MapConfig.path)
             try:
-                inv = game_map.get_objects_inventory(" ".join(message.content.split()[1::]), True)
-                await dialog.send_formatted_inventory(message, inv, False)
+                objectname = " ".join(message.content.split()[1::])
+                inv = game_map.get_objects_inventory(objectname, True)
+                formatted_inv = dialog.get_formatted_inventory(inv, False)
+                await message.delete()
+                await message.channel.send(f"Экипировка {objectname}:\n{formatted_inv}")
+
             except mapparser.MapObjectNotFoundException:
                 await message.channel.send("Объекта с таким именем нет на карте.")
                 return

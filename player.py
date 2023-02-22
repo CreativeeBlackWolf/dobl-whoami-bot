@@ -79,8 +79,13 @@ class Player:
 
         for item in inventory:
             equipped_item_regex = r"(\d+э)\."
-            if not re.findall(equipped_item_regex, item) and show_equipped_only:
-                continue
+            if show_equipped_only:
+                if not re.findall(equipped_item_regex, item):
+                    continue
+                else:
+                    item_name = re.findall(r"э\.([\W].+?) [\(|\{|\&]", item)[0][1::]
+                    formatted_inventory.append(item_name)
+                    continue
 
             item = item.replace("&lt;", "<")
             item = item.replace("&gt;", ">")
