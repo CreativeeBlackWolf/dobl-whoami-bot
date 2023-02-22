@@ -119,5 +119,5 @@ class Player:
 
         return formatted_inventory \
                or \
-               [f"В инвентаре {Fore.RED}нет{Style.RESET_ALL} предметов" if not show_equipped_only 
+               [f"В инвентаре {Fore.RED}нет{Style.RESET_ALL} предметов" if not show_equipped_only
                 else f"В инвентаре {Fore.RED}нет{Style.RESET_ALL} экипированных предметов"]

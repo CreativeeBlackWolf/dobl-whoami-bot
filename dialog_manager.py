@@ -130,8 +130,8 @@ async def send_player_inventory(message: discord.Message, player: Player) -> Non
         await message.channel.send(inventory_str)
 
 async def send_formatted_inventory(
-    message: discord.Message, 
-    inventory: list, 
+    message: discord.Message,
+    inventory: list,
     format_inventory: bool = True,
     show_equipped_only: bool = False) -> None:
     """
