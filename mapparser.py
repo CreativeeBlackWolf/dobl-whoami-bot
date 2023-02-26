@@ -53,10 +53,15 @@ class Map:
                     except KeyError:
                         pass
 
-    def get_objects_inventory(self, objectname: str) -> list:
+    def get_objects_inventory(
+            self, 
+            objectname: str, 
+            show_equipped_only: bool = False
+        ) -> list:
         """
         Get formatted inventory of a given object by name
         :param objectname: name of the object
+        :param show_equipped_only: return only equipped items
         :return: formatted inventory
         :raises: MapObjectNotFoundException if the object does not found
         """
@@ -71,8 +76,7 @@ class Map:
         except AttributeError:
             props = {}
 
-        return player.Player.format_inventory_list(props.get("Инвентарь", "").split("\n"))
-
+        return player.Player.format_inventory_list(props.get("Инвентарь", "").split("\n"), show_equipped_only)
 
     def get_player(self, playername: str, playerID: str) -> player.Player:
         """
@@ -279,7 +283,7 @@ class Map:
             for x in range(8):
                 if len(tileContents[y][x]) == 0:
                     continue
-                for char, charObjTuple in usedChars.items():
+                for _, charObjTuple in usedChars.items():
                     if tileContents[y][x] == charObjTuple[1]:
                         representation[y][x] = charObjTuple[0]
                         break

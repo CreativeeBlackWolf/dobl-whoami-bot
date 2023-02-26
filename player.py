@@ -59,11 +59,12 @@ class Player:
         return f"{self.MP}/{self.maxMP} ({self.trueMP})"
 
     @staticmethod
-    def format_inventory_list(inventory: list) -> list:
+    def format_inventory_list(inventory: list, show_equipped_only: bool = False) -> list:
         """
         Formats inventory for ANSI display
 
         :param inventory: list of items
+        :param show_equipped_only: show only equipped items
         :return: list of formatted items
         """
         def replacer(match):
@@ -74,9 +75,18 @@ class Player:
             if match.group(3) is not None:
                 return "???}"
 
-        formattedInventory = []
+        formatted_inventory = []
 
         for item in inventory:
+            equipped_item_regex = r"(\d+э)\."
+            if show_equipped_only:
+                if not re.findall(equipped_item_regex, item):
+                    continue
+                else:
+                    item_name = re.findall(r"э.([\W].+?) [\ |\(|\{|\n]", item)[0][1::]
+                    formatted_inventory.append(item_name)
+                    continue
+
             item = item.replace("&lt;", "<")
             item = item.replace("&gt;", ">")
             # replacing hidden properties with `???`
@@ -89,22 +99,25 @@ class Player:
 
             # colorize inventory items
             # checking if item equipped
-            item = re.sub(r"(\d+э)\.", rf"{Fore.GREEN}\1{Style.RESET_ALL}.", item)
+            item = re.sub(equipped_item_regex, rf"{Fore.GREEN}\1{Style.RESET_ALL}.", item)
 
             # colorizing hidden properties
             item = re.sub(r"\?{3}", f"{Fore.MAGENTA}???{Style.RESET_ALL}", item)
 
             # colorizing durability (if its less than 25%)
-            durabilitySearchRegex = r"(\([0-9]+?\/[0-9]+?\))"
-            durability = re.findall(durabilitySearchRegex, item)
+            durability_search_regex = r"(\([0-9]+?\/[0-9]+?\))"
+            durability = re.findall(durability_search_regex, item)
             if durability:
                 itemDurability, itemMaxDurability = [int(i) for i in durability[0].replace("(", "").replace(")", "").split("/")]
                 if itemDurability / itemMaxDurability <= 0.25:
-                    item = re.sub(durabilitySearchRegex, Fore.RED + r"\1" + Style.RESET_ALL, item)
+                    item = re.sub(durability_search_regex, Fore.RED + r"\1" + Style.RESET_ALL, item)
 
             # colorize price
             item = re.sub(r"([0-9]+?ж)", Fore.YELLOW + r"\1" + Style.RESET_ALL, item)
 
-            formattedInventory.append(item)
+            formatted_inventory.append(item)
 
-        return formattedInventory
+        return formatted_inventory \
+               or \
+               [f"В инвентаре {Fore.RED}нет{Style.RESET_ALL} предметов" if not show_equipped_only
+                else f"В инвентаре {Fore.RED}нет{Style.RESET_ALL} экипированных предметов"]

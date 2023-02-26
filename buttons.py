@@ -1,5 +1,5 @@
 from typing import Union
-from discord.ui import Button, View, button
+from discord.ui import Button, View
 from discord import ButtonStyle
 import discord
 import random

@@ -125,7 +125,7 @@ async def on_message(message: discord.Message):
             game_map, player = data
             view = WhoamiCommandView(game_map, player, message.author, False)
             view.message = await message.reply(
-                dialog.get_player_info_string(game_map, player), 
+                dialog.get_player_info_string(game_map, player),
                 view=view)
 
     elif message.content.lower().startswith(config.BotConfig.prefix + 'покажи'):
@@ -161,7 +161,7 @@ async def on_message(message: discord.Message):
             game_map, player = data
             view = WhoamiCommandView(game_map, player, message.author, True)
             view.message = await message.reply(
-                dialog.get_player_position_string(game_map, player), 
+                dialog.get_player_position_string(game_map, player),
                 view=view)
 
     elif message.content.lower().startswith(config.BotConfig.prefix + "группа"):
@@ -206,7 +206,7 @@ async def on_message(message: discord.Message):
                 game_map = mapparser.Map(config.MapConfig.path)
                 try:
                     inv = game_map.get_objects_inventory(" ".join(message.content.split()[1::]))
-                    await dialog.send_formatted_inventory(message, inv, formatInventory=False)
+                    await dialog.send_formatted_inventory(message, inv, format_inventory=False)
                 except mapparser.MapObjectNotFoundException:
                     await message.channel.send("Объекта с таким именем нет на карте.")
                     return
@@ -442,6 +442,28 @@ async def on_message(message: discord.Message):
                 await view.message.pin()
         else:
             await message.channel.send("Спросить кого?")
+
+    elif message.content.lower().startswith(
+        (config.BotConfig.prefix + "экип", config.BotConfig.prefix + "экипировка")
+        ):
+        if str(message.author.id) not in config.BotConfig.admins:
+            await message.channel.send("Ты как сюда попал, шизанутый?")
+            return
+
+        if len(message.content.split()) >= 2:
+            game_map = mapparser.Map(config.MapConfig.path)
+            try:
+                objectname = " ".join(message.content.split()[1::])
+                inv = game_map.get_objects_inventory(objectname, True)
+                formatted_inv = dialog.get_formatted_inventory(inv, False)
+                await message.delete()
+                await message.channel.send(f"Экипировка {objectname}:\n{formatted_inv}")
+
+            except mapparser.MapObjectNotFoundException:
+                await message.channel.send("Объекта с таким именем нет на карте.")
+                return
+        else:
+            await message.channel.send("Введи название объекта.")
 
     #endregion
 

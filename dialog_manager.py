@@ -37,6 +37,24 @@ def get_abilities_string(player: Player):
 {passive}
 ```'''
 
+def get_formatted_inventory(
+        inventory: list,
+        format_inventory: bool = True,
+        show_equipped_only: bool = False) -> str:
+    inv = "\n".join(Player.format_inventory_list(inventory, show_equipped_only) if format_inventory else inventory)
+    return f'''```ansi
+{inv}
+```'''
+
+def get_player_position_string(game_map: mapparser.Map, player: Player) -> str:
+    return f'''```ansi
+{game_map.get_floor_string(player)}
+
+{game_map.construct_ascii_room(player)}
+
+{game_map.list_doors_string(player)}
+```'''
+
 async def add_reaction_message(
     message: Union[discord.Message, discord.MessageReference],
     config: Config,
@@ -97,7 +115,6 @@ async def add_reaction_message(
     )
     config.BotConfig.write_reaction_triggers_file()
 
-
 async def send_player_inventory(message: discord.Message, player: Player) -> None:
     """
     Send inventory of a given player
@@ -112,15 +129,23 @@ async def send_player_inventory(message: discord.Message, player: Player) -> Non
     else:
         await message.channel.send(inventory_str)
 
-async def send_formatted_inventory(message: discord.Message, inventory: list, formatInventory = True) -> None:
+async def send_formatted_inventory(
+    message: discord.Message,
+    inventory: list,
+    format_inventory: bool = True,
+    show_equipped_only: bool = False) -> None:
     """
-    Format inventory list
+    Format inventory list and send it to channel
+
+    :param message: discord.Message object
+    :param inventory: Player.inventory list
+    :param format_inventory: format inventory with Player.format_inventory_list method
+    :param show_equipped_only: see Player.format_inventory_list method parameters
     """
-    inv = "\n".join(Player.format_inventory_list(inventory) if formatInventory else inventory)
     await message.delete()
-    await message.channel.send(f'''```ansi
-{inv}
-```''')
+    await message.channel.send(
+        get_formatted_inventory(inventory, format_inventory, show_equipped_only)
+    )
 
 async def send_abilities(message: discord.Message, player: Player) -> None:
     abilities_str = get_abilities_string(player)
@@ -132,14 +157,3 @@ async def send_abilities(message: discord.Message, player: Player) -> None:
         await message.channel.send(f"```Особенности:\n{passive}```")
     else:
         await message.channel.send(abilities_str)
-
-def get_player_position_string(game_map: mapparser.Map, player: Player) -> str:
-    if player.isDead:
-        return "```Ты мёртв```"
-    return f'''```ansi
-{game_map.get_floor_string(player)}
-
-{game_map.construct_ascii_room(player)}
-
-{game_map.list_doors_string(player)}
-```'''
